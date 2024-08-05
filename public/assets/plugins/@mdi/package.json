@@ -1,0 +1,59 @@
+{
+  "_args": [
+    [
+      "@mdi/font@7.1.96",
+      "/Users/faisal/fabric2/varion-dashboard-webapp"
+    ]
+  ],
+  "_from": "@mdi/font@7.1.96",
+  "_id": "@mdi/font@7.1.96",
+  "_inBundle": false,
+  "_integrity": "sha512-Imag6npmfkBDi2Ze2jiZVAPTDIKLxhz2Sx82xJ2zctyAU5LYJejLI5ChnDwiD9bMkQfVuzEsI98Q8toHyC+HCg==",
+  "_location": "/@mdi/font",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "version",
+    "registry": true,
+    "raw": "@mdi/font@7.1.96",
+    "name": "@mdi/font",
+    "escapedName": "@mdi%2ffont",
+    "scope": "@mdi",
+    "rawSpec": "7.1.96",
+    "saveSpec": null,
+    "fetchSpec": "7.1.96"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/@mdi/font/-/font-7.1.96.tgz",
+  "_spec": "7.1.96",
+  "_where": "/Users/faisal/fabric2/varion-dashboard-webapp",
+  "author": {
+    "name": "Austin Andrews",
+    "url": "http://twitter.com/templarian"
+  },
+  "bugs": {
+    "url": "https://github.com/Templarian/MaterialDesign/issues"
+  },
+  "description": "Dist for Material Design Webfont. This includes the Stock and Community icons in a single webfont collection.",
+  "homepage": "https://materialdesignicons.com",
+  "keywords": [
+    "material",
+    "design",
+    "icons",
+    "webfont"
+  ],
+  "license": "Apache-2.0",
+  "name": "@mdi/font",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Templarian/MaterialDesign-Webfont.git"
+  },
+  "scripts": {
+    "prepublish": "node scripts/verify.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "verify": "node scripts/verify.js"
+  },
+  "style": "css/materialdesignicons.css",
+  "version": "7.1.96"
+}
