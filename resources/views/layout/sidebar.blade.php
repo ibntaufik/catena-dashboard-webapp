@@ -1,7 +1,7 @@
 <nav class="sidebar">
   <div class="sidebar-header">
     <a href="#" class="sidebar-brand">
-      Noble<span>UI</span>
+      <image src="{{ url('assets/images/ico/catena-ico.png') }}" alt=""></image>
     </a>
     <div class="sidebar-toggler not-active">
       <span></span>
@@ -12,7 +12,7 @@
   <div class="sidebar-body">
     <ul class="nav">
       <li class="nav-item nav-category">Main</li>
-      <li class="nav-item {{ active_class(['/']) }}">
+      <li class="nav-item {{ active_class(['/']) }}" style="display: none;">
         <a href="{{ url('/') }}" class="nav-link">
           <i class="link-icon" data-feather="box"></i>
           <span class="link-title">Dashboard</span>
@@ -79,7 +79,7 @@
         </div>
       </li>
 
-      <li class="nav-item nav-category">web apps</li>
+      <!-- li class="nav-item nav-category">web apps</li>
       <li class="nav-item {{ active_class(['email/*']) }}">
         <a class="nav-link" data-bs-toggle="collapse" href="#email" role="button" aria-expanded="{{ is_active_route(['email/*']) }}" aria-controls="email">
           <i class="link-icon" data-feather="mail"></i>
@@ -369,7 +369,7 @@
           <i class="link-icon" data-feather="hash"></i>
           <span class="link-title">Documentation</span>
         </a>
-      </li>
+      </li -->
     </ul>
   </div>
 </nav>
