@@ -7,8 +7,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Model\User;
 use App\Model\VCP;
+use App\Model\HOAccount;
 use App\Model\RoleApprovalAt;
 use App\Http\Requests\UserPostRequest;
+use App\Http\Requests\RemoveUserPostRequest;
 
 class UserController extends Controller
 {
@@ -41,7 +43,8 @@ class UserController extends Controller
         try{
             $response["code"] = 200;
             $response["message"] = "Success";
-            $response["data"] = User::leftJoin("role_approval_at", "role_approval_at.user_id", "users.id")->leftJoin("vcp_account", "vcp_account.id", "role_approval_at.vcp_account_id")->select(DB::raw("users.name, users.email, role_approval_at.role_at, vcp_account.vcp_code"))->get();
+
+            $response["data"] = User::join("ho_account", "ho_account.user_id", "users.id")->whereNull("ho_account.deleted_at")->select(DB::raw("users.name, users.email"))->get();
         } catch(\Exception $e){
             \Log::error($e->getMessage());
             \Log::error($e->getTraceAsString());
@@ -88,26 +91,38 @@ class UserController extends Controller
             ];
 
             $user = User::create($dataUser);
+            HOAccount::create([
+                "user_id" => $user->id
+            ]);
 
-            $dataRoleApprovalAt = [
-                "user_id"   => $user->id,
-                "role_at"   => $input["role_at"],
-                "created_by" => "System Administrator"
-            ];
-            if(!empty($input["code"])){
-                $vcpAccount = VCP::findByCode($input["code"]);
-                if(!empty($vcpAccount)){
-                    $dataRoleApprovalAt["vcp_account_id"] = $vcpAccount->id;
-                }
-            }
-
-            RoleApprovalAt::create($dataRoleApprovalAt);
             $response["code"] = 200;
             $response["message"] = "Success";
             
         } catch(\Exception $e){
             \Log::error($e->getTraceAsString());
             $response["message"] = $e->getMessage();
+        }
+        
+        return response()->json($response);
+    }
+
+    public function delete(RemoveUserPostRequest $request){
+        
+        $response = [
+            "code"      => 400,
+            "message"   => "Failed to complete request",
+            "data"      => []
+        ];
+        
+        try{
+            $user = User::where("email", $request->input("email"))->first();
+            HOAccount::where("user_id", $user->id)->delete();
+
+            $response["code"] = 200;
+            $response["message"] = "Success";
+        } catch(\Exception $e){
+            \Log::debug($e->getMessage());
+            \Log::error($e->getTraceAsString());
         }
         
         return response()->json($response);

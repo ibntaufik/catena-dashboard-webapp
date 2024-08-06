@@ -7,17 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
 
-class Approval extends Model
+class HOAccount extends Model
 {
     use HasFactory;
     use SoftDeletes;
-    protected $table = 'ho_approval';
+    protected $table = 'ho_account';
     protected $primaryKey = 'id';
     protected $guarded = ['id'];
-    
-    public static function findById($id){
-        return empty($id) ? null : Cache::remember("approval.id|$id", 600, function() use($id){
-            return Approval::find($id);   
-        });
-    }
 }

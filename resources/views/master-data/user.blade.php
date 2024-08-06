@@ -47,23 +47,6 @@
                 <input type="password" class="form-control" id="password" maxlength="255" autocomplete="new-password" placeholder="Password" onkeypress="return isAlphaNumeric(event);">
               </div>
             </div>
-            <div class="col-sm-3">
-              <div class="mb-3">
-                <label for="role" class="form-label">Role</label>
-                <select id="role" class="form-control" name="role" style="heigth: 100%;">
-                  <option disabled selected>-- Select Role --</option>
-                  <option value="ho">HO</option>
-                  <option value="vcp">VCP</option>
-                </select>
-              </div>
-            </div>
-            <div class="col-sm-3" style="display: none;" id="selection-vcp">
-              <div class="mb-3">
-                <label for="code" class="form-label">VCP Code</label><br>
-                <select id="code" class="form-control" name="code">
-                </select>
-              </div>
-            </div>
           </div>
       </div>
       <div class="card-footer">
@@ -96,8 +79,6 @@
               <tr>
                 <th>Email</th>
                 <th>User Name</th>
-                <th>Role</th>
-                <th>VCP/VCH Code</th>
                 <th></th>
               </tr>
             </thead>
@@ -161,30 +142,22 @@
             { "targets": 0, "data": "email" },
             { "targets": 1, "data": "name" },
             { "targets": 2, "data": function(data, type, row, meta){
-                  return (data.role_at == null) ? "-" : data.role_at;
+                  return '<a href="#" onclick=$(this).delete("'+data.email+'") style="cursor: pointer;"><i data-feather="trash-2"></i>';
               }
-            },
-            { "targets": 3, "data":  function(data, type, row, meta){
-                  return (data.vcp_code == null) ? "-" : data.vcp_code;
-              }
-            },
-            { "targets": 4, "data": function(data, type, row, meta){
-                  return '<a href="#" onclick=$(this).deleteLocation("'+data.email+'") style="cursor: pointer;"><i data-feather="trash-2"></i>';
-              }
-            },
+            }
           ],
           "drawCallback": function(settings) {
               feather.replace(); // Initialize Feather icons
           }
       });
 
-      $.fn.deleteLocation = function(locationId) {
+      $.fn.delete = function(email) {
         $.ajax({
             type: "POST",
-            url: "{{ route('location.remove') }}",
+            url: "{{ route('user.remove') }}",
             data: {
               _token: "{{ csrf_token() }}",
-              location_id: locationId,
+              email: email,
             },
             dataType: "json",
             timeout: 300000
@@ -229,9 +202,7 @@
             _token: "{{ csrf_token() }}",
             email: $('#email_user').val(),
             name: $('#username').val(),
-            password: $('#password').val(),
-            role_at: $('#role').val(),
-            code: ($('#role').val() == "ho") ? '' : $('#code').val()
+            password: $('#password').val()
         };
 
         $.ajax({
@@ -254,7 +225,7 @@
             });
             $("#success").html(data.message);
             $('#gridDataTable').DataTable().ajax.reload();
-            $("#id-location, #sub-district, #district, #city, #province, #latitude, #longitude").val('');
+            $("#email_user, #password, #username").val('');
         }).fail(function(data){
             $('#response_message').removeClass('alert-success');
             $('#response_message').addClass('alert-danger');
