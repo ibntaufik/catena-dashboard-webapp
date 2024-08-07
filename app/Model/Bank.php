@@ -16,7 +16,7 @@ class Bank extends Model
     protected $guarded = ['id'];
     
     public static function findByCode($code){
-        return empty($code) ? null : Cache::remember("bank.code|$code", 600, function() use($code){
+        return empty($code) ? null : Cache::remember("bank.code|$code", config("constant.ttl"), function() use($code){
             return Bank::where("code", $code)->first();   
         });
     }

@@ -24,7 +24,7 @@ class VCHPostRequest extends FormRequest
     public function rules()
     {
         return [
-            "location_code"                 => "required|max:255",
+            "sub_district_id"               => "required|numeric",
             "vch_code"                      => "required|max:255",
             "email"                         => "required|email",
             "password"                      => "required|max:255",
@@ -42,7 +42,8 @@ class VCHPostRequest extends FormRequest
     public function messages()
     {
         return [
-            'location_code.required'                => 'Location is required',
+            'sub_district_id.required'          => 'Please select sub ditrict first',
+            'sub_district_id.numeric'           => 'Sub ditrict is not valid',
             'vch_code.required'                     => 'VCH Code is required',
             'email.required'                        => 'Email is required',
             'password.required'                     => 'Password is required',

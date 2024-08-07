@@ -16,7 +16,7 @@ class VCP extends Model
     protected $guarded = ['id'];
 
     public static function findByCode($code){
-        return empty($code) ? null : Cache::remember("vcp.code|$code", 600, function() use($code){
+        return empty($code) ? null : Cache::remember("vcp.code|$code", config("constant.ttl"), function() use($code){
             return VCP::where("vcp_code", $code)->first();   
         });
     }

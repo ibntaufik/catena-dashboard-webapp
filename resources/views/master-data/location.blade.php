@@ -33,26 +33,32 @@
             </div>
             <div class="col-sm-3">
               <div class="mb-3">
-                <label for="sub-district" class="form-label">Desa</label>
-                <input type="text" class="form-control" id="sub-district" maxlength="255" placeholder="Desa" onkeypress="return isAlphaNumericAndWhiteSpace(event);">
+                <label for="province" class="form-label">Provinsi</label>
+                <select id="province" class="form-control" name="province">
+                  <option value="select" disabled selected>-- Select --</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="mb-3">
+                <label for="city" class="form-label">Kota/Kab</label>
+                <select id="city" class="form-control" name="city">
+                  <option value="select" disabled selected>-- Select --</option>
+                </select>
               </div>
             </div>
             <div class="col-sm-3">
               <div class="mb-3">
                 <label for="district" class="form-label">Kecamatan</label>
-                <input type="text" class="form-control" id="district" maxlength="255" placeholder="Kecamatan" onkeypress="return isAlphaNumericAndWhiteSpace(event);">
+                <select id="district" class="form-control" name="district">
+                  <option value="select" disabled selected>-- Select --</option>
+                </select>
               </div>
             </div>
             <div class="col-sm-3">
               <div class="mb-3">
-                <label for="city" class="form-label">Kabupaten</label>
-                <input type="text" class="form-control" id="city" maxlength="255" placeholder="Kabupaten" onkeypress="return isAlphaNumericAndWhiteSpace(event);">
-              </div>
-            </div>
-            <div class="col-sm-3">
-              <div class="mb-3">
-                <label for="province" class="form-label">Provinsi</label>
-                <input type="text" class="form-control" id="province" maxlength="255" placeholder="Provinsi" onkeypress="return isAlphaNumericAndWhiteSpace(event);">
+                <label for="sub_district" class="form-label">Desa/Kelurahan</label>
+                <input id="sub_district" class="form-control" name="sub_district" placeholder="Desa"></input>
               </div>
             </div>
             <div class="col-sm-3">
@@ -97,11 +103,11 @@
           <table id="gridDataTable" class="table">
             <thead>
               <tr>
-                <th>ID Location</th>
-                <th>Desa</th>
-                <th>Kecamatan</th>
-                <th>Kabupaten</th>
                 <th>Provinsi</th>
+                <th>Kabupaten</th>
+                <th>Kecamatan</th>
+                <th>Desa</th>
+                <th>ID Location</th>
                 <th>Latitude</th>
                 <th>Longitude</th>
                 <th></th>
@@ -116,12 +122,71 @@
 @endsection
 
 @section('javascript')
+
 <script type="text/javascript">
     var start = 0;
     var limit = 10;
+
+    // add by faisal
+    // used for coverage.js file
+    var comboDefault = [{
+      id: "select",
+      text: '-- Select --',
+      disabled: true
+    }];
+
+    var province = {!! json_encode($province) !!};
+    var url_coverage_city = "{{ route('coverage.city') }}";
+    var url_coverage_district = "{{ route('coverage.district') }}";
+    var url_coverage_sub_district = "{{ route('coverage.sub_district') }}";
+
   $(document).ready(function() {
       
       $("#response_message").attr("style", 'display: none;');
+
+      $('#district').select2();
+      $('#province').select2({
+            width: '100%',
+            data: province
+      }).on("select2:select", function (e) {
+        if(e.params.data.selected){
+          $.ajax({
+              type: "GET",
+              url: url_coverage_city, // define from page
+              data: {
+                _token: "{{ csrf_token() }}",
+                province_id: e.params.data.id,
+              },
+              dataType: "json",
+              timeout: 300000
+          }).done(function(response){
+            $('#city').empty();
+            $('#city').select2({ width: '100%', data: response.data });
+          }).fail(function(data){
+              
+          });
+        }
+      });
+      
+      $('#city').select2().on("select2:select", function (e) {
+        if(e.params.data.selected){
+          $.ajax({
+              type: "GET",
+              url: url_coverage_district,
+              data: {
+                _token: "{{ csrf_token() }}",
+                city_id: e.params.data.id,
+              },
+              dataType: "json",
+              timeout: 300000
+          }).done(function(response){
+            $('#district').empty();
+            $('#district').select2({ width: '100%', data: response.data });
+          }).fail(function(data){
+              
+          });
+        }
+      });
 
       $('#gridDataTable').DataTable( {
           'paging'        : true,
@@ -149,11 +214,11 @@
           },
                                 
           "columnDefs" : [
-            { "targets": 0, "data": "code" },
-            { "targets": 1, "data": "sub_district" },
+            { "targets": 0, "data": "province" },
+            { "targets": 1, "data": "city" },
             { "targets": 2, "data": "district" },
-            { "targets": 3, "data": "city" },
-            { "targets": 4, "data": "province" },
+            { "targets": 3, "data": "sub_district" },
+            { "targets": 4, "data": "code" },
             { "targets": 5, "data": "latitude" },
             { "targets": 6, "data": "longitude" },
             { "targets": 7, "data": function(data, type, row, meta){
@@ -210,10 +275,8 @@
         var submitData = {
             _token: "{{ csrf_token() }}",
             code: $('#id-location').val(),
-            sub_district: $('#sub-district').val(),
-            district: $('#district').val(),
-            city: $('#city').val(),
-            province: $('#province').val(),
+            district_id: $('#district').val(),
+            name: $('#sub_district').val(),
             latitude: $('#latitude').val(),
             longitude: $('#longitude').val()
         };
@@ -228,6 +291,7 @@
             if(data.code == 200){
               $('#response_message').removeClass('alert-danger');
               $('#response_message').addClass('alert-success');
+              reset();
             } else {
               $('#response_message').removeClass('alert-success');
               $('#response_message').addClass('alert-danger');
@@ -240,7 +304,7 @@
             });
             
             $('#gridDataTable').DataTable().ajax.reload();
-            $("#id-location, #sub-district, #district, #city, #province, #latitude, #longitude").val('');
+            
         }).fail(function(data){
             $('#response_message').removeClass('alert-success');
             $('#response_message').addClass('alert-danger');
@@ -250,6 +314,15 @@
 
       $(".submit-button").removeClass("disabled");
       $(".spinner-border").attr("style", "display: none;");
+  }
+
+  function reset(){
+    $("#id-location, #latitude, #longitude").val('');
+    // add by faisal
+    // used to reset coverage combo from coverage.js file
+    $('#city, #district').empty();
+    $('#city, #district').select2({ width: '100%', data: comboDefault });
+    $('#province, #city, #district').val('select').select2();
   }
 
 

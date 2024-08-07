@@ -25,9 +25,6 @@
       <div class="card-body">
           <h6 class="card-title">Create Farmer Account</h6>
           <div class="row">
-            
-            <input type="text" name="username_fake" id="username_fake" autocomplete="off" style="display:none;">
-            <input type="password" name="password_fake" autocomplete="off" style="display:none;">
 
             <div class="col-sm-3">
               <div class="mb-3">
@@ -43,28 +40,14 @@
             </div>
             <div class="col-sm-3">
               <div class="mb-3">
+                <label for="phone" class="form-label">Phone</label>
+                <input type="text" class="form-control" id="phone" maxlength="15" autocomplete="off" placeholder="08123456789">
+              </div>
+            </div>
+            <div class="col-sm-3" style="display: none;">
+              <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
                 <input type="password" class="form-control" id="password" maxlength="255" autocomplete="new-password" placeholder="Password" onkeypress="return isAlphaNumeric(event);">
-              </div>
-            </div>
-            <div class="col-sm-3">
-              <div class="mb-3">
-                <label for="location_id" class="form-label">Location</label>
-                <select id="location_id" class="form-control" name="location_id">
-                  <option value="select" disabled selected>-- Select --</option>
-                </select>
-              </div>
-            </div>
-            <div class="col-sm-3">
-              <div class="mb-3">
-                <label for="latitude" class="form-label">Latitude</label>
-                <input type="text" class="form-control" id="latitude" maxlength="255" placeholder="Latitude" onkeypress="return isNumericAndDot(event);">
-              </div>
-            </div>
-            <div class="col-sm-3">
-              <div class="mb-3">
-                <label for="longitude" class="form-label">Longitude</label>
-                <input type="text" class="form-control" id="longitude" maxlength="255" placeholder="Longitude" onkeypress="return isNumericAndDot(event);">
               </div>
             </div>
             <div class="col-sm-3">
@@ -73,6 +56,7 @@
                 <input type="text" class="form-control" id="id_number" maxlength="255" placeholder="(SIM, KK, or KTP))" onkeypress="return isNumber(event);">
               </div>
             </div>
+            @include("layout.coverage")
             <div class="col-sm-6">
               <div class="mb-3">
                 <label for="city" class="form-label">Address</label>
@@ -130,6 +114,7 @@
                 <th>Name</th>
                 <th>Email</th>
                 <th>ID Number</th>
+                <th>Phone</th>
                 <th>Location</th>
                 <th>Latitude</th>
                 <th>Longitude</th>
@@ -146,20 +131,27 @@
 @endsection
 
 @section('javascript')
+<script src="{{ asset('assets/js/coverage.js') }}"></script>
 <script type="text/javascript">
     var start = 0;
     var limit = 10;
-    var candidate = {!! json_encode($candidate) !!};
     var fileType = "";
+
+    // add by faisal
+    // used for coverage.js file
+    var comboDefault = [{
+      id: "select",
+      text: '-- Select --',
+      disabled: true
+    }];
+    var province = {!! json_encode($province) !!};
+    var url_coverage_city = "{{ route('coverage.city') }}";
+    var url_coverage_district = "{{ route('coverage.district') }}";
+    var url_coverage_sub_district = "{{ route('coverage.sub_district') }}";
 
   $(document).ready(function() {
       
       $("#response_message").attr("style", 'display: none;');
-
-      $('#location_id').select2({
-            width: '100%',
-            data: candidate
-      });
 
       $('#gridDataTable').DataTable( {
           'paging'        : true,
@@ -190,11 +182,15 @@
             { "targets": 0, "data": "name" },
             { "targets": 1, "data": "email" },
             { "targets": 2, "data": "id_number" },
-            { "targets": 3, "data": "location" },
-            { "targets": 4, "data": "latitude" },
-            { "targets": 5, "data": "longitude" },
-            { "targets": 6, "data": "address" },
-            { "targets": 7, "data": function(data, type, row, meta){
+            { "targets": 3, "data":  function(data, type, row, meta){
+                  return data.phone ? data.phone : "-";
+              }
+            },
+            { "targets": 4, "data": "location" },
+            { "targets": 5, "data": "latitude" },
+            { "targets": 6, "data": "longitude" },
+            { "targets": 7, "data": "address" },
+            { "targets": 8, "data": function(data, type, row, meta){
                   return '<a href="#" onclick=$(this).delete("'+data.id_number+'") style="cursor: pointer;"><i data-feather="trash-2"></i>';
               }
             },
@@ -229,15 +225,14 @@
 
   function submit()
   {
-      $("#name, #address, #latitude, #longitude").attr('style', '');
-      $("#email_user, #name, #password").attr('style', '');
+      $("#email_user, #phone, #name, #address, #latitude, #longitude").attr('style', '');
       $("#response_message").attr("style", 'display: none;');
       $(".submit-button").addClass("disabled");
       $(".spinner-border").attr("style", '');
 
       var pass = true;
 
-      $("#name, #address, #latitude, #longitude, #email_user, #name, #password, #id_number").each(function(){
+      $("#name, #address, #latitude, #longitude, #name, #id_number").each(function(){
           $(this).attr('style', '');
           if($(this).val() == ''){
             $(this).attr('style', 'border: 1px solid #d57171 !important');
@@ -246,7 +241,7 @@
           }
       });
 
-      if(pass && !validateEmail($("#email_user").val())){
+      if(pass && ($("#email_user").val() !== '') && ($("#email_user").val() != null) && !validateEmail($("#email_user").val())){
         $('#response_message').removeClass('alert-success');
         $('#response_message').addClass('alert-danger');
         $("#response_message").attr("style", '');
@@ -263,12 +258,13 @@
             _token: "{{ csrf_token() }}",
             name: $('#name').val(),
             email: $('#email_user').val(),
+            phone: $('#phone').val(),
             password: $('#password').val(),
             address: $('#address').val(),
             latitude: $('#latitude').val(),
             longitude: $('#longitude').val(),
             id_number: $('#id_number').val(),
-            location_code: $('#location_id').val(),
+            sub_district_id: $('#sub_district').val(),
             file: $('#img-base64-id_file').val(),
             file_type: fileType
         };
@@ -287,6 +283,11 @@
             } else {
               $('#response_message').removeClass('alert-success');
               $('#response_message').addClass('alert-danger');
+
+              if(data.message.includes("Email already registered")){
+                $("#email_user").attr('style', 'border: 1px solid #d57171 !important');
+              }
+
             }
             $("#response_message").attr("style", '');
             $('#response_message').fadeTo(3000, 500).slideUp(500, function() {
@@ -307,11 +308,17 @@
   function reset(){
 
       $('#gridDataTable').DataTable().ajax.reload();
-      $("#name, #address, #latitude, #longitude, #email_user, #name, #password, #id_number").val('');
-      $("#location_id").val('select').select2();
+      $("#name, #address, #latitude, #longitude, #name, #id_number").val('');
+      
       $("#img-preview-id_file").attr({'src':''});
       $('#img-base64-id_file').attr({'value':''});
       $('#id_file').val('');
+
+      // add by faisal
+      // used to reset coverage combo from coverage.js file
+      $('#city, #district, #sub_district').empty();
+      $('#city, #district, #sub_district').select2({ width: '100%', data: comboDefault });
+      $('#province, #city, #district, #sub_district').val('select').select2();
   }
 
   function getBase64(file) {

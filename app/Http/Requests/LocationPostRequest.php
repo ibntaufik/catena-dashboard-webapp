@@ -24,11 +24,9 @@ class LocationPostRequest extends FormRequest
     public function rules()
     {
         return [
-            "code"   => "required|max:255",
-            "sub_district"  => "required|max:255",
-            "district"      => "required|max:255",
-            "city"          => "required|max:255",
-            "province"      => "required|max:255",
+            "code"          => "required|max:255",
+            "district_id"   => "required|numeric",
+            "name"          => "required|max:255",    
             "latitude"      => "required|numeric|max:255",
             "longitude"     => "required|numeric|max:255",
         ];
@@ -37,11 +35,10 @@ class LocationPostRequest extends FormRequest
     public function messages()
     {
         return [
-            'code.required'  => 'ID Location is required',
-            'sub_district.required' => 'Desa is required',
-            'district.required'      => 'Kecamatan is required',
-            'city.required'         => 'Kabupaten is required',
-            'province.required'     => 'Provinsi is required',
+            'code.required'         => 'ID Location is required',
+            'district_id.required'  => 'Please select district first',
+            'name.required'         => 'Please input sub ditrict first',
+            'district_id.numeric'   => 'District is not valid',
             'latitude.required'     => 'Latitude is required',
             'longitude.required'    => 'Longitude is required',
         ];

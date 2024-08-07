@@ -24,7 +24,7 @@ class VCPPostRequest extends FormRequest
     public function rules()
     {
         return [
-            "location_code"             => "required|max:255",
+            "sub_district_id"           => "required|numeric",
             "vcp_code"                  => "required|max:255",
             "field_coordinator_id"      => "required|max:255",
             "field_coordinator_name"    => "required|max:255",
@@ -39,7 +39,8 @@ class VCPPostRequest extends FormRequest
     public function messages()
     {
         return [
-            'location_code.required'            => 'Location is required',
+            'sub_district_id.required'          => 'Please select sub ditrict first',
+            'sub_district_id.numeric'           => 'Sub ditrict is not valid',
             'vcp_code.required'                 => 'VCP Code is required',
             'field_coordinator_id.required'     => 'Field Coordination ID is required',
             'field_coordinator_name.required'   => 'Field Coordination Name is required',

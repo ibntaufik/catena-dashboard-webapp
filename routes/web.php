@@ -57,6 +57,12 @@ Route::group(['prefix' => 'master-data'], function(){
         Route::post('submit', 'UserController@save')->name("user.submit");
         Route::post('remove', 'UserController@delete')->name("user.remove");
     });
+    Route::group(['prefix' => 'coverage'], function(){
+        Route::get('province', 'LocationController@listComboProvince')->name("coverage.province");
+        Route::get('city', 'LocationController@listComboCity')->name("coverage.city");
+        Route::get('district', 'LocationController@listComboDistrict')->name("coverage.district");
+        Route::get('sub-district', 'LocationController@listComboSubDistrict')->name("coverage.sub_district");
+    });
 });
 
 Route::group(['prefix' => 'email'], function(){

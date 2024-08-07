@@ -1,0 +1,56 @@
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'zMmdCj6Cm3z5a';
+
+<VirtualHost *:81>
+        ServerName livechat-staging.popbox.asia
+
+        ServerAdmin developer@popbox.asia
+        DocumentRoot /var/www/cognichat-dashboard/public/
+
+        <Directory /var/www/cognichat-dashboard/public/>
+                Options Indexes FollowSymLinks MultiViews
+                AllowOverride All
+                Order allow,deny
+                allow from all
+                Require all granted
+        </Directory>
+
+        <FilesMatch \.php$>
+                # From the Apache version 2.4.10 and above, use the SetHandler to run PHP as a fastCGI process server
+                 SetHandler "proxy:unix:/run/php/php7.4-fpm.sock|fcgi://localhost"
+        </FilesMatch>
+
+
+        ErrorLog /var/www/logs/staging-cognichat-dashboard/error.log
+        CustomLog /var/www/logs/staging-cognichat-dashboard/access.log combined
+</VirtualHost>
+
+<VirtualHost *:8000>
+        #ServerName _
+
+        ServerAdmin developer@popbox.asia
+        DocumentRoot /var/www/varion-webapp/public/
+
+        <Directory /var/www/varion-webapp/public/>
+                Options Indexes FollowSymLinks MultiViews
+                AllowOverride All
+                Order allow,deny
+                allow from all
+                Require all granted
+        </Directory>
+
+
+        ErrorLog /var/www/logs/varion-webapp-error.log
+        CustomLog /var/www/logs/varion-webapp-access.log combined
+</VirtualHost>
+
+sudo find /var/www/varion-webapp -type f -exec chmod 664 {} \;
+sudo find /var/www/varion-webapp -type d -exec chmod 775 {} \;
+
+
+faisal@cognizest.com
+
+i63MvA6Fetbny#f
+
+CREATE USER 'faisal'@'%' IDENTIFIED BY 'c2aqQz#c4t3Na';
+GRANT ALL ON catenadb.* TO 'faisal'@'%';
+FLUSH PRIVILEGES;

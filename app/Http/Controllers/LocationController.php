@@ -3,7 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Model\Location;
+use App\Model\Province;
+use App\Model\City;
+use App\Model\District;
+use App\Model\Subdistrict;
 use App\Http\Requests\LocationPostRequest;
 use App\Http\Requests\RemoveLocationPostRequest;
 
@@ -14,7 +19,11 @@ class LocationController extends Controller
     }
 
     public function index(Request $request){
-        return view("master-data.location");
+
+        $province = array_merge([
+            ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
+        ], Province::listByName(""));
+        return view("master-data.location", compact("province"));
     }
 
     public function datatables(Request $request){
@@ -27,7 +36,10 @@ class LocationController extends Controller
         try{
             $response["code"] = 200;
             $response["message"] = "Success";
-            $response["data"] = Location::get();
+            $response["data"] = Subdistrict::join("districts", "districts.id", "sub_districts.district_id")
+            ->join("cities", "cities.id", "districts.city_id")
+            ->join("provinces", "provinces.id", "cities.province_id")
+            ->select(DB::raw("sub_districts.code, sub_districts.name AS sub_district, sub_districts.latitude, sub_districts.longitude, districts.name AS district, cities.name AS city, provinces.name AS province"))->orderby("provinces.name", "ASC")->get();
         } catch(\Exception $e){
             
         }
@@ -46,7 +58,7 @@ class LocationController extends Controller
         try{
             $input = $request->except(["_token"]);
             $input["created_by"] = "Admin";
-            Location::create($input);
+            Subdistrict::create($input);
             $response["code"] = 200;
             $response["message"] = "Success";
             
@@ -67,7 +79,7 @@ class LocationController extends Controller
         ];
         
         try{
-            Location::where("code", $request->input("location_id"))->delete();
+            Subdistrict::where("code", $request->input("location_id"))->delete();
 
             $response["code"] = 200;
             $response["message"] = "Success";
@@ -96,6 +108,95 @@ class LocationController extends Controller
             $response["message"] = "Failed to complete request: error when trying to get user list from db";
         }
 
+        return response()->json($response);
+    }
+
+    public function listComboProvince(Request $request){
+        $response = [
+            "code"      => 400,
+            "message"   => "Failed to complete request",
+            "data"      => []
+        ];
+        try{
+            $name = "";
+            if($request->has("name") && ($request->input("name") != null) && ($request->input("name") != "")){
+                $name = $request->input("name");
+            }
+            $province = Province::listByName($name);
+        } catch (\Exception $e) {
+            \Log::error($e->getMessage());
+            \Log::error($e->getTraceAsString());
+        }
+    }
+
+    public function listComboCity(Request $request){
+        $response = [
+            "code"      => 400,
+            "message"   => "Failed to complete request",
+            "data"      => []
+        ];
+        try{
+            $provinceId = "";
+            if($request->has("province_id") && ($request->input("province_id") != null) && ($request->input("province_id") != "")){
+                $provinceId = $request->input("province_id");
+            }
+            $response["code"] = 200;
+            $response["message"] = "Request complete.";
+            $response["data"] = array_merge([
+                ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
+            ], City::listByProvinceId($provinceId));
+                
+        } catch (\Exception $e) {
+            \Log::error($e->getMessage());
+            \Log::error($e->getTraceAsString());
+        }
+
+        return response()->json($response);     
+    }
+
+    public function listComboDistrict(Request $request){
+        $response = [
+            "code"      => 400,
+            "message"   => "Failed to complete request",
+            "data"      => []
+        ];
+        try{
+            $cityId = "";
+            if($request->has("city_id") && ($request->input("city_id") != null) && ($request->input("city_id") != "")){
+                $cityId = $request->input("city_id");
+            }
+            $response["code"] = 200;
+            $response["message"] = "Request complete.";
+            $response["data"] = array_merge([
+                ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
+            ], District::listByCityId($cityId));
+        } catch (\Exception $e) {
+            \Log::error($e->getMessage());
+            \Log::error($e->getTraceAsString());
+        }
+        return response()->json($response);
+    }
+
+    public function listComboSubDistrict(Request $request){
+        $response = [
+            "code"      => 400,
+            "message"   => "Failed to complete request",
+            "data"      => []
+        ];
+        try{
+            $districtId = "";
+            if($request->has("district_id") && ($request->input("district_id") != null) && ($request->input("district_id") != "")){
+                $districtId = $request->input("district_id");
+            }
+            $response["code"] = 200;
+            $response["message"] = "Request complete.";
+            $response["data"] = array_merge([
+                ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
+            ], Subdistrict::listByDistrictId($districtId));
+        } catch (\Exception $e) {
+            \Log::error($e->getMessage());
+            \Log::error($e->getTraceAsString());
+        }
         return response()->json($response);
     }
 }

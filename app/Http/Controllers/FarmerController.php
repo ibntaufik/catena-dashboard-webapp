@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\FarmerPostRequest;
 use App\Http\Requests\RemoveFarmerPostRequest;
 use App\Model\Location;
+use App\Model\Province;
 use App\Model\Farmer;
 use App\Model\User;
 
@@ -23,13 +24,14 @@ class FarmerController extends Controller
             ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
         ];
 
-        $result = Location::select(DB::raw("code, sub_district"))->get()->toArray();
-        $result = collect($result)->map(function ($item) {
-            return ["id" => $item['code'], "text" => $item['sub_district']];
-        });
+        $result = Location::listCombo();
         $candidate = array_merge($candidate, json_decode($result, true));
 
-        return view("account.farmer", compact("candidate"));
+        $province = array_merge([
+            ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
+        ], Province::listByName(""));
+
+        return view("account.farmer", compact("candidate", "province"));
     }
 
     public function datatables(Request $request){
@@ -42,11 +44,15 @@ class FarmerController extends Controller
         try{
             $response["code"] = 200;
             $response["message"] = "Success";
-            $response["data"] = Farmer::leftJoin("location", "location.id", "farmer_account.location_id")
+            $response["data"] = Farmer::join("sub_districts", "sub_districts.id", "farmer_account.sub_district_id")
             ->leftJoin("users", "farmer_account.user_id", "users.id")
-            ->select(DB::raw("users.name, users.email, farmer_account.address, farmer_account.latitude, farmer_account.longitude, farmer_account.id_number, CONCAT(location.code, '-', location.sub_district) AS location"))->get();
+            ->join("districts", "districts.id", "sub_districts.district_id")
+            ->join("cities", "cities.id", "districts.city_id")
+            ->join("provinces", "provinces.id", "cities.province_id")
+            ->select(DB::raw("users.name, users.email, farmer_account.address, farmer_account.latitude, farmer_account.longitude, users.phone, farmer_account.id_number, CONCAT(sub_districts.code, ' <br> ', sub_districts.name, ' <br> ', districts.name, ' <br> ', cities.name, ' <br> ', provinces.name) AS location"))->get();
         } catch(\Exception $e){
-            
+            \Log::error($e->getMessage());
+            \Log::error($e->getTraceAsString());
         }
         
         return response()->json($response);
@@ -59,28 +65,38 @@ class FarmerController extends Controller
             "message"   => "Failed to complete request",
             "data"      => []
         ];
-        
-        try{
-            $input = $request->except(["_token"]);
-            $file = $request->input('file');
 
-            try{
-                $data = explode(',', $file);
-                $fileType = explode(';', $data[0]);
-                $isImage = explode(':', $fileType[0]);
-                if(strpos($isImage['1'], 'image') === false){
-                    $output['response']['message'] = 'ID photo must be an image';
-                    return response()->json($output);
-                }
-                
-                $decode = base64_decode($data[1]);
-                if (!$decode){
-                    $output['response']['message'] = 'ID photo is not valid';
-                    return response()->json($output);
-                }
-            } catch (\Exception $e){
+        $input = $request->except(["_token"]);
+        $file = $request->input('file');
+
+        if(User::isEmailExist($input["email"])){
+            $response["message"] = "Email already registered, please use other email";
+            return response()->json($response);
+        }
+        try{
+            $data = explode(',', $file);
+            $fileType = explode(';', $data[0]);
+            $isImage = explode(':', $fileType[0]);
+            if(strpos($isImage['1'], 'image') === false){
+                $output['response']['message'] = 'ID photo must be an image';
+                return response()->json($output);
+            }
+            
+            $decode = base64_decode($data[1]);
+            if (!$decode){
                 $output['response']['message'] = 'ID photo is not valid';
                 return response()->json($output);
+            }
+        } catch (\Exception $e){
+            $response['response']['message'] = 'ID photo is not valid';
+            return response()->json($response);
+        }
+
+        try{
+            
+            if (empty($input["email"])) {
+                $count = User::count();
+                $input["email"] = "farmer$count@gmail.com";
             }
 
             $dataUser = [
@@ -91,13 +107,10 @@ class FarmerController extends Controller
             ];
 
             $user = User::create($dataUser);
-            $location = Location::findByCode($input["location_code"]);
-            $input["location_id"] = $location->id;
-            unset($input["location_code"]);
 
             $dataFarmer = [
                 "user_id"       => $user->id,
-                "location_id"   => $input["location_id"],
+                "sub_district_id"  => $input["sub_district_id"],
                 "id_number"     => $input["id_number"],
                 "latitude"      => $input["latitude"],
                 "longitude"     => $input["longitude"],
@@ -117,7 +130,6 @@ class FarmerController extends Controller
         } catch(\Exception $e){
             \Log::error($e->getMessage());
             \Log::error($e->getTraceAsString());
-            $response["message"] = $e->getMessage();
         }
         
         return response()->json($response);

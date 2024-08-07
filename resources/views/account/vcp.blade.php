@@ -49,26 +49,6 @@
             </div>
             <div class="col-sm-3">
               <div class="mb-3">
-                <label for="location_id" class="form-label">Location</label>
-                <select id="location_id" class="form-control" name="location_id">
-                  <option value="select" disabled selected>-- Select --</option>
-                </select>
-              </div>
-            </div>
-            <div class="col-sm-3">
-              <div class="mb-3">
-                <label for="latitude" class="form-label">Latitude</label>
-                <input type="text" class="form-control" id="latitude" maxlength="255" placeholder="Latitude" onkeypress="return isNumericAndDot(event);">
-              </div>
-            </div>
-            <div class="col-sm-3">
-              <div class="mb-3">
-                <label for="longitude" class="form-label">Longitude</label>
-                <input type="text" class="form-control" id="longitude" maxlength="255" placeholder="Longitude" onkeypress="return isNumericAndDot(event);">
-              </div>
-            </div>
-            <div class="col-sm-3">
-              <div class="mb-3">
                 <label for="field_coordinator_id" class="form-label">Field Coordinator ID</label>
                 <input type="text" class="form-control" id="field_coordinator_id" maxlength="255" placeholder="Field Coordinator ID" onkeypress="return isAlphaNumericDash(event);">
               </div>
@@ -79,6 +59,9 @@
                 <input type="text" class="form-control" id="field_coordinator_name" maxlength="255" placeholder="Field Coordinator Name" onkeypress="return isAlphaNumericAndWhiteSpace(event);">
               </div>
             </div>
+
+            @include("layout.coverage")
+
             <div class="col-sm-6">
               <div class="mb-3">
                 <label for="city" class="form-label">Address</label>
@@ -135,19 +118,27 @@
 @endsection
 
 @section('javascript')
+<script src="{{ asset('assets/js/coverage.js') }}"></script>
 <script type="text/javascript">
     var start = 0;
     var limit = 10;
-    var candidate = {!! json_encode($candidate) !!};
+
+    // add by faisal
+    // used for coverage.js file
+    var comboDefault = [{
+      id: "select",
+      text: '-- Select --',
+      disabled: true
+    }];
+
+    var province = {!! json_encode($province) !!};
+    var url_coverage_city = "{{ route('coverage.city') }}";
+    var url_coverage_district = "{{ route('coverage.district') }}";
+    var url_coverage_sub_district = "{{ route('coverage.sub_district') }}";
 
   $(document).ready(function() {
       
       $("#response_message").attr("style", 'display: none;');
-
-      $('#location_id').select2({
-            width: '100%',
-            data: candidate
-      });
 
       $('#gridDataTable').DataTable( {
           'paging'        : true,
@@ -177,7 +168,7 @@
           "columnDefs" : [
             { "targets": 0, "data": "vcp_code" },
             { "targets": 1, "data": "email" },
-            { "targets": 2, "data": "sub_district" },
+            { "targets": 2, "data": "location" },
             { "targets": 3, "data": "address" },
             { "targets": 4, "data": "latitude" },
             { "targets": 5, "data": "longitude" },
@@ -239,7 +230,7 @@
             vcp_code: $('#vcp-code').val(),
             email: $('#email_user').val(),
             password: $('#password').val(),
-            location_code: $('#location_id').val(),
+            sub_district_id: $('#sub_district').val(),
             address: $('#address').val(),
             latitude: $('#latitude').val(),
             longitude: $('#longitude').val(),
@@ -261,6 +252,10 @@
             } else {
               $('#response_message').removeClass('alert-success');
               $('#response_message').addClass('alert-danger');
+
+              if(data.message.includes("Email already registered")){
+                $("#email_user").attr('style', 'border: 1px solid #d57171 !important');
+              }
             }
             $("#response_message").attr("style", '');
             $('#response_message').fadeTo(3000, 500).slideUp(500, function() {
@@ -279,9 +274,14 @@
   }
 
   function reset(){
-    $('#gridDataTable').DataTable().ajax.reload();
-    $("#vcp-code, #email_user, #password, #address, #latitude, #longitude, #field_coordinator_id, #field_coordinator_name").val('');
-    $("#location_id").val('select').select2();
+      $('#gridDataTable').DataTable().ajax.reload();
+      $("#vcp-code, #email_user, #password, #address, #latitude, #longitude, #field_coordinator_id, #field_coordinator_name").val('');
+    
+      // add by faisal
+      // used to reset coverage combo from coverage.js file
+      $('#city, #district, #sub_district').empty();
+      $('#city, #district, #sub_district').select2({ width: '100%', data: comboDefault });
+      $('#province, #city, #district, #sub_district').val('select').select2();
   }
 
 

@@ -24,24 +24,21 @@ class FarmerPostRequest extends FormRequest
     public function rules()
     {
         return [
-            "location_code" => "required|max:255",
-            "name"          => "required|max:255",
-            "address"       => "required|max:255",
-            "email"         => "required|email",
-            "password"      => "required|max:255",
-            "latitude"      => "required|numeric",
-            "longitude"     => "required|numeric",
-            "id_number"     => "required|max:255",
+            "sub_district_id"   => "required|numeric",
+            "name"              => "required|max:255",
+            "address"           => "required|max:255",
+            "latitude"          => "required|numeric",
+            "longitude"         => "required|numeric",
+            "id_number"         => "required|max:255",
         ];
     }
 
     public function messages()
     {
         return [
-            'location_code.required'    => 'Location is required',
+            'sub_district_id.required'  => 'Please select sub ditrict first',
+            'sub_district_id.numeric'   => 'Sub ditrict is not valid',
             'name.required'             => 'VCP Code is required',
-            'email.required'            => 'Email is required',
-            'password.required'         => 'Password is required',
             'id_number.required'        => 'Identity Number is required',
             'latitude.required'         => 'Latitude is required',
             'longitude.required'        => 'Longitude is required',

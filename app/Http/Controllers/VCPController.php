@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\VCPPostRequest;
 use App\Http\Requests\RemoveVCPPostRequest;
-use App\Model\Location;
+use App\Model\Province;
 use App\Model\VCP;
 use App\Model\User;
 
@@ -18,17 +18,11 @@ class VCPController extends Controller
     }
 
     public function index(Request $request){
-        $candidate = [
+        $province = array_merge([
             ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
-        ];
+        ], Province::listByName(""));
 
-        $result = Location::select(DB::raw("code, sub_district"))->get()->toArray();
-        $result = collect($result)->map(function ($item) {
-            return ["id" => $item['code'], "text" => $item['sub_district']];
-        });
-        $candidate = array_merge($candidate, json_decode($result, true));
-
-        return view("account.vcp", compact("candidate"));
+        return view("account.vcp", compact("province"));
     }
 
     public function datatables(Request $request){
@@ -41,7 +35,10 @@ class VCPController extends Controller
         try{
             $response["code"] = 200;
             $response["message"] = "Success";
-            $response["data"] = VCP::leftJoin("location", "location.id", "vcp_account.location_id")->leftJoin("users", "vcp_account.user_id", "users.id")->select(DB::raw("vcp_account.vcp_code, users.email, location.sub_district, vcp_account.address, vcp_account.latitude, vcp_account.longitude, vcp_account.field_coordinator_id, vcp_account.field_coordinator_name"))->get();
+            $response["data"] = VCP::leftJoin("users", "vcp_account.user_id", "users.id")->join("sub_districts", "sub_districts.id", "vcp_account.sub_district_id")
+            ->join("districts", "districts.id", "sub_districts.district_id")
+            ->join("cities", "cities.id", "districts.city_id")
+            ->join("provinces", "provinces.id", "cities.province_id")->select(DB::raw("vcp_account.vcp_code, users.email, CONCAT(sub_districts.code, ' <br> ', sub_districts.name, ' <br> ', districts.name, ' <br> ', cities.name, ' <br> ', provinces.name) AS location, vcp_account.address, vcp_account.latitude, vcp_account.longitude, vcp_account.field_coordinator_id, vcp_account.field_coordinator_name"))->get();
         } catch(\Exception $e){
             
         }
@@ -57,6 +54,12 @@ class VCPController extends Controller
             "data"      => []
         ];
         $input = $request->except(["_token"]);
+
+        if(User::isEmailExist($input["email"])){
+            $response["message"] = "Email already registered, please use other email";
+            return response()->json($response);
+        }
+        
         try{
             $dataUser = [
                 "email" => $input["email"],
@@ -68,8 +71,6 @@ class VCPController extends Controller
             $user = User::create($dataUser);
 
             $input["created_by"] = "Admin";
-            $location = Location::findByCode($input["location_code"]);
-            $input["location_id"] = $location->id;
             $input["user_id"]  = $user->id;
             unset($input["location_code"]);
             VCP::create($input);

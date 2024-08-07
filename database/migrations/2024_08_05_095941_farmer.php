@@ -19,7 +19,7 @@ return new class extends Migration
                 $table->engine = 'InnoDB';
                 $table->increments('id');
                 $table->unsignedBigInteger('user_id')->index();
-                $table->unsignedInteger('location_id')->index();
+                $table->unsignedInteger('sub_district_id')->index();
                 $table->text('address');
                 $table->string('latitude', 255)->index();
                 $table->string('longitude', 255)->index();
@@ -31,7 +31,7 @@ return new class extends Migration
                 $table->softDeletes();
 
                 $table->foreign('user_id')->references('id')->on('users');
-                $table->foreign('location_id')->references('id')->on('location');
+                $table->foreign('sub_district_id')->references('id')->on('sub_districts');
             });
         }
     }

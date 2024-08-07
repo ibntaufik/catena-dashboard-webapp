@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\VCHPostRequest;
 use App\Http\Requests\RemoveVCHPostRequest;
-use App\Model\Location;
+use App\Model\Province;
 use App\Model\Bank;
 use App\Model\VCH;
 use App\Model\User;
@@ -19,18 +19,10 @@ class VCHController extends Controller
     }
 
     public function index(Request $request){
-
-        // Get list of Location
-        $candidate = [
+        $province = array_merge([
             ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
-        ];
-
-        $result = Location::select(DB::raw("code, sub_district"))->get()->toArray();
-        $result = collect($result)->map(function ($item) {
-            return ["id" => $item['code'], "text" => $item['sub_district']];
-        });
-        $candidate = array_merge($candidate, json_decode($result, true));
-
+        ], Province::listByName(""));
+        
         // Get list of Bank
         $bank = [
             ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
@@ -41,7 +33,7 @@ class VCHController extends Controller
         });
         $bank = array_merge($bank, json_decode($list, true));
 
-        return view("account.vch", compact("candidate", "bank"));
+        return view("account.vch", compact("province", "bank"));
     }
 
     public function datatables(Request $request){
@@ -54,7 +46,13 @@ class VCHController extends Controller
         try{
             $response["code"] = 200;
             $response["message"] = "Success";
-            $response["data"] = VCH::leftJoin("location", "location.id", "vch_account.location_id")->leftJoin("bank", "vch_account.bank_id", "bank.id")->leftJoin("users", "vch_account.user_id", "users.id")->select(DB::raw("vch_account.vch_code, users.email, location.sub_district, vch_account.address, vch_account.latitude, vch_account.longitude, vch_account.vendor_id, vch_account.vendor_name, bank.name AS vendor_bank_name, vch_account.vendor_bank_address, vch_account.vendor_bank_account_number"))->get();
+            $response["data"] = VCH::leftJoin("bank", "vch_account.bank_id", "bank.id")
+            ->leftJoin("users", "vch_account.user_id", "users.id")
+            ->join("sub_districts", "sub_districts.id", "vch_account.sub_district_id")
+            ->join("districts", "districts.id", "sub_districts.district_id")
+            ->join("cities", "cities.id", "districts.city_id")
+            ->join("provinces", "provinces.id", "cities.province_id")
+            ->select(DB::raw("vch_account.vch_code, users.email, CONCAT(sub_districts.code, ' <br> ', sub_districts.name, ' <br> ', districts.name, ' <br> ', cities.name, ' <br> ', provinces.name) AS location, vch_account.address, vch_account.latitude, vch_account.longitude, vch_account.vendor_id, vch_account.vendor_name, bank.name AS vendor_bank_name, vch_account.vendor_bank_address, vch_account.vendor_bank_account_number"))->get();
         } catch(\Exception $e){
             \Log::error($e->getMessage());
             \Log::error($e->getTraceAsString());
@@ -71,6 +69,12 @@ class VCHController extends Controller
             "data"      => []
         ];
         $input = $request->except(["_token"]);
+
+        if(User::isEmailExist($input["email"])){
+            $response["message"] = "Email already registered, please use other email";
+            return response()->json($response);
+        }
+
         try{
             $dataUser = [
                 "email" => $input["email"],
@@ -82,13 +86,9 @@ class VCHController extends Controller
             $user = User::create($dataUser);
             
             $input["created_by"] = "Admin";
-            $location = Location::findByCode($input["location_code"]);
-            $input["location_id"] = $location->id;
             $input["user_id"]  = $user->id;
-            $bank = Bank::findByCode($input["location_code"]);
-            $input["bank_id"] = $location->id;
-
-            unset($input["location_code"]);
+            $bank = Bank::findByCode($input["bank_code"]);
+            $input["bank_id"] = $bank->id;
 
             VCH::create($input);
             $response["code"] = 200;

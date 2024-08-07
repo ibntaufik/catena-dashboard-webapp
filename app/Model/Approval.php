@@ -16,7 +16,7 @@ class Approval extends Model
     protected $guarded = ['id'];
     
     public static function findById($id){
-        return empty($id) ? null : Cache::remember("approval.id|$id", 600, function() use($id){
+        return empty($id) ? null : Cache::remember("approval.id|$id", config("constant.ttl"), function() use($id){
             return Approval::find($id);   
         });
     }
