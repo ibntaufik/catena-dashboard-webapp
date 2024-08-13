@@ -15,7 +15,7 @@
 <nav class="page-breadcrumb">
   <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="#">Master Data</a></li>
-    <li class="breadcrumb-item active" aria-current="page">VCH Account</li>
+    <li class="breadcrumb-item active" aria-current="page">Account</li>
   </ol>
 </nav>
 
@@ -23,43 +23,48 @@
   <div class="col-md-12 grid-margin stretch-card">
     <div class="card">
       <div class="card-body">
-          <h6 class="card-title">Create VCH Account</h6>
+          <h6 class="card-title">Create Account</h6>
           <div class="row">
             
+            <input type="text" name="username_fake" id="username_fake" autocomplete="off" style="display:none;">
+            <input type="password" name="password_fake" autocomplete="off" style="display:none;">
+
             <div class="col-sm-3">
               <div class="mb-3">
-                <label for="vch_code" class="form-label">VCH Code</label>
-                <select id="vch_code" class="form-control" name="vch_code">
+                <label for="name" class="form-label">ID</label>
+                <input type="text" class="form-control" id="user_id" maxlength="255" autocomplete="off" placeholder="ID" onkeypress="return isAlphaNumericDash(event);">
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="mb-3">
+                <label for="name" class="form-label">Name</label>
+                <input type="text" class="form-control" id="name" maxlength="255" autocomplete="off" placeholder="Name" onkeypress="return isAlphaNumericAndWhiteSpace(event);">
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="text" class="form-control" id="email_user" maxlength="255" autocomplete="off" placeholder="me@mail.co">
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" maxlength="255" autocomplete="new-password" placeholder="Password" onkeypress="return isAlphaNumeric(event);">
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="mb-3">
+                <label for="phone" class="form-label">Phone</label>
+                <input type="text" class="form-control" id="phone" maxlength="255" placeholder="Phone" onkeypress="return isNumber(event);">
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="mb-3">
+                <label for="status_account" class="form-label">Status</label>
+                <select id="status_account" class="form-control" name="status_account">
                   <option value="select" disabled selected>-- Select --</option>
                 </select>
-              </div>
-            </div>
-            <div class="col-sm-3">
-              <div class="mb-3">
-                <label for="account_code" class="form-label">Account</label>
-                <select id="account_code" class="form-control" name="account_code">
-                  <option value="select" disabled selected>-- Select --</option>
-                </select>
-              </div>
-            </div>
-            <div class="col-sm-3">
-              <div class="mb-3">
-                <label for="vendor_name" class="form-label">Vendor Bank Name</label>
-                <select id="bank_id" class="form-control" name="bank_id">
-                  <option value="select" disabled selected>-- Select --</option>
-                </select>
-              </div>
-            </div>
-            <div class="col-sm-3">
-              <div class="mb-3">
-                <label for="vendor_name" class="form-label">Vendor Account Number</label>
-                <input type="text" class="form-control" id="vendor_bank_account_number" maxlength="255" placeholder="Vendor Account Number" onkeypress="return isNumber(event);">
-              </div>
-            </div>
-            <div class="col-sm-12">
-              <div class="mb-3">
-                <label for="city" class="form-label">Vendor Bank Address</label>
-                <textarea type="text" class="form-control" id="vendor_bank_location" rows="2" placeholder="Address" onkeypress="return validateAddress(event);"></textarea>
               </div>
             </div>
           </div>
@@ -87,21 +92,16 @@
   <div class="col-md-12 grid-margin stretch-card">
     <div class="card">
       <div class="card-body">
-        <h6 class="card-title">List of VCH Account</h6>
+        <h6 class="card-title">List of User Account</h6>
         <div class="table-responsive">
           <table id="gridDataTable" class="table">
             <thead>
               <tr>
-                <th>VCH Code</th>
+                <th>ID</th>
+                <th>Name</th>
                 <th>Email</th>
-                <th>Location</th>
-                <th>Latitude</th>
-                <th>Longitude</th>
-                <th>Vendor ID</th>
-                <th>Vendor Name</th>
-                <th>Vendor Bank Name</th>
-                <th>Vendor Bank Location</th>
-                <th>Vendor Account Number</th>
+                <th>Phone</th>
+                <th>Status</th>
                 <th></th>
               </tr>
             </thead>
@@ -117,27 +117,23 @@
 <script type="text/javascript">
     var start = 0;
     var limit = 10;
-    var bank = {!! json_encode($bank) !!};
-    var account = {!! json_encode($account) !!};
-    var vch = {!! json_encode($vch) !!};
+    var statusAccount = {!! json_encode($statusAccount) !!};
 
   $(document).ready(function() {
-      
-      $("#response_message").attr("style", 'display: none;');
+      console.log(statusAccount);
+      $("#response_message").hide();
 
-      $('#bank_id').select2({
-            width: '100%',
-            data: bank
+      $("#role").select2().on("change", function(e){
+        if($("#role option:selected").val() == "vcp"){
+          $("#selection-vcp").show();
+        } else {
+          $("#selection-vcp").hide();
+        }
       });
 
-      $('#account_code').select2({
+      $("#status_account").select2({
             width: '100%',
-            data: account
-      });
-
-      $('#vch_code').select2({
-            width: '100%',
-            data: vch
+            data: statusAccount
       });
 
       $('#gridDataTable').DataTable( {
@@ -150,7 +146,7 @@
           "searching"     : true,
           "pageLength"    : limit,
           "ajax": {
-            "url": "{{ route('vch-account.grid-list') }}",
+            "url": "{{ route('accounts.grid-list') }}",
             "data": function ( d ) {
               var info = $('#gridDataTable').DataTable().page.info();
               d.start = info.start;
@@ -166,39 +162,28 @@
           },
                                 
           "columnDefs" : [
-            { "targets": 0, "data": "vch_code" },
-            { "targets": 1, "data": "email" },
-            { "targets": 2, "data":  function(data, type, row, meta){
-                  return data.address+', '+data.location;
+            { "targets": 0, "data": "code" },
+            { "targets": 1, "data": "name" },
+            { "targets": 2, "data": "email" },
+            { "targets": 3, "data": "phone" },
+            { "targets": 4, "data": "status" },
+            { "targets": 5, "data": function(data, type, row, meta){
+                  return '<a href="#" onclick=$(this).delete("'+data.code+'") style="cursor: pointer;"><i data-feather="trash-2"></i>';
               }
-            },
-            { "targets": 3, "data": "latitude" },
-            { "targets": 4, "data": "longitude" },
-            { "targets": 5, "data": "vendor_code" },
-            { "targets": 6, "data": "vendor_name" },
-            { "targets": 7, "data": "vendor_bank_name" },
-            { "targets": 8, "data": "vendor_bank_address" },
-            { "targets": 9, "data": "vendor_bank_account_number" },
-            { "targets": 10, "data": function(data, type, row, meta){
-                  return '<a href="#" onclick=$(this).delete("'+data.vch_code+'|'+data.vendor_code+'") style="cursor: pointer;"><i data-feather="trash-2"></i>';
-              }
-            },
+            }
           ],
           "drawCallback": function(settings) {
               feather.replace(); // Initialize Feather icons
           }
       });
 
-      $.fn.delete = function(concatCode) {
-
-        codes = concatCode.split("|");
+      $.fn.delete = function(code) {
         $.ajax({
             type: "POST",
-            url: "{{ route('vch-account.remove') }}",
+            url: "{{ route('accounts.remove') }}",
             data: {
               _token: "{{ csrf_token() }}",
-              vch_code: codes[0],
-              vendor_code: codes[1],
+              code: code,
             },
             dataType: "json",
             timeout: 300000
@@ -209,22 +194,17 @@
         });
       };
   });
-  
-  function validateInput(input){
-      var re = /^[a-zA-Z0-9.,\s\/-]*$/;
-      return re.test(input);
-  }
 
   function submit()
   {
-      $("#vendor_bank_location, #vendor_bank_account_number").attr('style', '');
+      $("#email_user, #username, #password").attr('style', '');
       $("#response_message").attr("style", 'display: none;');
       $(".submit-button").addClass("disabled");
       $(".spinner-border").attr("style", '');
 
       var pass = true;
 
-      $("#vendor_bank_location, #vendor_bank_account_number").each(function(){
+      $("#email_user, #name, #password").each(function(){
           $(this).attr('style', '');
           if($(this).val() == ''){
             $(this).attr('style', 'border: 1px solid #d57171 !important');
@@ -232,19 +212,31 @@
           }
       });
 
+      if(!validateEmail($("#email_user").val())){
+        $('#response_message').removeClass('alert-success');
+        $('#response_message').addClass('alert-danger');
+        $("#response_message").attr("style", '');
+        $("#success").html("Email is not valid");
+        $('#response_message').fadeTo(3000, 500).slideUp(500, function() {
+          $("#success-alert").slideUp(500);
+        });
+        pass = false;
+      }
+
       if(pass){
         var submitData = {
             _token: "{{ csrf_token() }}",
-            vch_code: $('#vch_code').val(),
-            account_code: $('#account_code').val(),
-            bank_code: $('#bank_id').val(),
-            vendor_bank_account_number: $('#vendor_bank_account_number').val(),
-            vendor_bank_address: $('#vendor_bank_location').val(),
+            user_id: $('#user_id').val(),
+            name: $('#name').val(),
+            phone: $('#phone').val(),
+            status_account: $('#status_account').val(),
+            email: $('#email_user').val(),
+            password: $('#password').val()
         };
 
         $.ajax({
             type: "POST",
-            url: "{{ route('vch-account.submit') }}",
+            url: "{{ route('accounts.submit') }}",
             data: submitData,
             dataType: "json",
             timeout: 300000
@@ -256,16 +248,14 @@
             } else {
               $('#response_message').removeClass('alert-success');
               $('#response_message').addClass('alert-danger');
-
-              if(data.message.includes("Email already registered")){
-                $("#email_user").attr('style', 'border: 1px solid #d57171 !important');
-              }
             }
             $("#response_message").attr("style", '');
             $('#response_message').fadeTo(3000, 500).slideUp(500, function() {
               $("#success-alert").slideUp(500);
             });
             $("#success").html(data.message);
+            $('#gridDataTable').DataTable().ajax.reload();
+            
         }).fail(function(data){
             $('#response_message').removeClass('alert-success');
             $('#response_message').addClass('alert-danger');
@@ -278,10 +268,10 @@
   }
 
   function reset(){
-      $('#gridDataTable').DataTable().ajax.reload();
-      $("#vendor_bank_account_number, #vendor_bank_location").val('');
-      $("#vch_code, #account_code, #bank_id").val('select').select2();
+    $("#email_user, #password, #phone, #user_id, #name").val('');
+    $('#status_account').val('select').select2();
   }
+
 </script>
 @endsection  
 

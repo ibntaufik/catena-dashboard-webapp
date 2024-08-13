@@ -16,6 +16,12 @@ class Bank extends Model
     protected $guarded = ['id'];
     
     public static function findByCode($code){
+        return empty($code) ? null : Cache::remember("bank.withTrashed.code|$code", config("constant.ttl"), function() use($code){
+            return Bank::withTrashed()->where("code", $code)->first();   
+        });
+    }
+    
+    public static function findActiveByCode($code){
         return empty($code) ? null : Cache::remember("bank.code|$code", config("constant.ttl"), function() use($code){
             return Bank::where("code", $code)->first();   
         });

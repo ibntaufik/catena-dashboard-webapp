@@ -24,6 +24,13 @@ function isDecimal(evt, obj, delimiter) {
   return true;
 }
 
+function formatDecimal(el){
+    if(el.value == ""){
+        el.value = 0;
+    }
+    el.value = parseFloat(el.value).toFixed(2);
+}
+
 function isAlphaNumericAndWhiteSpace(evt){
 	var regex = new RegExp("^[a-zA-Z0-9 ]*$");
     var key = String.fromCharCode(evt.charCode ? evt.which : evt.charCode);
@@ -42,8 +49,8 @@ function isAlphaNumericAndWhiteSpaceAndComma(evt){
     }
 }
 
-function isAlphabeticAndWhiteSpace(evt){
-	var regex = new RegExp("^[a-zA-Z ]*$");
+function isAlphaNumericAndAnyWhiteSpace(evt){
+	var regex = new RegExp("^[a-zA-Z0-9\s]*$");
     var key = String.fromCharCode(evt.charCode ? evt.which : evt.charCode);
     if (!regex.test(key)) {
         evt.preventDefault();
@@ -69,6 +76,15 @@ function isAlphaNumericDash(evt){
     }
 }
 
+function isAlphaNumericDashSlash(evt){
+  var regex = new RegExp("^[a-zA-Z0-9\/-]*$");
+    var key = String.fromCharCode(evt.charCode ? evt.which : evt.charCode);
+    if (!regex.test(key)) {
+        evt.preventDefault();
+        return false;
+    }
+}
+
 function isAlphabetic(evt){
 	var regex = new RegExp("^[a-zA-Z]*$");
     var key = String.fromCharCode(evt.charCode ? evt.which : evt.charCode);
@@ -77,6 +93,17 @@ function isAlphabetic(evt){
         return false;
     }
 }
+
+function validateDescription(evt){
+  var regex = new RegExp("^[a-zA-Z0-9.,\s\/-]*$");
+    var key = String.fromCharCode(evt.charCode ? evt.which : evt.charCode);
+    if (!regex.test(key)) {
+        evt.preventDefault();
+        return false;
+    }
+}
+
+
 
 function isNumericAndDot(evt){
   var regex = new RegExp("^[0-9.]*$");

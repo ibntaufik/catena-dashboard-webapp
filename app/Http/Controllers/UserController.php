@@ -24,9 +24,9 @@ class UserController extends Controller
             ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
         ];
 
-        $result = VCP::select(DB::raw("vcp_code"))->get()->toArray();
+        $result = VCP::select(DB::raw("code"))->get()->toArray();
         $result = collect($result)->map(function ($item) {
-            return ["id" => $item['vcp_code'], "text" => $item['vcp_code']];
+            return ["id" => $item['code'], "text" => $item['code']];
         });
         $candidate = array_merge($candidate, json_decode($result, true));
 

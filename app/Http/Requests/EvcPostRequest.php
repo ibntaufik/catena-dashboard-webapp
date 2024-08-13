@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class VCHPostRequest extends FormRequest
+class EvcPostRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,7 +25,6 @@ class VCHPostRequest extends FormRequest
     {
         return [
             "sub_district_id"   => "required|numeric",
-            "evc_code"          => "required",
             "code"              => "required|max:255",
             "latitude"          => "required|numeric",
             "longitude"         => "required|numeric",
@@ -38,9 +37,11 @@ class VCHPostRequest extends FormRequest
         return [
             'sub_district_id.required'  => 'Please select sub ditrict first',
             'sub_district_id.numeric'   => 'Sub ditrict is not valid',
-            'code.required'             => 'VCH Code is required',
+            'code.required'             => 'EVC Code is required',
             'latitude.required'         => 'Latitude is required',
+            'latitude.numeric'          => 'Latitude is not valid',
             'longitude.required'        => 'Longitude is required',
+            'longitude.numeric'         => 'Longitude is not valid',
             'address.required'          => 'Address is required',
         ];
     }

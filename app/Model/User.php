@@ -16,7 +16,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'email', 'password', 'phone'
     ];
 
     /**
@@ -39,6 +39,11 @@ class User extends Authenticatable
 
     public static function isEmailExist($email){
         $user = User::where("email", $email)->first();
+        return empty($user) ? false : true;
+    }
+
+    public static function isPhoneExist($phone){
+        $user = User::where("phone", $phone)->first();
         return empty($user) ? false : true;
     }
 }

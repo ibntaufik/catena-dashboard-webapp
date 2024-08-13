@@ -19,7 +19,6 @@ class Subdistrict extends Model
     public static function listByDistrictId($id){
         return empty($id) ? [] : Cache::remember("coverage.sub_district.district_id|$id", config("constant.ttl"), function() use($id){
             $result = Subdistrict::where("district_id", $id)->select(DB::raw("id, CONCAT(code, ' - ', name) AS text"))->orderBy("name", "ASC")->get()->toArray();
-            \Log::debug($result);
             return $result;
         });
     }

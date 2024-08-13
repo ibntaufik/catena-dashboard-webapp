@@ -47,13 +47,13 @@
         <div class="collapse {{ show_class(['transaction/*']) }}" id="transaction">
           <ul class="nav sub-menu">
             <li class="nav-item">
-              <a href="{{ url('/transaction/create-purchase-order') }}" class="nav-link {{ active_class(['transaction/create-purchase-order']) }}">Create Purchase Order</a>
+              <a href="{{ url('/transaction/purchase-order') }}" class="nav-link {{ active_class(['transaction/purchase-order']) }}">Create Purchase Order</a>
             </li>
             <li class="nav-item">
-              <a href="{{ url('/transaction/purchase-order-release') }}" class="nav-link {{ active_class(['transaction/purchase-order-release']) }}">Purchase Order Release</a>
+              <a href="{{ url('/transaction/purchase-order/release') }}" class="nav-link {{ active_class(['transaction/purchase-order/release']) }}">Purchase Order Release</a>
             </li>
             <li class="nav-item">
-              <a href="{{ url('/transaction/farmer-and-vcp-transaction') }}" class="nav-link {{ active_class(['transaction/farmer-and-vcp-transaction']) }}">Farmer &amp; VCP Transaction</a>
+              <a href="{{ url('/transaction/farmer-and-vcp') }}" class="nav-link {{ active_class(['transaction/farmer-and-vcp']) }}">Farmer &amp; VCP Transaction</a>
             </li>
           </ul>
         </div>
@@ -73,7 +73,19 @@
               <a href="{{ url('/master-data/location') }}" class="nav-link {{ active_class(['master-data/location']) }}">Location</a>
             </li>
             <li class="nav-item">
-              <a href="{{ url('/master-data/user') }}" class="nav-link {{ active_class(['master-data/user']) }}">User Account</a>
+              <a href="{{ url('/master-data/user') }}" class="nav-link {{ active_class(['master-data/user']) }}">HO Account</a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ url('/master-data/evc') }}" class="nav-link {{ active_class(['master-data/evc']) }}">EVC</a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ url('/master-data/vch') }}" class="nav-link {{ active_class(['master-data/vch']) }}">VCH</a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ url('/master-data/vcp') }}" class="nav-link {{ active_class(['master-data/vcp']) }}">VCP</a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ url('/master-data/accounts') }}" class="nav-link {{ active_class(['master-data/accounts']) }}">Accounts</a>
             </li>
           </ul>
         </div>

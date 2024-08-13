@@ -53,7 +53,7 @@ class ApprovalController extends Controller
             if(empty($isExist)){
                 $input["created_by"] = "Admin";
                 Approval::create($input);
-            } else {\Log::debug($isExist);
+            } else {
                 $isExist->deleted_at = null;
                 $isExist->updated_at = now();
                 $isExist->updated_by = "Admin";

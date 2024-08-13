@@ -15,7 +15,7 @@
 <nav class="page-breadcrumb">
   <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="#">Master Data</a></li>
-    <li class="breadcrumb-item active" aria-current="page">VCH Account</li>
+    <li class="breadcrumb-item active" aria-current="page">VCH</li>
   </ol>
 </nav>
 
@@ -23,43 +23,31 @@
   <div class="col-md-12 grid-margin stretch-card">
     <div class="card">
       <div class="card-body">
-          <h6 class="card-title">Create VCH Account</h6>
+          <h6 class="card-title">Create VCH</h6>
           <div class="row">
-            
+
             <div class="col-sm-3">
               <div class="mb-3">
-                <label for="vch_code" class="form-label">VCH Code</label>
-                <select id="vch_code" class="form-control" name="vch_code">
+                <label for="evc_code" class="form-label">EVC Code</label>
+                <select id="evc_code" class="form-control" name="evc_code">
                   <option value="select" disabled selected>-- Select --</option>
                 </select>
               </div>
             </div>
+
             <div class="col-sm-3">
               <div class="mb-3">
-                <label for="account_code" class="form-label">Account</label>
-                <select id="account_code" class="form-control" name="account_code">
-                  <option value="select" disabled selected>-- Select --</option>
-                </select>
+                <label for="name" class="form-label">Code</label>
+                <input type="text" class="form-control" id="code" maxlength="255" placeholder="VCH Code" onkeypress="return isAlphaNumericDash(event);">
               </div>
             </div>
-            <div class="col-sm-3">
+
+            @include("layout.coverage")
+
+            <div class="col-sm-6">
               <div class="mb-3">
-                <label for="vendor_name" class="form-label">Vendor Bank Name</label>
-                <select id="bank_id" class="form-control" name="bank_id">
-                  <option value="select" disabled selected>-- Select --</option>
-                </select>
-              </div>
-            </div>
-            <div class="col-sm-3">
-              <div class="mb-3">
-                <label for="vendor_name" class="form-label">Vendor Account Number</label>
-                <input type="text" class="form-control" id="vendor_bank_account_number" maxlength="255" placeholder="Vendor Account Number" onkeypress="return isNumber(event);">
-              </div>
-            </div>
-            <div class="col-sm-12">
-              <div class="mb-3">
-                <label for="city" class="form-label">Vendor Bank Address</label>
-                <textarea type="text" class="form-control" id="vendor_bank_location" rows="2" placeholder="Address" onkeypress="return validateAddress(event);"></textarea>
+                <label for="city" class="form-label">Address</label>
+                <textarea type="text" class="form-control" id="address" rows="3" placeholder="Address" onkeypress="return validateAddress(event);"></textarea>
               </div>
             </div>
           </div>
@@ -87,21 +75,16 @@
   <div class="col-md-12 grid-margin stretch-card">
     <div class="card">
       <div class="card-body">
-        <h6 class="card-title">List of VCH Account</h6>
+        <h6 class="card-title">List of VCH</h6>
         <div class="table-responsive">
           <table id="gridDataTable" class="table">
             <thead>
               <tr>
-                <th>VCH Code</th>
-                <th>Email</th>
-                <th>Location</th>
+                <th>Code</th>
+                <th>Alamat</th>
+                <th>Lokasi</th>
                 <th>Latitude</th>
                 <th>Longitude</th>
-                <th>Vendor ID</th>
-                <th>Vendor Name</th>
-                <th>Vendor Bank Name</th>
-                <th>Vendor Bank Location</th>
-                <th>Vendor Account Number</th>
                 <th></th>
               </tr>
             </thead>
@@ -114,32 +97,32 @@
 @endsection
 
 @section('javascript')
+<script src="{{ asset('assets/js/coverage.js') }}"></script>
 <script type="text/javascript">
     var start = 0;
     var limit = 10;
-    var bank = {!! json_encode($bank) !!};
-    var account = {!! json_encode($account) !!};
-    var vch = {!! json_encode($vch) !!};
+    var fileType = "";
+    var evc = {!! json_encode($evc) !!};
+
+    // add by faisal
+    // used for coverage.js file
+    var comboDefault = [{
+      id: "select",
+      text: '-- Select --',
+      disabled: true
+    }];
+    var province = {!! json_encode($province) !!};
+    var url_coverage_city = "{{ route('coverage.city') }}";
+    var url_coverage_district = "{{ route('coverage.district') }}";
+    var url_coverage_sub_district = "{{ route('coverage.sub_district') }}";
 
   $(document).ready(function() {
       
       $("#response_message").attr("style", 'display: none;');
-
-      $('#bank_id').select2({
-            width: '100%',
-            data: bank
+      $("#evc_code").select2({
+        width: '100%',
+        data: evc
       });
-
-      $('#account_code').select2({
-            width: '100%',
-            data: account
-      });
-
-      $('#vch_code').select2({
-            width: '100%',
-            data: vch
-      });
-
       $('#gridDataTable').DataTable( {
           'paging'        : true,
           'lengthChange'  : false,
@@ -150,7 +133,7 @@
           "searching"     : true,
           "pageLength"    : limit,
           "ajax": {
-            "url": "{{ route('vch-account.grid-list') }}",
+            "url": "{{ route('vch.grid-list') }}",
             "data": function ( d ) {
               var info = $('#gridDataTable').DataTable().page.info();
               d.start = info.start;
@@ -166,21 +149,20 @@
           },
                                 
           "columnDefs" : [
-            { "targets": 0, "data": "vch_code" },
-            { "targets": 1, "data": "email" },
-            { "targets": 2, "data":  function(data, type, row, meta){
-                  return data.address+', '+data.location;
+            { "targets": 0, "data": function(data, type, row, meta){
+                  return data.evc_code+' - '+data.code;
+              }
+            },
+            { "targets": 1, "data": "address" },
+            { "targets": 2, "data": function(data, type, row, meta){
+                  return data.sub_district+', '+data.district+', '+data.city+', '+data.province;
               }
             },
             { "targets": 3, "data": "latitude" },
             { "targets": 4, "data": "longitude" },
-            { "targets": 5, "data": "vendor_code" },
-            { "targets": 6, "data": "vendor_name" },
-            { "targets": 7, "data": "vendor_bank_name" },
-            { "targets": 8, "data": "vendor_bank_address" },
-            { "targets": 9, "data": "vendor_bank_account_number" },
-            { "targets": 10, "data": function(data, type, row, meta){
-                  return '<a href="#" onclick=$(this).delete("'+data.vch_code+'|'+data.vendor_code+'") style="cursor: pointer;"><i data-feather="trash-2"></i>';
+            { "targets": 5, "data": "address" },
+            { "targets": 6, "data": function(data, type, row, meta){
+                  return '<a href="#" onclick=$(this).delete("'+data.code+'") style="cursor: pointer;"><i data-feather="trash-2"></i>';
               }
             },
           ],
@@ -189,16 +171,13 @@
           }
       });
 
-      $.fn.delete = function(concatCode) {
-
-        codes = concatCode.split("|");
+      $.fn.delete = function(code) {
         $.ajax({
             type: "POST",
-            url: "{{ route('vch-account.remove') }}",
+            url: "{{ route('vch.remove') }}",
             data: {
               _token: "{{ csrf_token() }}",
-              vch_code: codes[0],
-              vendor_code: codes[1],
+              vch_code: code,
             },
             dataType: "json",
             timeout: 300000
@@ -217,34 +196,36 @@
 
   function submit()
   {
-      $("#vendor_bank_location, #vendor_bank_account_number").attr('style', '');
+      $("#code, #address, #latitude, #longitude").attr('style', '');
       $("#response_message").attr("style", 'display: none;');
       $(".submit-button").addClass("disabled");
       $(".spinner-border").attr("style", '');
 
       var pass = true;
 
-      $("#vendor_bank_location, #vendor_bank_account_number").each(function(){
+      $("#code, #address, #latitude, #longitude").each(function(){
           $(this).attr('style', '');
           if($(this).val() == ''){
             $(this).attr('style', 'border: 1px solid #d57171 !important');
             pass = false;
+            return;
           }
       });
 
       if(pass){
         var submitData = {
             _token: "{{ csrf_token() }}",
-            vch_code: $('#vch_code').val(),
-            account_code: $('#account_code').val(),
-            bank_code: $('#bank_id').val(),
-            vendor_bank_account_number: $('#vendor_bank_account_number').val(),
-            vendor_bank_address: $('#vendor_bank_location').val(),
+            code: $('#code').val(),
+            evc_code: $('#evc_code').val(),
+            sub_district_id: $('#sub_district').val(),
+            latitude: $('#latitude').val(),
+            longitude: $('#longitude').val(),
+            address: $('#address').val(),
         };
 
         $.ajax({
             type: "POST",
-            url: "{{ route('vch-account.submit') }}",
+            url: "{{ route('vch.submit') }}",
             data: submitData,
             dataType: "json",
             timeout: 300000
@@ -260,6 +241,7 @@
               if(data.message.includes("Email already registered")){
                 $("#email_user").attr('style', 'border: 1px solid #d57171 !important');
               }
+
             }
             $("#response_message").attr("style", '');
             $('#response_message').fadeTo(3000, 500).slideUp(500, function() {
@@ -278,10 +260,18 @@
   }
 
   function reset(){
+
       $('#gridDataTable').DataTable().ajax.reload();
-      $("#vendor_bank_account_number, #vendor_bank_location").val('');
-      $("#vch_code, #account_code, #bank_id").val('select').select2();
+      $("#code, #address, #latitude, #longitude").val('');
+      $('#evc_code').val('select').select2();
+
+      // add by faisal
+      // used to reset coverage combo from coverage.js file
+      $('#city, #district, #sub_district').empty();
+      $('#city, #district, #sub_district').select2({ width: '100%', data: comboDefault });
+      $('#province, #city, #district, #sub_district').val('select').select2();
   }
+
 </script>
 @endsection  
 

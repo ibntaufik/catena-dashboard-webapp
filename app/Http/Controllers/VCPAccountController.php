@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\VCPPostRequest;
 use App\Http\Requests\RemoveVCPPostRequest;
 use App\Model\Province;
-use App\Model\VCH;
 use App\Model\VCP;
 use App\Model\User;
 
@@ -23,10 +22,7 @@ class VCPController extends Controller
             ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
         ], Province::listByName(""));
 
-        $vch = array_merge([
-            ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
-        ], json_decode(VCH::listCombo(), true));
-        return view("master-data.vcp.index", compact("province", "vch"));
+        return view("account.vcp", compact("province"));
     }
 
     public function datatables(Request $request){
@@ -39,16 +35,12 @@ class VCPController extends Controller
         try{
             $response["code"] = 200;
             $response["message"] = "Success";
-            $response["data"] = VCP::join("t_vch", "t_vch.id", "t_vcp.vch_id")
-            ->join("t_evc", "t_evc.id", "t_vch.evc_id")
-            ->join("sub_districts", "sub_districts.id", "t_vcp.sub_district_id")
+            $response["data"] = VCP::leftJoin("users", "vcp_account.user_id", "users.id")->join("sub_districts", "sub_districts.id", "vcp_account.sub_district_id")
             ->join("districts", "districts.id", "sub_districts.district_id")
             ->join("cities", "cities.id", "districts.city_id")
-            ->join("provinces", "provinces.id", "cities.province_id")
-            ->select(DB::raw("t_evc.code AS evc_code, t_vch.code AS vch_code, t_vcp.code AS code, t_vcp.address, t_vcp.latitude, t_vcp.longitude, sub_districts.name AS sub_district, districts.name AS district, cities.name AS city, provinces.name AS province"))->get();
+            ->join("provinces", "provinces.id", "cities.province_id")->select(DB::raw("vcp_account.vcp_code, users.email, CONCAT(sub_districts.code, ' <br> ', sub_districts.name, ' <br> ', districts.name, ' <br> ', cities.name, ' <br> ', provinces.name) AS location, vcp_account.address, vcp_account.latitude, vcp_account.longitude, vcp_account.field_coordinator_id, vcp_account.field_coordinator_name"))->get();
         } catch(\Exception $e){
-            \Log::error($e->getMessage());
-            \Log::error($e->getTraceAsString());
+            
         }
         
         return response()->json($response);
@@ -63,23 +55,25 @@ class VCPController extends Controller
         ];
         $input = $request->except(["_token"]);
 
+        if(User::isEmailExist($input["email"])){
+            $response["message"] = "Email already registered, please use other email";
+            return response()->json($response);
+        }
+        
         try{
-            if(VCP::findByCode($input["code"])){
-                $response["message"] = "VCP with code ".$input["code"]." already registered.";
-                return response()->json($response);
-            }
+            $dataUser = [
+                "email" => $input["email"],
+                "password" => Hash::make($input["password"]),
+                "name" => $input["field_coordinator_name"],
+                "created_by" => "System Administrator"
+            ];
 
-            $vch = VCH::findByCode($input["vch_code"]);
-            if(empty($vch)){
-                $response["message"] = "VCH with code ".$input["code"]." not registered in system.";
-                return response()->json($response);
-            } else if(!empty($vch->deleted_at)){
-                $response["message"] = "VCH with code ".$input["code"]." have been deleted from system.";
-                return response()->json($response);
-            }
-            $input["vch_id"] = $vch->id;
-            unset($input["vch_code"]);
-            $user = VCP::create($input);
+            $user = User::create($dataUser);
+
+            $input["created_by"] = "Admin";
+            $input["user_id"]  = $user->id;
+            unset($input["location_code"]);
+            VCP::create($input);
             $response["code"] = 200;
             $response["message"] = "Success";
             
@@ -101,7 +95,7 @@ class VCPController extends Controller
         ];
         
         try{
-            VCP::where("ode", $request->input("vcp_code"))->delete();
+            VCP::where("vcp_code", $request->input("vcp_code"))->delete();
 
             $response["code"] = 200;
             $response["message"] = "Success";

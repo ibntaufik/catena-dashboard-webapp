@@ -28,10 +28,10 @@ Route::group(['prefix' => 'account'], function(){
         Route::post('remove', 'VCPController@delete')->name("vcp.remove");
     });
     Route::group(['prefix' => 'vch'], function(){
-        Route::get('', 'VCHController@index')->name("vch.index");
-        Route::get('grid-list', 'VCHController@datatables')->name("vch.grid-list");
-        Route::post('submit', 'VCHController@save')->name("vch.submit");
-        Route::post('remove', 'VCHController@delete')->name("vch.remove");
+        Route::get('', 'VchAccountController@index')->name("vch-account.index");
+        Route::get('grid-list', 'VchAccountController@datatables')->name("vch-account.grid-list");
+        Route::post('submit', 'VchAccountController@save')->name("vch-account.submit");
+        Route::post('remove', 'VchAccountController@delete')->name("vch-account.remove");
     });
 });    
 Route::group(['prefix' => 'master-data'], function(){
@@ -62,6 +62,36 @@ Route::group(['prefix' => 'master-data'], function(){
         Route::get('city', 'LocationController@listComboCity')->name("coverage.city");
         Route::get('district', 'LocationController@listComboDistrict')->name("coverage.district");
         Route::get('sub-district', 'LocationController@listComboSubDistrict')->name("coverage.sub_district");
+    });
+    Route::group(['prefix' => 'evc'], function(){
+        Route::get('', 'EvcController@index')->name("evc.index");
+        Route::get('grid-list', 'EvcController@datatables')->name("evc.grid-list");
+        Route::post('submit', 'EvcController@save')->name("evc.submit");
+        Route::post('remove', 'EvcController@delete')->name("evc.remove");
+    });
+    Route::group(['prefix' => 'vch'], function(){
+        Route::get('', 'VCHController@index')->name("vch.index");
+        Route::get('grid-list', 'VCHController@datatables')->name("vch.grid-list");
+        Route::post('submit', 'VCHController@save')->name("vch.submit");
+        Route::post('remove', 'VCHController@delete')->name("vch.remove");
+    });
+    Route::group(['prefix' => 'vcp'], function(){
+        Route::get('', 'VCPController@index')->name("vcp.index");
+        Route::get('grid-list', 'VCPController@datatables')->name("vcp.grid-list");
+        Route::post('submit', 'VCPController@save')->name("vcp.submit");
+        Route::post('remove', 'VCPController@delete')->name("vcp.remove");
+    });
+    Route::group(['prefix' => 'accounts'], function(){
+        Route::get('', 'AccountController@index')->name("accounts.index");
+        Route::get('grid-list', 'AccountController@datatables')->name("accounts.grid-list");
+        Route::post('submit', 'AccountController@save')->name("accounts.submit");
+        Route::post('remove', 'AccountController@delete')->name("accounts.remove");
+    });
+});
+
+Route::group(['prefix' => 'transaction'], function(){
+    Route::group(['prefix' => 'purchase-order'], function(){
+        Route::get('', 'PurchaseOrderController@index')->name("purchase-order.index");
     });
 });
 
