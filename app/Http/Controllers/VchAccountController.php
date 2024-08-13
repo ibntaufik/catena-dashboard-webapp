@@ -29,7 +29,7 @@ class VchAccountController extends Controller
         // List of Account
         $account = array_merge([
             ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
-        ], json_decode(Account::listCombo(), true));
+        ], json_decode(Account::listVendor(), true));
 
         // Get list of Bank
         $bank = Bank::select(DB::raw("code, name"))->get()->toArray();

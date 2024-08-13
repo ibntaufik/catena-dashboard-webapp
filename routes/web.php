@@ -22,10 +22,10 @@ Route::group(['prefix' => 'account'], function(){
         Route::post('remove', 'FarmerController@delete')->name("farmer.remove");
     });
     Route::group(['prefix' => 'vcp'], function(){
-        Route::get('', 'VCPController@index')->name("vcp.index");
-        Route::get('grid-list', 'VCPController@datatables')->name("vcp.grid-list");
-        Route::post('submit', 'VCPController@save')->name("vcp.submit");
-        Route::post('remove', 'VCPController@delete')->name("vcp.remove");
+        Route::get('', 'VcpAccountController@index')->name("vcp-account.index");
+        Route::get('grid-list', 'VcpAccountController@datatables')->name("vcp-account.grid-list");
+        Route::post('submit', 'VcpAccountController@save')->name("vcp-account.submit");
+        Route::post('remove', 'VcpAccountController@delete')->name("vcp-account.remove");
     });
     Route::group(['prefix' => 'vch'], function(){
         Route::get('', 'VchAccountController@index')->name("vch-account.index");

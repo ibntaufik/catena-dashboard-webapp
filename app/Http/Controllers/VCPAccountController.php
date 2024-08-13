@@ -5,24 +5,29 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use App\Http\Requests\VCPPostRequest;
+use App\Http\Requests\VcpAccountPostRequest;
 use App\Http\Requests\RemoveVCPPostRequest;
-use App\Model\Province;
-use App\Model\VCP;
+use App\Model\Account;
 use App\Model\User;
+use App\Model\VcpAccount;
+use App\Model\VCP;
 
-class VCPController extends Controller
+class VcpAccountController extends Controller
 {
     public function __construct(){
         
     }
 
     public function index(Request $request){
-        $province = array_merge([
+        $vcp = array_merge([
             ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
-        ], Province::listByName(""));
+        ], json_decode(VCP::listCombo(), true));
 
-        return view("account.vcp", compact("province"));
+        $account = array_merge([
+            ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
+        ], json_decode(Account::listFieldCoordinator()));
+
+        return view("account.vcp", compact("vcp", "account"));
     }
 
     public function datatables(Request $request){
@@ -35,18 +40,23 @@ class VCPController extends Controller
         try{
             $response["code"] = 200;
             $response["message"] = "Success";
-            $response["data"] = VCP::leftJoin("users", "vcp_account.user_id", "users.id")->join("sub_districts", "sub_districts.id", "vcp_account.sub_district_id")
+            $response["data"] = VcpAccount::join("t_vcp", "account_vcp.vcp_id", "t_vcp.id")
+            ->join("accounts", "account_vcp.account_id", "accounts.id")
+            ->join("users", "accounts.user_id", "users.id")
+            ->join("sub_districts", "sub_districts.id", "t_vcp.sub_district_id")
             ->join("districts", "districts.id", "sub_districts.district_id")
             ->join("cities", "cities.id", "districts.city_id")
-            ->join("provinces", "provinces.id", "cities.province_id")->select(DB::raw("vcp_account.vcp_code, users.email, CONCAT(sub_districts.code, ' <br> ', sub_districts.name, ' <br> ', districts.name, ' <br> ', cities.name, ' <br> ', provinces.name) AS location, vcp_account.address, vcp_account.latitude, vcp_account.longitude, vcp_account.field_coordinator_id, vcp_account.field_coordinator_name"))->get();
+            ->join("provinces", "provinces.id", "cities.province_id")
+            ->select(DB::raw("t_vcp.code AS vcp_code, users.email, CONCAT(sub_districts.name, ' <br> ', districts.name, ' <br> ', cities.name, ' <br> ', provinces.name) AS location, t_vcp.address, t_vcp.latitude, t_vcp.longitude, accounts.code AS field_coordinator_id, users.name AS field_coordinator_name"))->get();
         } catch(\Exception $e){
-            
+            \Log::error($e->getMessage());
+            \Log::error($e->getTraceAsString());
         }
         
         return response()->json($response);
     }
 
-    public function save(VCPPostRequest $request){
+    public function save(VcpAccountPostRequest $request){
         
         $response = [
             "code"      => 400,
@@ -54,26 +64,25 @@ class VCPController extends Controller
             "data"      => []
         ];
         $input = $request->except(["_token"]);
-
-        if(User::isEmailExist($input["email"])){
-            $response["message"] = "Email already registered, please use other email";
-            return response()->json($response);
-        }
         
         try{
-            $dataUser = [
-                "email" => $input["email"],
-                "password" => Hash::make($input["password"]),
-                "name" => $input["field_coordinator_name"],
-                "created_by" => "System Administrator"
-            ];
+            $vcp = VCP::findActiveByCode($input["vcp_code"]);
+            if(empty($vcp)){
+                $response["message"] = "VCP Code ".$input["vcp_code"]." is not listed on system";
+                return response()->json($response);
+            }
 
-            $user = User::create($dataUser);
+            $account = Account::findActiveByCode($input["account_code"]);
+            if(empty($account)){
+                $response["message"] = "Account with code ".$input["account_code"]." is not listed on system";
+                return response()->json($response);
+            }
 
-            $input["created_by"] = "Admin";
-            $input["user_id"]  = $user->id;
-            unset($input["location_code"]);
-            VCP::create($input);
+            VcpAccount::create([
+                "vcp_id" => $vcp->id,
+                "account_id" => $account->id
+            ]);
+            
             $response["code"] = 200;
             $response["message"] = "Success";
             

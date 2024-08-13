@@ -120,7 +120,7 @@ return new class extends Migration
                 $table->engine = 'InnoDB';
                 $table->increments('id');
                 $table->unsignedInteger('vcp_id')->index();
-                $table->unsignedBigInteger('user_id')->index();
+                $table->unsignedInteger('account_id')->index();
                 $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'))->index();
                 $table->string('created_by', 255)->default("System");
                 $table->timestamp('updated_at')->nullable();
@@ -128,7 +128,7 @@ return new class extends Migration
                 $table->softDeletes();
 
                 $table->foreign('vcp_id')->references('id')->on($this->tableVcp);
-                $table->foreign('user_id')->references('id')->on("users");
+                $table->foreign('account_id')->references('id')->on($this->tableAccount);
             });
         }
         if(!Schema::hasTable($this->tableEvcAccount)){

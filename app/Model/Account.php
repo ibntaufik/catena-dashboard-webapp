@@ -34,11 +34,20 @@ class Account extends Model
         });
     }
 
-    public static function listCombo(){
+    public static function listVendor(){
         return Cache::remember("account.list_combo", config("constant.ttl"), function(){
-            $result = Account::join("users", "users.id", "accounts.user_id")->select(DB::raw("code, status, users.name"))->get()->toArray();
+            $result = Account::join("users", "users.id", "accounts.user_id")->where("accounts.status", "vendor")->select(DB::raw("code, status, users.name"))->get()->toArray();
             return collect($result)->map(function ($item) {
-                return ["id" => $item['code'], "text" => $item['code']."-".$item['name']."-".$item['status']];
+                return ["id" => $item['code'], "text" => $item['code']." - ".$item['name']];
+            });
+        });
+    }
+
+    public static function listFieldCoordinator(){
+        return Cache::remember("account.list_combo", config("constant.ttl"), function(){
+            $result = Account::join("users", "users.id", "accounts.user_id")->where("accounts.status", "fc")->select(DB::raw("code, status, users.name"))->get()->toArray();
+            return collect($result)->map(function ($item) {
+                return ["id" => $item['code'], "text" => $item['code']." - ".$item['name']];
             });
         });
     }

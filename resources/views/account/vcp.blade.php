@@ -26,46 +26,20 @@
           <h6 class="card-title">Create VCP Account</h6>
           <div class="row">
             
-            <input type="text" name="username_fake" id="username_fake" autocomplete="off" style="display:none;">
-            <input type="password" name="password_fake" autocomplete="off" style="display:none;">
-
             <div class="col-sm-3">
               <div class="mb-3">
-                <label for="vcp-code" class="form-label">VCP Code</label>
-                <input type="text" class="form-control" id="vcp-code" maxlength="255" autocomplete="off" placeholder="ID-XYZ-123" onkeypress="return isAlphaNumericDash(event);">
+                <label for="vcp_code" class="form-label">VCP Code</label>
+                <select id="vcp_code" class="form-control" name="vcp_code">
+                  <option value="select" disabled selected>-- Select --</option>
+                </select>
               </div>
             </div>
             <div class="col-sm-3">
               <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="text" class="form-control" id="email_user" maxlength="255" autocomplete="off" placeholder="me@mail.co">
-              </div>
-            </div>
-            <div class="col-sm-3">
-              <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" maxlength="255" autocomplete="new-password" placeholder="Password" onkeypress="return isAlphaNumeric(event);">
-              </div>
-            </div>
-            <div class="col-sm-3">
-              <div class="mb-3">
-                <label for="field_coordinator_id" class="form-label">Field Coordinator ID</label>
-                <input type="text" class="form-control" id="field_coordinator_id" maxlength="255" placeholder="Field Coordinator ID" onkeypress="return isAlphaNumericDash(event);">
-              </div>
-            </div>
-            <div class="col-sm-3">
-              <div class="mb-3">
-                <label for="field_coordinator_name" class="form-label">Field Coordinator Name</label>
-                <input type="text" class="form-control" id="field_coordinator_name" maxlength="255" placeholder="Field Coordinator Name" onkeypress="return isAlphaNumericAndWhiteSpace(event);">
-              </div>
-            </div>
-
-            @include("layout.coverage")
-
-            <div class="col-sm-6">
-              <div class="mb-3">
-                <label for="city" class="form-label">Address</label>
-                <textarea type="text" class="form-control" id="address" rows="3" placeholder="Address" onkeypress="return validateAddress(event);"></textarea>
+                <label for="account_code" class="form-label">Account</label>
+                <select id="account_code" class="form-control" name="account_code">
+                  <option value="select" disabled selected>-- Select --</option>
+                </select>
               </div>
             </div>
           </div>
@@ -100,7 +74,6 @@
               <tr>
                 <th>VCP Code</th>
                 <th>Email</th>
-                <th>Location</th>
                 <th>Address</th>
                 <th>Latitude</th>
                 <th>Longitude</th>
@@ -118,27 +91,25 @@
 @endsection
 
 @section('javascript')
-<script src="{{ asset('assets/js/coverage.js') }}"></script>
 <script type="text/javascript">
     var start = 0;
     var limit = 10;
-
-    // add by faisal
-    // used for coverage.js file
-    var comboDefault = [{
-      id: "select",
-      text: '-- Select --',
-      disabled: true
-    }];
-
-    var province = {!! json_encode($province) !!};
-    var url_coverage_city = "{{ route('coverage.city') }}";
-    var url_coverage_district = "{{ route('coverage.district') }}";
-    var url_coverage_sub_district = "{{ route('coverage.sub_district') }}";
+    var account = {!! json_encode($account) !!};
+    var vcp = {!! json_encode($vcp) !!};
 
   $(document).ready(function() {
       
       $("#response_message").attr("style", 'display: none;');
+
+      $('#account_code').select2({
+            width: '100%',
+            data: account
+      });
+
+      $('#vcp_code').select2({
+            width: '100%',
+            data: vcp
+      });
 
       $('#gridDataTable').DataTable( {
           'paging'        : true,
@@ -150,7 +121,7 @@
           "searching"     : true,
           "pageLength"    : limit,
           "ajax": {
-            "url": "{{ route('vcp.grid-list') }}",
+            "url": "{{ route('vcp-account.grid-list') }}",
             "data": function ( d ) {
               var info = $('#gridDataTable').DataTable().page.info();
               d.start = info.start;
@@ -168,13 +139,15 @@
           "columnDefs" : [
             { "targets": 0, "data": "vcp_code" },
             { "targets": 1, "data": "email" },
-            { "targets": 2, "data": "location" },
-            { "targets": 3, "data": "address" },
-            { "targets": 4, "data": "latitude" },
-            { "targets": 5, "data": "longitude" },
-            { "targets": 6, "data": "field_coordinator_id" },
-            { "targets": 7, "data": "field_coordinator_name" },
-            { "targets": 8, "data": function(data, type, row, meta){
+            { "targets": 2, "data": function(data, type, row, meta){
+                  return data.address+', <br>'+data.location;
+              }
+            },
+            { "targets": 3, "data": "latitude" },
+            { "targets": 4, "data": "longitude" },
+            { "targets": 5, "data": "field_coordinator_id" },
+            { "targets": 6, "data": "field_coordinator_name" },
+            { "targets": 7, "data": function(data, type, row, meta){
                   return '<a href="#" onclick=$(this).delete("'+data.vcp_code+'") style="cursor: pointer;"><i data-feather="trash-2"></i>';
               }
             },
@@ -187,7 +160,7 @@
       $.fn.delete = function(code) {
         $.ajax({
             type: "POST",
-            url: "{{ route('vcp.remove') }}",
+            url: "{{ route('vcp-account.remove') }}",
             data: {
               _token: "{{ csrf_token() }}",
               vcp_code: code,
@@ -209,38 +182,22 @@
 
   function submit()
   {
-      $("#vcp-code, #address, #email_user, #password, #field_coordinator_id, #field_coordinator_name, #latitude, #longitude").attr('style', '');
       $("#response_message").attr("style", 'display: none;');
       $(".submit-button").addClass("disabled");
       $(".spinner-border").attr("style", '');
 
       var pass = true;
 
-      $("#vcp-code, #email_user, #password, #address, #field_coordinator_id, #field_coordinator_name, #latitude, #longitude").each(function(){
-          $(this).attr('style', '');
-          if($(this).val() == ''){
-            $(this).attr('style', 'border: 1px solid #d57171 !important');
-            pass = false;
-          }
-      });
-
       if(pass){
         var submitData = {
             _token: "{{ csrf_token() }}",
-            vcp_code: $('#vcp-code').val(),
-            email: $('#email_user').val(),
-            password: $('#password').val(),
-            sub_district_id: $('#sub_district').val(),
-            address: $('#address').val(),
-            latitude: $('#latitude').val(),
-            longitude: $('#longitude').val(),
-            field_coordinator_id: $('#field_coordinator_id').val(),
-            field_coordinator_name: $('#field_coordinator_name').val()
+            vcp_code: $('#vcp_code').val(),
+            account_code: $('#account_code').val()
         };
 
         $.ajax({
             type: "POST",
-            url: "{{ route('vcp.submit') }}",
+            url: "{{ route('vcp-account.submit') }}",
             data: submitData,
             dataType: "json",
             timeout: 300000
@@ -252,10 +209,6 @@
             } else {
               $('#response_message').removeClass('alert-success');
               $('#response_message').addClass('alert-danger');
-
-              if(data.message.includes("Email already registered")){
-                $("#email_user").attr('style', 'border: 1px solid #d57171 !important');
-              }
             }
             $("#response_message").attr("style", '');
             $('#response_message').fadeTo(3000, 500).slideUp(500, function() {
@@ -275,13 +228,8 @@
 
   function reset(){
       $('#gridDataTable').DataTable().ajax.reload();
-      $("#vcp-code, #email_user, #password, #address, #latitude, #longitude, #field_coordinator_id, #field_coordinator_name").val('');
-    
-      // add by faisal
-      // used to reset coverage combo from coverage.js file
-      $('#city, #district, #sub_district').empty();
-      $('#city, #district, #sub_district').select2({ width: '100%', data: comboDefault });
-      $('#province, #city, #district, #sub_district').val('select').select2();
+
+      $("#vcp_code, #account_code").val('select').select2();
   }
 
 

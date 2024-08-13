@@ -11,7 +11,7 @@ class VcpAccount extends Model
 {
     use HasFactory;
     use SoftDeletes;
-    protected $table = 'vcp_account';
+    protected $table = 'account_vcp';
     protected $primaryKey = 'id';
     protected $guarded = ['id'];
 
