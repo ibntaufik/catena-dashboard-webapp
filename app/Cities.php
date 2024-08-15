@@ -23,9 +23,12 @@ class Cities implements ToCollection
                 $result = City::join("provinces", "provinces.id", "cities.province_id")->where([
                     "cities.name" => $row[1],
                     "provinces.name" => $row[0]
-                ])->select(DB::raw("provinces.name, cities.*"))->first();
+                ])->select(DB::raw("provinces.name AS province_name, cities.*"))->first();
                 if($result){
-                    City::where("id", $result->id)->update(["code" => strtoupper($row[2])]);
+                    City::where("id", $result->id)->update([
+                        "code" => strtoupper($row[2]),
+                        "name" => strtoupper($result->name),
+                    ]);
                 } else {
                     $province = Province::where("name", $row[0])->first();
                     City::create([

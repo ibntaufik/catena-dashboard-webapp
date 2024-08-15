@@ -9,6 +9,7 @@ use App\Model\Province;
 use App\Model\City;
 use App\Model\District;
 use App\Model\Subdistrict;
+use App\Helpers\CommonHelper;
 use App\Http\Requests\LocationPostRequest;
 use App\Http\Requests\RemoveLocationPostRequest;
 
@@ -74,6 +75,9 @@ class LocationController extends Controller
 
             $input["created_by"] = "Admin";
             Subdistrict::create($input);
+
+            CommonHelper::forgetWildcard("*coverage*");
+
             $response["code"] = 200;
             $response["message"] = "Success";
             
@@ -95,7 +99,7 @@ class LocationController extends Controller
         
         try{
             Subdistrict::where("code", $request->input("location_id"))->delete();
-
+            CommonHelper::forgetWildcard("*coverage*");
             $response["code"] = 200;
             $response["message"] = "Success";
         } catch(\Exception $e){

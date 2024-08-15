@@ -17,7 +17,7 @@ class Evc extends Model
     protected $guarded = ['id'];
 
     public static function listCombo(){
-        return Cache::remember("account.list_combo.evc", config("constant.ttl"), function(){
+        return Cache::remember("evc.list_combo", config("constant.ttl"), function(){
             $result = Evc::select(DB::raw("code"))->get()->toArray();
             return collect($result)->map(function ($item) {
                 return ["id" => $item['code'], "text" => $item['code']];

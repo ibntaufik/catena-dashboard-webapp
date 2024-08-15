@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
+use App\Helpers\CommonHelper;
+use App\Http\Requests\SelectedPostRequest;
 use App\Model\Approval;
 use App\Model\User;
-use App\Http\Requests\SelectedPostRequest;
 
 class ApprovalController extends Controller
 {
@@ -53,6 +55,7 @@ class ApprovalController extends Controller
             if(empty($isExist)){
                 $input["created_by"] = "Admin";
                 Approval::create($input);
+                CommonHelper::forgetWildcard("*approval*");
             } else {
                 $isExist->deleted_at = null;
                 $isExist->updated_at = now();
@@ -78,32 +81,38 @@ class ApprovalController extends Controller
             "data"      => []
         ];
         
-        try{
-            Approval::where("id", $request->input("user_id"))->delete();
+        try{\Log::debug($request->input("user_id"));
+            Approval::where("user_id", $request->input("user_id"))->delete();
+
+            CommonHelper::forgetWildcard("*approval*");
             $response["code"] = 200;
             $response["message"] = "Success";
             $response["data"] = $this->collectCandidate();
         } catch(\Exception $e){
+            \Log::error($e->getMessage());
             \Log::error($e->getTraceAsString());
-            $response["message"] = $e->getMessage();
         }
         
         return response()->json($response);
     }
 
     function collectCandidate(){
-        $candidate = [
-            ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
-        ];
 
-        $approver = Approval::select("user_id")->get()->toArray();
+        return Cache::remember("approval.candidat", config("constant.ttl"), function(){
 
-        $result = User::join("ho_account", "ho_account.user_id", "users.id")
-        ->when(count($approver) > 0, function($builder) use($approver){
-            return $builder->whereNotIn("id", $approver);
-        })->select(DB::raw("users.id, name AS text"))->get()->toArray();
-        $candidate = array_merge($candidate, $result);
+            $candidate = [
+                ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
+            ];
 
-        return $candidate;
+            $approver = Approval::select("user_id")->get()->toArray();
+
+            $result = User::join("ho_account", "ho_account.user_id", "users.id")
+            ->when(count($approver) > 0, function($builder) use($approver){
+                return $builder->whereNotIn("id", $approver);
+            })->select(DB::raw("users.id, name AS text"))->get()->toArray();
+            $candidate = array_merge($candidate, $result);
+
+            return $candidate;
+        });
     }
 }

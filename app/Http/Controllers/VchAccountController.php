@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Helpers\CommonHelper;
 use App\Http\Requests\VchAccountPostRequest;
 use App\Http\Requests\RemoveVchAccountPostRequest;
 use App\Model\Account;
@@ -115,6 +116,8 @@ class VchAccountController extends Controller
             $input["bank_id"] = $bank->id;
 
             VchAccount::create($input);
+
+            CommonHelper::forgetWildcard("*account*");
             $response["code"] = 200;
             $response["message"] = "Success";
             

@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\VCPPostRequest;
 use App\Http\Requests\RemoveVCPPostRequest;
 use App\Model\Province;
 use App\Model\VCH;
 use App\Model\VCP;
 use App\Model\User;
+use App\Helpers\CommonHelper;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class VCPController extends Controller
 {
@@ -80,6 +81,9 @@ class VCPController extends Controller
             $input["vch_id"] = $vch->id;
             unset($input["vch_code"]);
             $user = VCP::create($input);
+
+            CommonHelper::forgetWildcard("*vcp*");
+            
             $response["code"] = 200;
             $response["message"] = "Success";
             

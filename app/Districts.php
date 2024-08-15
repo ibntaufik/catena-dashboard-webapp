@@ -41,7 +41,7 @@ class Districts implements ToCollection
                     if($city){
                         District::create([
                             "city_id" => $city->id,
-                            "name"  => $row[2],
+                            "name"  => strtoupper($row[2]),
                             "code"  => $row[3]
                         ]);
                     }

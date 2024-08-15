@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Helpers\CommonHelper;
 use App\Http\Requests\AccountPostRequest;
 use App\Model\Account;
 use App\Model\User;
@@ -91,6 +92,8 @@ class AccountController extends Controller
                 "code"          => $input["user_id"],
                 "created_by"    => "System Administrator"
             ]);
+
+            CommonHelper::forgetWildcard("*account*");
 
             $response["code"] = 200;
             $response["message"] = "Success";

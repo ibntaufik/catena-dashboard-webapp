@@ -25,8 +25,8 @@ class Provinces implements ToCollection
                 Province::where("id", $result->id)->update(["code" => $row[1], "name" => strtoupper($result->name)]);
             } else {
                 Province::create([
-                    "name" => $row[0],
-                    "code" => $row[1],
+                    "name" => strtoupper($row[0]),
+                    "code" => strtoupper($row[1]),
                 ]);
             }
         }

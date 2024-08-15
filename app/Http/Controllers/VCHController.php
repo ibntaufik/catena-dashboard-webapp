@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use App\Model\Province;
 use App\Model\Evc;
 use App\Model\VCH;
+use App\Helpers\CommonHelper;
 use App\Http\Requests\VCHPostRequest;
 use App\Http\Requests\RemoveVchPostRequest;
 
@@ -55,6 +56,9 @@ class VCHController extends Controller
             $input["evc_id"] = $evc->id;
             unset($input["evc_code"]);
             $user = VCH::create($input);
+
+            CommonHelper::forgetWildcard("*vch*");
+
             $response["code"] = 200;
             $response["message"] = "Success";
             

@@ -9,6 +9,7 @@ use App\Model\User;
 use App\Model\VCP;
 use App\Model\HOAccount;
 use App\Model\RoleApprovalAt;
+use App\Helpers\CommonHelper;
 use App\Http\Requests\UserPostRequest;
 use App\Http\Requests\RemoveUserPostRequest;
 
@@ -24,7 +25,7 @@ class UserController extends Controller
             ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
         ];
 
-        $result = VCP::select(DB::raw("code"))->get()->toArray();
+        $result = VCP::getCodeOnly();;
         $result = collect($result)->map(function ($item) {
             return ["id" => $item['code'], "text" => $item['code']];
         });

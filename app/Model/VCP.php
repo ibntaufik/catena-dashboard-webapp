@@ -36,4 +36,10 @@ class VCP extends Model
             return VCP::where("code", $code)->first();   
         });
     }
+
+    public static function getCodeOnly(){
+        return Cache::remember("vcp.get_code_only", config("constant.ttl"), function(){
+            return VCP::select(DB::raw("code"))->get()->toArray();
+        });
+    }
 }

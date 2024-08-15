@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
+use App\Helpers\CommonHelper;
 use App\Http\Requests\VcpAccountPostRequest;
 use App\Http\Requests\RemoveVCPPostRequest;
 use App\Model\Account;
 use App\Model\User;
 use App\Model\VcpAccount;
 use App\Model\VCP;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class VcpAccountController extends Controller
 {
@@ -93,6 +94,8 @@ class VcpAccountController extends Controller
                 "account_id" => $account->id
             ]);
             
+            CommonHelper::forgetWildcard("*vcp*");
+
             $response["code"] = 200;
             $response["message"] = "Success";
             

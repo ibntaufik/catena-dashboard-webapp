@@ -41,7 +41,7 @@ class EvcController extends Controller
 
             $user = Evc::create($input);
 
-            Cache::forget("account.list_combo.evc");
+            CommonHelper::forgetWildcard("*evc*");
             
             $response["code"] = 200;
             $response["message"] = "Success";

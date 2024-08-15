@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use App\Helpers\CommonHelper;
 use App\Http\Requests\FarmerPostRequest;
 use App\Http\Requests\RemoveFarmerPostRequest;
 use App\Model\Location;
