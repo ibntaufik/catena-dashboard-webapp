@@ -6,5 +6,10 @@
  */
 
 return [
-    "ttl" => env('CACHE_TTL', 600),// 10 minutes
+    "ttl"               => env('CACHE_TTL', 600),// 10 minutes
+    "account_status"    => [
+        "fc"            => "Field Coordinator",
+        "vendor"        => "Vendor",
+        "how"           => "Head of Warehouse"
+    ]
 ];

@@ -78,6 +78,16 @@ class VcpAccountController extends Controller
                 return response()->json($response);
             }
 
+            // Check if selected account and master data already in db.
+            $isExist = VcpAccount::where([
+                "account_id"    => $account->id,
+                "vcp_id"        => $vcp->id,
+            ])->select("id")->first();
+            if(!empty($isExist)){
+                $response["message"] = "Account code ".$input["account_code"]." with VCP code ".$input["vcp_code"]." already listed on system";
+                return response()->json($response);
+            }
+
             VcpAccount::create([
                 "vcp_id" => $vcp->id,
                 "account_id" => $account->id

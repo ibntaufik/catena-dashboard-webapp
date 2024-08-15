@@ -10,6 +10,7 @@ use App\Http\Requests\FarmerPostRequest;
 use App\Http\Requests\RemoveFarmerPostRequest;
 use App\Model\Location;
 use App\Model\Province;
+use App\Model\Subdistrict;
 use App\Model\Farmer;
 use App\Model\User;
 
@@ -20,18 +21,12 @@ class FarmerController extends Controller
     }
 
     public function index(Request $request){
-        $candidate = [
-            ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
-        ];
-
-        $result = Location::listCombo();
-        $candidate = array_merge($candidate, json_decode($result, true));
 
         $province = array_merge([
             ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
         ], Province::listByName(""));
 
-        return view("account.farmer", compact("candidate", "province"));
+        return view("account.farmer", compact("province"));
     }
 
     public function datatables(Request $request){
@@ -44,12 +39,12 @@ class FarmerController extends Controller
         try{
             $response["code"] = 200;
             $response["message"] = "Success";
-            $response["data"] = Farmer::join("sub_districts", "sub_districts.id", "farmer_account.sub_district_id")
-            ->leftJoin("users", "farmer_account.user_id", "users.id")
+            $response["data"] = Farmer::join("sub_districts", "sub_districts.id", "account_farmer.sub_district_id")
+            ->leftJoin("users", "account_farmer.user_id", "users.id")
             ->join("districts", "districts.id", "sub_districts.district_id")
             ->join("cities", "cities.id", "districts.city_id")
             ->join("provinces", "provinces.id", "cities.province_id")
-            ->select(DB::raw("users.name, users.email, farmer_account.address, farmer_account.latitude, farmer_account.longitude, users.phone, farmer_account.id_number, CONCAT(sub_districts.code, ' <br> ', sub_districts.name, ' <br> ', districts.name, ' <br> ', cities.name, ' <br> ', provinces.name) AS location"))->get();
+            ->select(DB::raw("CONCAT(account_farmer.code, '<br>', users.name) AS name, users.email, account_farmer.address, account_farmer.latitude, account_farmer.longitude, users.phone, account_farmer.id_number, CONCAT(sub_districts.code, ' <br> ', sub_districts.name, ' <br> ', districts.name, ' <br> ', cities.name, ' <br> ', provinces.name) AS location"))->get();
         } catch(\Exception $e){
             \Log::error($e->getMessage());
             \Log::error($e->getTraceAsString());
@@ -73,6 +68,17 @@ class FarmerController extends Controller
             $response["message"] = "Email already registered, please use other email";
             return response()->json($response);
         }
+
+        if(!empty($input["phone"]) && User::isPhoneExist($input["phone"])){
+            $response["message"] = "Phone ".$input["phone"]." already registered, please use other number";
+            return response()->json($response);
+        }
+
+        if(!empty($input["id_number"])  && Farmer::isIdNumberExist($input["id_number"])){
+            $response["message"] = "ID number ".$input["id_number"]." already registered.";
+            return response()->json($response);
+        }
+
         try{
             $data = explode(',', $file);
             $fileType = explode(';', $data[0]);
@@ -93,7 +99,19 @@ class FarmerController extends Controller
         }
 
         try{
+            $prefix = Subdistrict::where("sub_districts.id", $input["sub_district_id"])
+                ->select(DB::raw("sub_districts.code"))
+                ->first();
             
+            $farmer = Farmer::withTrashed()->where("sub_district_id", $input["sub_district_id"])
+                ->orderBy("code", "DESC")->select("code")->first();
+
+            if(empty($farmer)){
+                $input["code"] = $prefix->code.str_pad(1, 5, "0", STR_PAD_LEFT);
+            } else {
+                $input["code"] = $prefix->code.str_pad((substr($farmer->code, 12) + 1), 5, "0", STR_PAD_LEFT);
+            }
+
             if (empty($input["email"])) {
                 $count = User::count();
                 $input["email"] = "farmer$count@gmail.com";
@@ -103,19 +121,21 @@ class FarmerController extends Controller
                 "email" => $input["email"],
                 "password" => Hash::make($input["password"]),
                 "name" => $input["name"],
+                "phone" => $input["phone"],
                 "created_by" => "System Administrator"
             ];
 
             $user = User::create($dataUser);
 
             $dataFarmer = [
-                "user_id"       => $user->id,
-                "sub_district_id"  => $input["sub_district_id"],
-                "id_number"     => $input["id_number"],
-                "latitude"      => $input["latitude"],
-                "longitude"     => $input["longitude"],
-                "address"       => $input["address"],
-                "created_by"    => "System Administrator"
+                "user_id"           => $user->id,
+                "code"              => $input["code"],
+                "sub_district_id"   => $input["sub_district_id"],
+                "id_number"         => $input["id_number"],
+                "latitude"          => $input["latitude"],
+                "longitude"         => $input["longitude"],
+                "address"           => $input["address"],
+                "created_by"        => "System Administrator"
             ];
             
             if(!empty($file)){

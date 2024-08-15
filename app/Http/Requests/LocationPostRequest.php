@@ -24,7 +24,6 @@ class LocationPostRequest extends FormRequest
     public function rules()
     {
         return [
-            "code"          => "required|max:255",
             "district_id"   => "required|numeric",
             "name"          => "required|max:255",    
             "latitude"      => "required|numeric|max:255",
@@ -35,7 +34,6 @@ class LocationPostRequest extends FormRequest
     public function messages()
     {
         return [
-            'code.required'         => 'ID Location is required',
             'district_id.required'  => 'Please select district first',
             'name.required'         => 'Please input sub ditrict first',
             'district_id.numeric'   => 'District is not valid',

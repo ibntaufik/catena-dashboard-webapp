@@ -80,6 +80,7 @@ class VchAccountController extends Controller
         $input = $request->except(["_token"]);
 
         try{
+
             $vch = VCH::findActiveByCode($input["vch_code"]);
             if(empty($vch)){
                 $response["message"] = "VCH Code ".$input["vch_code"]." is not listed on system";
@@ -89,6 +90,16 @@ class VchAccountController extends Controller
             $account = Account::findActiveByCode($input["account_code"]);
             if(empty($account)){
                 $response["message"] = "Account with code ".$input["account_code"]." is not listed on system";
+                return response()->json($response);
+            }
+
+            // Check if selected account and master data already in db.
+            $isExist = VchAccount::where([
+                "account_id"    => $account->id,
+                "vch_id"        => $vch->id,
+            ])->select("id")->first();
+            if(!empty($isExist)){
+                $response["message"] = "Account code ".$input["account_code"]." with VCH code ".$input["vch_code"]." already listed on system";
                 return response()->json($response);
             }
 

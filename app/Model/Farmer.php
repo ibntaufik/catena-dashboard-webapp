@@ -11,7 +11,12 @@ class Farmer extends Model
 {
     use HasFactory;
     use SoftDeletes;
-    protected $table = 'farmer_account';
+    protected $table = 'account_farmer';
     protected $primaryKey = 'id';
     protected $guarded = ['id'];
+
+    public static function isIdNumberExist($IdNumber){
+        $user = Farmer::where("id_number", $IdNumber)->first();
+        return empty($user) ? false : true;
+    }
 }

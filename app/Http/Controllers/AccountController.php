@@ -19,10 +19,15 @@ class AccountController extends Controller
 
         $statusAccount = [
             ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
-            ['id' => 'fc', 'text' => 'Field Coordinator'],
-            ['id' => 'vendor', 'text' => 'Vendor'],
-            ['id' => 'how', 'text' => 'Head of Warehouse'],
         ];
+
+        $accountStatus = config("constant.account_status");
+        foreach ($accountStatus as $key => $value) {
+            $statusAccount[] = [
+                "id"    => $key,
+                "text"  => $value
+            ];
+        }
         return view("master-data.account.index", compact("statusAccount"));
     }
 
@@ -66,7 +71,7 @@ class AccountController extends Controller
             return response()->json($response);
         }
 
-        if(!empty(Account::findByCode($input["phone"]))){
+        if(!empty(Account::findByCode($input["user_id"]))){
             $response["message"] = "Account with code ".input["phone"]." already registered.";
             return response()->json($response);
         }
@@ -78,11 +83,11 @@ class AccountController extends Controller
                 "name"      => $input["name"],
                 "phone"     => $input["phone"]
             ];
-\Log::debug($dataUser);
+
             $user = User::create($dataUser);
             Account::create([
                 "user_id"       => $user->id,
-                "status"        => $input["status_account"],
+                "status"        => config("constant.account_status.".$input["status_account"]),
                 "code"          => $input["user_id"],
                 "created_by"    => "System Administrator"
             ]);

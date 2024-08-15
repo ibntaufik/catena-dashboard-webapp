@@ -111,14 +111,13 @@
           <table id="gridDataTable" class="table">
             <thead>
               <tr>
-                <th>Name</th>
+                <th>ID - Name</th>
                 <th>Email</th>
                 <th>ID Number</th>
                 <th>Phone</th>
-                <th>Location</th>
+                <th>Address</th>
                 <th>Latitude</th>
                 <th>Longitude</th>
-                <th>Address</th>
                 <th></th>
               </tr>
             </thead>
@@ -186,11 +185,13 @@
                   return data.phone ? data.phone : "-";
               }
             },
-            { "targets": 4, "data": "location" },
+            { "targets": 4, "data":  function(data, type, row, meta){
+                  return data.address+"<br>"+data.location;
+              }
+            },
             { "targets": 5, "data": "latitude" },
             { "targets": 6, "data": "longitude" },
-            { "targets": 7, "data": "address" },
-            { "targets": 8, "data": function(data, type, row, meta){
+            { "targets": 7, "data": function(data, type, row, meta){
                   return '<a href="#" onclick=$(this).delete("'+data.id_number+'") style="cursor: pointer;"><i data-feather="trash-2"></i>';
               }
             },

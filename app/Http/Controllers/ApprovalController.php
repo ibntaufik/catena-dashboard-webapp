@@ -98,7 +98,8 @@ class ApprovalController extends Controller
 
         $approver = Approval::select("user_id")->get()->toArray();
 
-        $result = User::when(count($approver) > 0, function($builder) use($approver){
+        $result = User::join("ho_account", "ho_account.user_id", "users.id")
+        ->when(count($approver) > 0, function($builder) use($approver){
             return $builder->whereNotIn("id", $approver);
         })->select(DB::raw("users.id, name AS text"))->get()->toArray();
         $candidate = array_merge($candidate, $result);

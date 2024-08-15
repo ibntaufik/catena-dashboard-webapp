@@ -25,7 +25,7 @@
       <div class="card-body">
           <h6 class="card-title">Create Location</h6>
           <div class="row">
-            <div class="col-sm-3">
+            <div class="col-sm-3" style="display: none;">
               <div class="mb-3">
                 <label for="id-location" class="form-label">ID Location</label>
                 <input type="text" class="form-control" id="id-location" maxlength="255" autocomplete="off" placeholder="IDXYZ123" onkeypress="return isAlphaNumeric(event);">
@@ -256,14 +256,14 @@
 
   function submit()
   {
-      $("#id-location, #sub-district").attr('style', '');
+      $("#sub-district").attr('style', '');
       $("#response_message").attr("style", 'display: none;');
       $(".submit-button").addClass("disabled");
       $(".spinner-border").attr("style", '');
 
       var pass = true;
 
-      $("#id-location, #sub-district, #district, #city, #province, #latitude, #longitude").each(function(){
+      $("#sub-district, #district, #city, #province, #latitude, #longitude").each(function(){
           $(this).attr('style', '');
           if($(this).val() == ''){
             $(this).attr('style', 'border: 1px solid #d57171 !important');
@@ -274,9 +274,9 @@
       if(pass){
         var submitData = {
             _token: "{{ csrf_token() }}",
-            code: $('#id-location').val(),
+            code: "",
             district_id: $('#district').val(),
-            name: $('#sub_district').val(),
+            name: $('#sub_district').val().toUpperCase(),
             latitude: $('#latitude').val(),
             longitude: $('#longitude').val()
         };
@@ -317,7 +317,7 @@
   }
 
   function reset(){
-    $("#id-location, #latitude, #longitude").val('');
+    $("#sub_district, #latitude, #longitude").val('');
     // add by faisal
     // used to reset coverage combo from coverage.js file
     $('#city, #district').empty();

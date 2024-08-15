@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Model\Province;
 use App\Model\Evc;
+use App\Helpers\CommonHelper;
 use App\Http\Requests\EvcPostRequest;
 use App\Http\Requests\RemoveEvcPostRequest;
 
@@ -39,6 +40,9 @@ class EvcController extends Controller
             }
 
             $user = Evc::create($input);
+
+            Cache::forget("account.list_combo.evc");
+            
             $response["code"] = 200;
             $response["message"] = "Success";
             

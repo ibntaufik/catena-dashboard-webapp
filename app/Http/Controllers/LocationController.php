@@ -57,6 +57,21 @@ class LocationController extends Controller
         
         try{
             $input = $request->except(["_token"]);
+            if(array_key_exists("code", $input) && empty($input["code"])){
+                $subdistrict = Subdistrict::withTrashed()->where("district_id", $input["district_id"])
+                ->orderBy("code", "DESC")->select("code")->first();
+
+                $prefix = Province::join("cities", "cities.province_id", "provinces.id")
+                ->join("districts", "districts.city_id", "cities.id")
+                ->where("districts.id", $input["district_id"])->select(DB::raw("CONCAT(provinces.code, cities.code, districts.code) AS code"))->first();
+
+                if(empty($subdistrict)){
+                    $input["code"] = $prefix->code.str_pad(1, 3, "0", STR_PAD_LEFT);
+                } else {
+                    $input["code"] = $prefix->code.str_pad((substr($subdistrict->code, 9) + 1), 3, "0", STR_PAD_LEFT);
+                }
+            }
+
             $input["created_by"] = "Admin";
             Subdistrict::create($input);
             $response["code"] = 200;

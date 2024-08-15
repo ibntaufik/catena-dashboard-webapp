@@ -94,24 +94,10 @@
 <script type="text/javascript">
     var start = 0;
     var limit = 10;
-    var candidate = {!! json_encode($candidate) !!};
 
   $(document).ready(function() {
       
       $("#response_message").hide();
-
-      $("#role").select2().on("change", function(e){
-        if($("#role option:selected").val() == "vcp"){
-          $("#selection-vcp").show();
-        } else {
-          $("#selection-vcp").hide();
-        }
-      });
-
-      $("#code").select2({
-            width: '100%',
-            data: candidate
-      });
 
       $('#gridDataTable').DataTable( {
           'paging'        : true,
