@@ -30,7 +30,7 @@ class VchAccount extends Model
     }
 
     public static function combo(){
-        return Cache::remember("account.list_combo.vch", config("constant.ttl"), function(){
+        return Cache::remember("account.combo.vch", config("constant.ttl"), function(){
             $result = VchAccount::join("t_vch", "account_vch.vch_id", "t_vch.id")
             ->join("accounts", "account_vch.account_id", "accounts.id")
             ->join("users", "accounts.user_id", "users.id")
