@@ -98,6 +98,79 @@
     </div>
   </div>
 </div>
+
+<div class="modal fade" id="waitingModal" tabindex="-1" aria-labelledby="waitingModalLabel" aria-hidden="true">
+  <div class="modal-dialog" style="width: 700px; max-width: 1200px;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Approval Process</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="btn-close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Status: <strong id="labelWarning"></strong></p>
+
+        <table id="detailPo" class="w-100 table table-bordered mt-2">
+          <tr>
+            <td class="w-50">
+              <label>VCH Code</label>
+              <label id="labelVchCode"></label>
+            </td>
+            <td class="w-50">
+              <label>Vendor</label>
+              <label id="labelVendorId"></label>
+            </td>
+          </tr> 
+          <tr> 
+            <td class="w-50">
+              <label>PO Number</label>
+              <label id="labelPoNumber"></label>
+            </td>
+            <td class="w-50">
+              <label>Item</label>
+              <label id="labelPoNumber"></label>
+            </td>
+          </tr> 
+          <tr>
+            <td class="w-50">
+              <label>PO Date</label>
+              <label id="labelPoDate"></label>
+            </td>
+            <td class="w-50">
+              <label>Expected Shipping Date</label>
+              <label id="labelExpectedShippingDate"></label>
+            </td>
+          </tr>
+          <tr>
+            <td class="w-50">
+              <label>Item Type</label>
+              <label id="labelItemType"></label>
+            </td>
+            <td class="w-50">
+              <label>Item Unit Price</label>
+              <label id="labelItemUnitPrice"></label>
+            </td>
+          </tr>
+          <tr>
+            <td class="w-50">
+              <label>Item Quantity</label>
+              <label id="labelItemQuantity"></label>
+            </td>
+            <td class="w-50">
+              <label>Item Max. Quantity</label>
+              <label id="labelItemMaxQuantity"></label>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 @endsection
 
 @section('javascript')
@@ -138,13 +211,13 @@
           "columnDefs" : [
             { "targets": 0, "data": "status", "className": "text-center",
               "render":function( data, type, row, meta ){
-                var fontColor = "#D88E00";
+                var classLabel = "fontColorWarning";
                 if(data == "approved"){
-                  fontColor = "#148F00";
+                  classLabel = "fontColorApproved";
                 } else if(data == "rejected"){
-                  fontColor = "#FF0909";
+                  classLabel = "fontColorRejected";
                 }
-                return '<label style="color: '+fontColor+'";>'+ucFirstWord(data)+'</label>';
+                return '<a href="#" onclick=showDetail("'+data+'")><label class="'+classLabel+'" style="cursor: pointer;";>'+ucFirstWord(data)+'</label>';
               }
             },
             { "targets": 1, "data": "vch_code", "className": "text-center" },
@@ -202,6 +275,18 @@
 
     function submit(){
         
+    }
+
+    function showDetail(status){
+      $("#labelWarning").html(ucFirstWord(status));
+      var classLabel = "fontColorWarning";
+      if(status == "approved"){
+        classLabel = "fontColorApproved";
+      } else if(status == "rejected"){
+        classLabel = "fontColorRejected";
+      }
+      $("#labelWarning").addClass(classLabel);
+      $('#waitingModal').modal('show');
     }
 
     function search(status){

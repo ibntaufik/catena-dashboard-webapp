@@ -1,0 +1,13 @@
+@charset "UTF-8";
+
+.fontColorWarning{
+	color: #D88E00;
+}
+
+.fontColorApproved{
+	color: #148F00;
+}
+
+.fontColorRejected{
+	color: #FF0909;
+}
