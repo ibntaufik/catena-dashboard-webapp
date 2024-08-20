@@ -82,7 +82,7 @@ class VCPController extends Controller
             unset($input["vch_code"]);
             $user = VCP::create($input);
 
-            CommonHelper::forgetWildcard("*vcp*");
+            CommonHelper::forgetCache("*vcp*");
             
             $response["code"] = 200;
             $response["message"] = "Success";

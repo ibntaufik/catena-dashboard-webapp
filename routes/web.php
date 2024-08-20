@@ -92,6 +92,10 @@ Route::group(['prefix' => 'master-data'], function(){
 Route::group(['prefix' => 'transaction'], function(){
     Route::group(['prefix' => 'purchase-order'], function(){
         Route::get('', 'PurchaseOrderController@index')->name("purchase-order.index");
+        Route::get('grid-list', 'PurchaseOrderController@datatables')->name("purchase-order.grid-list");
+        Route::post('submit', 'PurchaseOrderController@save')->name("purchase-order.submit");
+        Route::post('remove', 'PurchaseOrderController@delete')->name("purchase-order.remove");
+        Route::get('release', 'PurchaseOrderController@release')->name("purchase-order.release");
     });
 });
 

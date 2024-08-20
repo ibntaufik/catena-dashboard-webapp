@@ -57,7 +57,7 @@ class VCHController extends Controller
             unset($input["evc_code"]);
             $user = VCH::create($input);
 
-            CommonHelper::forgetWildcard("*vch*");
+            CommonHelper::forgetCache("vch");
 
             $response["code"] = 200;
             $response["message"] = "Success";
@@ -81,7 +81,7 @@ class VCHController extends Controller
         
         try{
             VCH::where("code", $request->input("vch_code"))->delete();
-
+            CommonHelper::forgetCache("vch");
             $response["code"] = 200;
             $response["message"] = "Success";
         } catch(\Exception $e){

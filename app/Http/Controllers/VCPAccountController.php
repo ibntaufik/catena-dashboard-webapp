@@ -94,7 +94,7 @@ class VcpAccountController extends Controller
                 "account_id" => $account->id
             ]);
             
-            CommonHelper::forgetWildcard("*vcp*");
+            CommonHelper::forgetCache("vcp");
 
             $response["code"] = 200;
             $response["message"] = "Success";
@@ -118,7 +118,7 @@ class VcpAccountController extends Controller
         
         try{
             VCP::where("vcp_code", $request->input("vcp_code"))->delete();
-
+            CommonHelper::forgetCache("vcp");
             $response["code"] = 200;
             $response["message"] = "Success";
         } catch(\Exception $e){

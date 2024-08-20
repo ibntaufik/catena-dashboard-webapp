@@ -9,13 +9,13 @@ use Illuminate\Support\Facades\Redis;
 class CommonHelper
 {
     
-    public static function forgetWildcard($pattern, int $maxCountValue = 10000)
+    public static function forgetCache($pattern, int $maxCountValue = 10000)
     {
-        $keys = Redis::connection('cache')->keys('*$pattern*');
+        $keys = Redis::connection('cache')->keys("*$pattern*");
         foreach($keys as $key){
-            $result = explode(':', $key);
+            $result = explode(':', $key);\Log::debug($result);
             Cache::forget($result[1]);
-        } 
+        }
     }
 
 }

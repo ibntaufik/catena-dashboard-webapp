@@ -117,7 +117,7 @@ class VchAccountController extends Controller
 
             VchAccount::create($input);
 
-            CommonHelper::forgetWildcard("*account*");
+            CommonHelper::forgetCache("account");
             $response["code"] = 200;
             $response["message"] = "Success";
             
@@ -157,7 +157,7 @@ class VchAccountController extends Controller
             ])->update([
                 "deleted_at" => date("Y-m-d H:i:s")
             ]);
-
+            CommonHelper::forgetCache("account");
             $response["code"] = 200;
             $response["message"] = "Success";
         } catch(\Exception $e){

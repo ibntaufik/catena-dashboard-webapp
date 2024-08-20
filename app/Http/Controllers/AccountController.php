@@ -93,7 +93,7 @@ class AccountController extends Controller
                 "created_by"    => "System Administrator"
             ]);
 
-            CommonHelper::forgetWildcard("*account*");
+            CommonHelper::forgetCache("account");
 
             $response["code"] = 200;
             $response["message"] = "Success";

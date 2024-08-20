@@ -28,16 +28,16 @@
           <div class="row">
             <div class="col-sm-3">
               <div class="mb-3">
-                <label for="vch_code" class="form-label">VCH Code</label>
-                <select id="vch_code" class="form-control" name="vch_code">
+                <label for="account_vch_id" class="form-label">VCH Code</label>
+                <select id="account_vch_id" class="form-control" name="account_vch_id">
                   <option value="select" disabled selected>-- Select --</option>
                 </select>
               </div>
             </div>
             <div class="col-sm-3">
               <div class="mb-3">
-                <label for="field_coordirnator_id" class="form-label">Field Coordinator ID</label>
-                <input type="text" class="form-control" id="field_coordirnator_id" maxlength="255" placeholder="Field Coordinator ID" onkeypress="return isAlphaNumericDash(event);">
+                <label for="vendor_id" class="form-label">Vendor ID</label>
+                <input type="text" class="form-control vendor_id" maxlength="255" placeholder="Vendor ID" disabled="disabled" onkeypress="return isAlphaNumericDash(event);">
               </div>
             </div>
             <div class="col-sm-3">
@@ -49,31 +49,35 @@
             <div class="col-sm-3">
               <div class="mb-3">
                 <label for="po_date" class="form-label">PO Date</label>
-                <div class="input-group flatpickr me-2 mb-2 mb-md-0" id="po_date">
+                <div class="input-group flatpickr me-2 mb-2 mb-md-0" id="div_po_date">
                   <span class="input-group-text input-group-addon bg-transparent" data-toggle><i data-feather="calendar"></i></span>
-                  <input type="text" class="form-control bg-transparent" placeholder="Select date" data-input>
+                  <input type="text" class="form-control bg-transparent" id="po_date" placeholder="Select date" data-input>
                 </div>
               </div>
             </div>
             <div class="col-sm-3">
               <div class="mb-3">
-                <label for="expected_shipping_date" class="form-label">Expecting Shipping Date</label>
-                <div class="input-group flatpickr me-2 mb-2 mb-md-0" id="expected_shipping_date">
+                <label for="expected_shipping_date" class="form-label">Expected Shipping Date</label>
+                <div class="input-group flatpickr me-2 mb-2 mb-md-0" id="div_expected_shipping_date">
                   <span class="input-group-text input-group-addon bg-transparent" data-toggle><i data-feather="calendar"></i></span>
-                  <input type="text" class="form-control bg-transparent" placeholder="Select date" data-input>
+                  <input type="text" class="form-control bg-transparent" id="expected_shipping_date" placeholder="Select date" data-input>
                 </div>
               </div>
             </div>
             <div class="col-sm-3">
               <div class="mb-3">
-                <label for="item_name" class="form-label">Item Name</label>
-                <input type="text" class="form-control" id="item_name" maxlength="255" placeholder="Item Name" onkeypress="return isAlphaNumericAndWhiteSpace(event);">
+                <label for="item" class="form-label">Item Name</label>
+                <select id="item" class="form-control" name="item">
+                  <option value="select" disabled selected>-- Select --</option>
+                </select>
               </div>
             </div>
             <div class="col-sm-3">
               <div class="mb-3">
                 <label for="item_type" class="form-label">Item Type</label>
-                <input type="text" class="form-control" id="item_type" maxlength="255" placeholder="Item Type" onkeypress="return isAlphaNumericAndWhiteSpace(event);">
+                <select id="item_type" class="form-control" name="item_type">
+                  <option value="select" disabled selected>-- Select --</option>
+                </select>
               </div>
             </div>
             <div class="col-sm-3">
@@ -91,7 +95,9 @@
             <div class="col-sm-3">
               <div class="mb-3">
                 <label for="item_unit" class="form-label">Item Unit</label>
-                <input type="text" class="form-control" id="item_unit" maxlength="255" placeholder="Item Unit" onkeypress="return validateDescription(event);">
+                <select id="item_unit" class="form-control" name="item_unit">
+                  <option value="select" disabled selected>-- Select --</option>
+                </select>
               </div>
             </div>
             <div class="col-sm-3">
@@ -103,7 +109,7 @@
             <div class="col-sm-3">
               <div class="mb-3">
                 <label for="item_ax_quantity" class="form-label">Item Max. Quantity</label>
-                <input type="text" class="form-control" id="item_ax_quantity" maxlength="255" placeholder="Item Max. Quantity" pattern="^\$\d{1,3}(,\d{3})*(\.\d+)?" style="text-align:right;" onkeypress="return isNumber(event);" value="" data-type="currency">
+                <input type="text" class="form-control" id="item_max_quantity" maxlength="255" placeholder="Item Max. Quantity" pattern="^\$\d{1,3}(,\d{3})*(\.\d+)?" style="text-align:right;" onkeypress="return isNumber(event);" value="" data-type="currency">
               </div>
             </div>
           </div>
@@ -131,18 +137,23 @@
   <div class="col-md-12 grid-margin stretch-card">
     <div class="card">
       <div class="card-body">
-        <h6 class="card-title">List of locations</h6>
+        <h6 class="card-title">List of purchase order</h6>
         <div class="table-responsive">
           <table id="gridDataTable" class="table">
             <thead>
               <tr>
-                <th>Provinsi</th>
-                <th>Kabupaten</th>
-                <th>Kecamatan</th>
-                <th>Desa</th>
-                <th>ID Location</th>
-                <th>Latitude</th>
-                <th>Longitude</th>
+                <th>VCH Code</th>
+                <th>Vendor</th>
+                <th>PO Number</th>
+                <th>PO Date</th>
+                <th>Expected Shipping Date</th>
+                <th>Item Name</th>
+                <th>Item Type</th>
+                <th>Item Description</th>
+                <th>Item Quantity</th>
+                <th>Item Unit</th>
+                <th>Item Unit Price</th>
+                <th>Item Max. Quantity</th>
                 <th></th>
               </tr>
             </thead>
@@ -161,12 +172,43 @@
     var start = 0;
     var limit = 10;
 
-    
+    var vch = {!! json_encode($vch) !!};
+    var item = {!! json_encode($item) !!};
+    var itemType = {!! json_encode($itemType) !!};
+    var itemUnit = {!! json_encode($itemUnit) !!};
+    var inputForm = null;
+    var selectForm = null;
 
-  $(document).ready(function() {
-      
+    $(document).ready(function() {
+      inputForm = $('.card-body input[type="text"]').map(function() {
+          return this.id != '' ? "#"+this.id : null;
+      }).get().join(', ');
+
+      selectForm = $('.card-body select').map(function() {
+          return this.id != '' ? "#"+this.id : null;
+      }).get().join(', ');
+
       $("#response_message").attr("style", 'display: none;');
-      $("#vch_code").select2();
+
+      $("#account_vch_id").select2({
+        width: "100%",
+        data: vch
+      }).on("select2:select", function (e) {
+        $(".vendor_id").val(e.params.data.name);
+      });
+
+      $("#item").select2({
+        width: "100%",
+        data: item
+      });
+      $("#item_type").select2({
+        width: "100%",
+        data: itemType
+      });
+      $("#item_unit").select2({
+        width: "100%",
+        data: itemUnit
+      });
       
       $('#gridDataTable').DataTable( {
           'paging'        : true,
@@ -178,7 +220,7 @@
           "searching"     : true,
           "pageLength"    : limit,
           "ajax": {
-            "url": "{{ route('location.grid-list') }}",
+            "url": "{{ route('purchase-order.grid-list') }}",
             "data": function ( d ) {
               var info = $('#gridDataTable').DataTable().page.info();
               d.start = info.start;
@@ -194,15 +236,30 @@
           },
                                 
           "columnDefs" : [
-            { "targets": 0, "data": "province" },
-            { "targets": 1, "data": "city" },
-            { "targets": 2, "data": "district" },
-            { "targets": 3, "data": "sub_district" },
-            { "targets": 4, "data": "code" },
-            { "targets": 5, "data": "latitude" },
-            { "targets": 6, "data": "longitude" },
-            { "targets": 7, "data": function(data, type, row, meta){
-                  return '<a href="#" onclick=$(this).deleteLocation("'+data.code+'") style="cursor: pointer;"><i data-feather="trash-2"></i>';
+            { "targets": 0, "data": "vch_code", "className": "text-center" },
+            { "targets": 1, "data": "vendor" },
+            { "targets": 2, "data": "po_number", "className": "text-center" },
+            { "targets": 3, "data": "po_date", "className": "text-center" },
+            { "targets": 4, "data": "expected_shipping_date", "className": "text-center" },
+            { "targets": 5, "data": "item_name" },
+            { "targets": 6, "data": "item_type", "className": "text-center" },
+            { "targets": 7, "data": "item_description" },
+            { "targets": 8, "data": "item_quantity", "className": "text-end",
+              "render":function( data, type, row, meta ){
+                var val = (data/1).toFixed(0).replace('.', ',');
+                return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+              }
+            },
+            { "targets": 9, "data": "item_unit", "className": "text-center" },
+            { "targets": 10, "data": "item_unit_price", "className": "text-end" },
+            { "targets": 11, "data": "item_max_quantity", "className": "text-end",
+              "render":function( data, type, row, meta ){
+                var val = (data/1).toFixed(0).replace('.', ',');
+                return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+              }
+            },
+            { "targets": 12, "data": function(data, type, row, meta){
+                  return '<a href="#" onclick=$(this).delete("'+data.po_number+'") style="cursor: pointer;"><i data-feather="trash-2"></i>';
               }
             },
           ],
@@ -211,18 +268,21 @@
           }
       });
 
-      $.fn.deleteLocation = function(locationId) {
+      $.fn.delete = function(poNumber) {
         $.ajax({
             type: "POST",
-            url: "{{ route('location.remove') }}",
+            url: "{{ route('purchase-order.remove') }}",
             data: {
               _token: "{{ csrf_token() }}",
-              location_id: locationId,
+              po_number: poNumber,
             },
             dataType: "json",
             timeout: 300000
         }).done(function(data){
-            $('#gridDataTable').DataTable().ajax.reload();
+            setTimeout(function() {
+              $('#gridDataTable').DataTable().ajax.reload();
+            }, 500);
+            
         }).fail(function(data){
             
         });
@@ -235,19 +295,19 @@
   }
 
   // Date Picker
-  if($('#po_date').length) {
-    flatpickr("#po_date", {
+  if($('#div_po_date').length) {
+    flatpickr("#div_po_date", {
       wrap: true,
-      dateFormat: "d-M-Y",
+      dateFormat: "d-F-Y",
       defaultDate: "today",
       minDate: "today"
     });
   }
 
-  if($('#expected_shipping_date').length) {
-    flatpickr("#expected_shipping_date", {
+  if($('#div_expected_shipping_date').length) {
+    flatpickr("#div_expected_shipping_date", {
       wrap: true,
-      dateFormat: "d-M-Y",
+      dateFormat: "d-F-Y",
       defaultDate: "today",
       minDate: "today"
     });
@@ -256,14 +316,14 @@
 
   function submit()
   {
-      $("#id-location, #sub-district").attr('style', '');
+      $(inputForm).attr('style', '');
       $("#response_message").attr("style", 'display: none;');
       $(".submit-button").addClass("disabled");
       $(".spinner-border").attr("style", '');
 
       var pass = true;
 
-      $("#id-location, #sub-district, #district, #city, #province, #latitude, #longitude").each(function(){
+      $(inputForm).each(function(){
           $(this).attr('style', '');
           if($(this).val() == ''){
             $(this).attr('style', 'border: 1px solid #d57171 !important');
@@ -271,19 +331,34 @@
           }
       });
 
+      $(selectForm).each(function(){
+          $(this).next('.select2-container').find('.select2-selection').css('border-color', '')
+          if($(this).val() == null){
+            $(this).next('.select2-container').find('.select2-selection').css('border-color', 'red')
+            pass = false;
+          }
+      });
+
       if(pass){
         var submitData = {
             _token: "{{ csrf_token() }}",
-            code: $('#id-location').val(),
-            district_id: $('#district').val(),
-            name: $('#sub_district').val(),
-            latitude: $('#latitude').val(),
-            longitude: $('#longitude').val()
+            account_vch_id: $("#account_vch_id").val(),
+            po_number: $("#po_number").val(),
+            po_date: moment($("#po_date").val()).format("YYYY-MM-DD"),
+            expected_shipping_date: moment($("#expected_shipping_date").val()).format("YYYY-MM-DD"),
+            item_id: $("#item").val(),
+            item_type_id: $("#item_type").val(),
+            item_description: $("#item_description").val(),
+            item_quantity: numeral($("#item_quantity").val()).format('0'),
+            item_unit_id: $("#item_unit").val(),
+            item_unit_price: numeral($("#item_unit_price").val()).format('0'),
+            item_max_quantity: numeral($("#item_max_quantity").val()).format('0'),
+            status: "waiting"
         };
 
         $.ajax({
             type: "POST",
-            url: "{{ route('location.submit') }}",
+            url: "{{ route('purchase-order.submit') }}",
             data: submitData,
             dataType: "json",
             timeout: 300000
@@ -317,12 +392,9 @@
   }
 
   function reset(){
-    $("#id-location, #latitude, #longitude").val('');
-    // add by faisal
-    // used to reset coverage combo from coverage.js file
-    $('#city, #district').empty();
-    $('#city, #district').select2({ width: '100%', data: comboDefault });
-    $('#province, #city, #district').val('select').select2();
+    $(inputForm).val('');
+    $(selectForm).val('select').select2();
+    $(".vendor_id").val('');
   }
 
 

@@ -76,7 +76,7 @@ class LocationController extends Controller
             $input["created_by"] = "Admin";
             Subdistrict::create($input);
 
-            CommonHelper::forgetWildcard("*coverage*");
+            CommonHelper::forgetCache("coverage");
 
             $response["code"] = 200;
             $response["message"] = "Success";
@@ -99,7 +99,7 @@ class LocationController extends Controller
         
         try{
             Subdistrict::where("code", $request->input("location_id"))->delete();
-            CommonHelper::forgetWildcard("*coverage*");
+            CommonHelper::forgetCache("coverage");
             $response["code"] = 200;
             $response["message"] = "Success";
         } catch(\Exception $e){

@@ -118,6 +118,7 @@ return [
     'url' => 'The :attribute format is invalid.',
     'uuid' => 'The :attribute must be a valid UUID.',
 
+    "greater-than"         => 'The :attribute should be larger than :value',
     /*
     |--------------------------------------------------------------------------
     | Custom Validation Language Lines

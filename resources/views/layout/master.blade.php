@@ -56,6 +56,9 @@
     <script src="{{ asset('assets/plugins/feather-icons/feather.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/perfect-scrollbar/perfect-scrollbar.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/select2-4.1.0/dist/js/select2.min.js') }}"></script>
+    <script src="{{ asset('assets/plugins/moment/moment.min.js') }}"></script>
+    <script src="{{ asset('assets/plugins/numeral/min/numeral.min.js') }}"></script>
+
     <!-- end base js -->
 
     <!-- plugin js -->
@@ -70,6 +73,7 @@
     <script src="{{ asset('assets/js/notify.js') }}"></script>
 
     <script src="{{ asset('assets/js/validation-regex.js') }}"></script>
+    <script src="{{ asset('assets/js/custom.js') }}"></script>
 
     @stack('custom-scripts')
 </body>

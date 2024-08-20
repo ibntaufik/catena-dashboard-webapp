@@ -55,7 +55,7 @@ class ApprovalController extends Controller
             if(empty($isExist)){
                 $input["created_by"] = "Admin";
                 Approval::create($input);
-                CommonHelper::forgetWildcard("*approval*");
+                CommonHelper::forgetCache("approval");
             } else {
                 $isExist->deleted_at = null;
                 $isExist->updated_at = now();
@@ -84,7 +84,7 @@ class ApprovalController extends Controller
         try{\Log::debug($request->input("user_id"));
             Approval::where("user_id", $request->input("user_id"))->delete();
 
-            CommonHelper::forgetWildcard("*approval*");
+            CommonHelper::forgetCache("approval");
             $response["code"] = 200;
             $response["message"] = "Success";
             $response["data"] = $this->collectCandidate();

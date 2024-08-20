@@ -41,7 +41,7 @@ class EvcController extends Controller
 
             $user = Evc::create($input);
 
-            CommonHelper::forgetWildcard("*evc*");
+            CommonHelper::forgetCache("evc");
             
             $response["code"] = 200;
             $response["message"] = "Success";
@@ -65,7 +65,7 @@ class EvcController extends Controller
         
         try{
             Evc::where("code", $request->input("code"))->delete();
-
+            CommonHelper::forgetCache("evc");
             $response["code"] = 200;
             $response["message"] = "Success";
         } catch(\Exception $e){

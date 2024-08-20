@@ -17,7 +17,7 @@ class VCH extends Model
     protected $guarded = ['id'];
 
     public static function listCombo(){
-        return Cache::remember("vch.list_combo.vch", config("constant.ttl"), function(){
+        return Cache::remember("vch.list_combo", config("constant.ttl"), function(){
             $result = VCH::select(DB::raw("code"))->get()->toArray();
             return collect($result)->map(function ($item) {
                 return ["id" => $item['code'], "text" => $item['code']];
