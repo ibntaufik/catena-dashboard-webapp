@@ -142,12 +142,22 @@
           </tr>
           <tr>
             <td class="w-50">
-              <label>Item Type</label>
-              <label id="labelItemType"></label>
+              <label>Item Unit</label>
+              <label id="labelItemUnit"></label>
             </td>
             <td class="w-50">
               <label>Item Unit Price</label>
               <label id="labelItemUnitPrice"></label>
+            </td>
+          </tr>
+          <tr>
+            <td class="w-50">
+              <label>Item Type</label>
+              <label id="labelItemType"></label>
+            </td>
+            <td class="w-50">
+              <label>Item Description</label>
+              <label id="labelItemDescription"></label>
             </td>
           </tr>
           <tr>
@@ -161,6 +171,11 @@
             </td>
           </tr>
         </table>
+        <br>
+        <br>
+        <strong>Reason for rejection</strong>
+        <br>
+        <textarea id="reason" class="w-100" rows="3"></textarea>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
