@@ -25,21 +25,17 @@ class PurchaseOrderController extends Controller
 
         $vch = array_merge([
             ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
-        ], json_decode(VchAccount::combo(), true));
+        ], VchAccount::combo());
 
         $item = array_merge([
             ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
         ], Item::listCombo());
 
-        $itemType = array_merge([
-            ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
-        ], ItemType::listCombo());
-
         $itemUnit = array_merge([
             ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
         ], ItemUnit::listCombo());
 
-        return view("transactions.purchase-order.create", compact("vch", "item", "itemType", "itemUnit"));
+        return view("transactions.purchase-order.create", compact("vch", "item", "itemUnit"));
     }
 
     public function release(Request $request){
@@ -53,7 +49,7 @@ class PurchaseOrderController extends Controller
             "data"      => []
         ];
 
-        $status = $request->input("status", "waiting");
+        $status = $request->input("status", "all");
 
         try{
             $response["code"] = 200;
@@ -63,8 +59,8 @@ class PurchaseOrderController extends Controller
                     ->join("accounts", "account_vch.account_id", "accounts.id")
                     ->join("users", "accounts.user_id", "users.id")
                     ->join("t_vch", "t_vch.id", "account_vch.vch_id")
-                    ->join("item", "item.id", "purchase_order.item_id")
                     ->join("item_type", "item_type.id", "purchase_order.item_type_id")
+                    ->join("item", "item.id", "item_type.item_id")
                     ->join("item_unit", "item_unit.id", "purchase_order.item_unit_id")
                     ->when(!empty($status) && in_array($status, ["waiting", "approved", "rejected"]), function($builder) use($status){
                         return $builder->where("purchase_order.status", $status);

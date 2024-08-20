@@ -28,7 +28,6 @@ class PurchaseOrderPostRequest extends FormRequest
             "po_number"                 => "required|regex:/^[a-zA-Z0-9\/-]*$/",
             "po_date"                   => "required|date_format:Y-m-d",
             "expected_shipping_date"    => "required|date_format:Y-m-d",
-            "item_id"                   => "required|numeric",
             "item_type_id"              => "required|numeric",
             "item_description"          => "required|max:255",
             "item_quantity"             => "required|min:1|regex:/^\d+$/",
@@ -47,7 +46,6 @@ class PurchaseOrderPostRequest extends FormRequest
             'po_date.date_format'                   => 'Format date is invalid',
             'expected_shipping_date.required'       => 'Please input PO Date',
             'expected_shipping_date.date_format'    => 'Format date is invalid',
-            'item_id.required'                      => 'Please select Item first',
             'item_type_id.required'                 => 'Please select Item Type first',
             'item_description.required'             => 'Please describe item first',
         ];

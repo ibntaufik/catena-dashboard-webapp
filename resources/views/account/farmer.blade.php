@@ -309,7 +309,7 @@
   function reset(){
 
       $('#gridDataTable').DataTable().ajax.reload();
-      $("#name, #address, #latitude, #longitude, #name, #id_number").val('');
+      $("#name, #address, #latitude, #longitude, #name, #id_number, #phone").val('');
       
       $("#img-preview-id_file").attr({'src':''});
       $('#img-base64-id_file').attr({'value':''});

@@ -1,7 +1,8 @@
 <?php
 
-namespace App\model;
+namespace App\Model;
 
+use App\Model\VCH;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -31,15 +32,21 @@ class VchAccount extends Model
 
     public static function combo(){
         return Cache::remember("account.combo.vch", config("constant.ttl"), function(){
-            $result = VchAccount::join("t_vch", "account_vch.vch_id", "t_vch.id")
-            ->join("accounts", "account_vch.account_id", "accounts.id")
-            ->join("users", "accounts.user_id", "users.id")
-            ->where("status", config("constant.account_status.vendor"))
-            ->select(DB::raw("t_vch.code, account_vch.id, CONCAT('(', accounts.code, ') ', users.name) AS vendor"))
-            ->get()->toArray();
-            return collect($result)->map(function ($item) {
-                return ["id" => $item['id'], "text" => $item['code'], "name" => $item["vendor"]];
-            });
+
+            $vch = VCH::select(DB::raw("id, code AS text"))->get()->toArray();
+            foreach ($vch as $key => $row) {
+                $vchAccount = VchAccount::join("accounts", "account_vch.account_id", "accounts.id")
+                ->join("users", "accounts.user_id", "users.id")
+                ->where("status", config("constant.account_status.vendor"))
+                ->select(DB::raw("account_vch.id, CONCAT('(', accounts.code, ') ', users.name) AS text"))
+                ->get()->toArray();
+
+                $vch[$key]["vendor"] =  array_merge([
+                    ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
+                ], $vchAccount);
+            }
+
+            return $vch;
         });
     }
 }

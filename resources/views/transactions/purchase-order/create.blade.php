@@ -37,7 +37,9 @@
             <div class="col-sm-3">
               <div class="mb-3">
                 <label for="vendor_id" class="form-label">Vendor ID</label>
-                <input type="text" class="form-control vendor_id" maxlength="255" placeholder="Vendor ID" disabled="disabled" onkeypress="return isAlphaNumericDash(event);">
+                <select id="vendor_id" class="form-control" name="vendor_id">
+                  <option value="select" disabled selected>-- Select --</option>
+                </select>
               </div>
             </div>
             <div class="col-sm-3">
@@ -174,7 +176,6 @@
 
     var vch = {!! json_encode($vch) !!};
     var item = {!! json_encode($item) !!};
-    var itemType = {!! json_encode($itemType) !!};
     var itemUnit = {!! json_encode($itemUnit) !!};
     var inputForm = null;
     var selectForm = null;
@@ -190,21 +191,26 @@
 
       $("#response_message").attr("style", 'display: none;');
 
+      $('#item_type, #vendor_id').select2();
+
       $("#account_vch_id").select2({
         width: "100%",
         data: vch
       }).on("select2:select", function (e) {
-        $(".vendor_id").val(e.params.data.name);
+          $('#vendor_id').empty();
+          $('#vendor_id').select2({ width: '100%', data: e.params.data.vendor });
       });
 
       $("#item").select2({
         width: "100%",
         data: item
+      }).on("select2:select", function (e) {
+        if(e.params.data.selected){
+          $('#item_type').empty();
+          $('#item_type').select2({ width: '100%', data: e.params.data.itemType });
+        }
       });
-      $("#item_type").select2({
-        width: "100%",
-        data: itemType
-      });
+
       $("#item_unit").select2({
         width: "100%",
         data: itemUnit
@@ -342,11 +348,10 @@
       if(pass){
         var submitData = {
             _token: "{{ csrf_token() }}",
-            account_vch_id: $("#account_vch_id").val(),
+            account_vch_id: $("#vendor_id").val(),
             po_number: $("#po_number").val(),
             po_date: moment($("#po_date").val()).format("YYYY-MM-DD"),
             expected_shipping_date: moment($("#expected_shipping_date").val()).format("YYYY-MM-DD"),
-            item_id: $("#item").val(),
             item_type_id: $("#item_type").val(),
             item_description: $("#item_description").val(),
             item_quantity: numeral($("#item_quantity").val()).format('0'),
