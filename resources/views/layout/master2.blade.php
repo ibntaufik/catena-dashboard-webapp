@@ -39,6 +39,7 @@ License: For each use you must have a valid license purchased only from above li
 
   <!-- common css -->
   <link href="{{ asset('css/app.css') }}" rel="stylesheet" />
+  <link href="{{ asset('css/custom.css') }}" rel="stylesheet" />
   <!-- end common css -->
 
   @stack('style')
