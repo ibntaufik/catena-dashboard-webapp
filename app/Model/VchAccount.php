@@ -6,9 +6,9 @@ use App\Model\VCH;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Cache;
 class VchAccount extends Model
 {
     use HasFactory;
@@ -31,16 +31,35 @@ class VchAccount extends Model
     }
 
     public static function combo(){
-        return Cache::remember("account.combo.vch", config("constant.ttl"), function(){
 
-            $vch = VCH::select(DB::raw("id, code AS text"))->get()->toArray();
-            foreach ($vch as $key => $row) {
-                $vchAccount = VchAccount::join("accounts", "account_vch.account_id", "accounts.id")
+        $isVchAdmin = Auth::user()->isA('vch_admin');
+        $cacheName = "account.combo.vch";
+        if($isVchAdmin){
+            $cacheName .= "user_vch";
+        }
+        
+        return Cache::remember($cacheName, config("constant.ttl"), function() use($isVchAdmin){
+
+            $vch = VchAccount::join("accounts", "account_vch.account_id", "accounts.id")
+                ->join("t_vch", "account_vch.vch_id", "t_vch.id")
+                ->join("t_evc", "t_vch.evc_id", "t_evc.id")
                 ->join("users", "accounts.user_id", "users.id")
-                ->where("status", config("constant.account_status.vendor"))
-                ->select(DB::raw("account_vch.id, CONCAT('(', accounts.code, ') ', users.name) AS text"))
+                ->when($isVchAdmin, function($builder){
+                    return $builder->where("users.id", Auth::user()->id);
+                })->select(DB::raw("t_vch.id, CONCAT(t_evc.code, '-', t_vch.code) AS text"))->groupBy(DB::raw("t_vch.id, t_evc.code, t_vch.code"))
                 ->get()->toArray();
 
+            foreach ($vch as $key => $row) {
+                $vchAccount = VchAccount::join("accounts", "account_vch.account_id", "accounts.id")
+                ->join("t_vch", "account_vch.vch_id", "t_vch.id")
+                ->join("users", "accounts.user_id", "users.id")
+                ->when($isVchAdmin, function($builder){
+                    return $builder->where("users.id", Auth::user()->id);
+                })
+                ->where("account_vch.vch_id", $row["id"])
+                ->select(DB::raw("account_vch.id, CONCAT('(', accounts.code, ') ', users.name) AS text"))
+                ->get()->toArray();
+                
                 $vch[$key]["vendor"] =  array_merge([
                     ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
                 ], $vchAccount);

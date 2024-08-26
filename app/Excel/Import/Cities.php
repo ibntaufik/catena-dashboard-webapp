@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Excel\Import;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

@@ -16,7 +16,8 @@
         "laravel/ui": "^4.5",
         "maatwebsite/excel": "*",
         "predis/predis": "^2.2",
-        "psr/simple-cache": "*"
+        "psr/simple-cache": "*",
+        "silber/bouncer": "^1.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

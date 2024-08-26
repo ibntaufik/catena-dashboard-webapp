@@ -97,8 +97,10 @@ Route::group(['middleware' => 'auth'], function () {
             Route::get('', 'PurchaseOrderController@index')->name("purchase-order.index");
             Route::get('grid-list', 'PurchaseOrderController@datatables')->name("purchase-order.grid-list");
             Route::post('submit', 'PurchaseOrderController@save')->name("purchase-order.submit");
+            Route::post('update', 'PurchaseOrderController@update')->name("purchase-order.update");
             Route::post('remove', 'PurchaseOrderController@delete')->name("purchase-order.remove");
             Route::get('release', 'PurchaseOrderController@release')->name("purchase-order.release");
+            Route::get('latest-history', 'PurchaseOrderController@latestHistory')->name("purchase-order.latest-history");
         });
     });
 });

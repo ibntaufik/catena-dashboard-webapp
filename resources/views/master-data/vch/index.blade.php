@@ -82,7 +82,6 @@
               <tr>
                 <th>Code</th>
                 <th>Alamat</th>
-                <th>Lokasi</th>
                 <th>Latitude</th>
                 <th>Longitude</th>
                 <th></th>
@@ -153,15 +152,13 @@
                   return data.evc_code+' - '+data.code;
               }
             },
-            { "targets": 1, "data": "address" },
-            { "targets": 2, "data": function(data, type, row, meta){
-                  return data.sub_district+', '+data.district+', '+data.city+', '+data.province;
+            { "targets": 1, "data": function(data, type, row, meta){
+                  return data.address+',<br>'+data.sub_district+',<br>'+data.district+',<br>'+data.city+',<br>'+data.province;
               }
             },
-            { "targets": 3, "data": "latitude" },
-            { "targets": 4, "data": "longitude" },
-            { "targets": 5, "data": "address" },
-            { "targets": 6, "data": function(data, type, row, meta){
+            { "targets": 2, "data": "latitude" },
+            { "targets": 3, "data": "longitude" },
+            { "targets": 4, "data": function(data, type, row, meta){
                   return '<a href="#" onclick=$(this).delete("'+data.code+'") style="cursor: pointer;"><i data-feather="trash-2"></i>';
               }
             },

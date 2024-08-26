@@ -45,7 +45,7 @@ class FarmerController extends Controller
             ->join("districts", "districts.id", "sub_districts.district_id")
             ->join("cities", "cities.id", "districts.city_id")
             ->join("provinces", "provinces.id", "cities.province_id")
-            ->select(DB::raw("CONCAT(account_farmer.code, '<br>', users.name) AS name, users.email, account_farmer.address, account_farmer.latitude, account_farmer.longitude, users.phone, account_farmer.id_number, CONCAT(sub_districts.code, ' <br> ', sub_districts.name, ' <br> ', districts.name, ' <br> ', cities.name, ' <br> ', provinces.name) AS location"))->get();
+            ->select(DB::raw("CONCAT(account_farmer.code, '<br>', users.name) AS name, users.email, account_farmer.address, account_farmer.latitude, account_farmer.longitude, users.phone, account_farmer.id_number, CONCAT(sub_districts.code, ' <br> ', sub_districts.name, ' <br> ', districts.name, ' <br> ', cities.name, ' <br> ', provinces.name) AS location"))->orderBy("account_farmer.created_at", "DESC")->get();
         } catch(\Exception $e){
             \Log::error($e->getMessage());
             \Log::error($e->getTraceAsString());

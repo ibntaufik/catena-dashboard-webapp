@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    protected $table = "farmer_account";
+    protected $table = "purchase_order_approval";
     /**
      * Run the migrations.
      *
@@ -14,24 +14,23 @@ return new class extends Migration
      */
     public function up()
     {
+        Schema::dropIfExists("role_approval_at");
         if(!Schema::hasTable($this->table)){
             Schema::create($this->table, function (Blueprint $table) {
                 $table->engine = 'InnoDB';
                 $table->increments('id');
+                $table->unsignedInteger('purchase_order_id')->index();
                 $table->unsignedBigInteger('user_id')->index();
-                $table->unsignedInteger('sub_district_id')->index();
-                $table->text('address');
-                $table->string('latitude', 255)->index();
-                $table->string('longitude', 255)->index();
-                $table->string('id_number', 255)->index();
+                $table->string('status', 10);
+                $table->text('reason_rejected')->nullable();
                 $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'))->index();
                 $table->string('created_by', 255)->default("System");
                 $table->timestamp('updated_at')->nullable();
                 $table->string('updated_by', 255)->nullable();
                 $table->softDeletes();
 
-                $table->foreign('user_id')->references('id')->on('users');
-                $table->foreign('sub_district_id')->references('id')->on('sub_districts');
+                $table->foreign('purchase_order_id')->references('id')->on("purchase_order");
+                $table->foreign('user_id')->references('id')->on("users");
             });
         }
     }

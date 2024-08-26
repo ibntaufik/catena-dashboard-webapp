@@ -18,7 +18,7 @@ class PurchaseOrder extends Model
 
     public static function findByPoNumber($poNumber){
         return empty($poNumber) ? null : Cache::remember("purchase_order.po_number|$poNumber", config("constant.ttl"), function() use($poNumber){
-            return PurchaseOrder::withTrashed()->where("po_number", $poNumber)->first();   
+            return PurchaseOrder::withTrashed()->where("po_number", $poNumber)->first();
         });
     }
 }

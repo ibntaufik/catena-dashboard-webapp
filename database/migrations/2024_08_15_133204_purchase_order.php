@@ -62,7 +62,7 @@ return new class extends Migration
                 $table->increments('id');
                 $table->unsignedInteger('account_vch_id')->index();
                 $table->string('status', 17)->default('waiting')->index();
-                $table->string('po_number', 17)->index();
+                $table->string('po_number', 50)->index();
                 $table->date('po_date')->index();
                 $table->date('expected_shipping_date')->index();
                 $table->unsignedInteger('item_type_id')->index();

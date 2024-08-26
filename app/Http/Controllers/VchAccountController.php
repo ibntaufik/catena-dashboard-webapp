@@ -62,7 +62,7 @@ class VchAccountController extends Controller
             ->join("districts", "districts.id", "sub_districts.district_id")
             ->join("cities", "cities.id", "districts.city_id")
             ->join("provinces", "provinces.id", "cities.province_id")
-            ->select(DB::raw("t_vch.code AS vch_code, users.email, CONCAT(sub_districts.name, ' <br> ', districts.name, ' <br> ', cities.name, ' <br> ', provinces.name) AS location, t_vch.address, t_vch.latitude, t_vch.longitude, accounts.code AS vendor_code, users.name AS vendor_name, bank.name AS vendor_bank_name, account_vch.vendor_bank_address, account_vch.vendor_bank_account_number"))->get();
+            ->select(DB::raw("t_vch.code AS vch_code, users.email, CONCAT(sub_districts.name, ' <br> ', districts.name, ' <br> ', cities.name, ' <br> ', provinces.name) AS location, t_vch.address, t_vch.latitude, t_vch.longitude, accounts.code AS vendor_code, users.name AS vendor_name, bank.name AS vendor_bank_name, account_vch.vendor_bank_address, account_vch.vendor_bank_account_number"))->orderBy("t_vch.code", "ASC")->get();
         } catch(\Exception $e){
             \Log::error($e->getMessage());
             \Log::error($e->getTraceAsString());

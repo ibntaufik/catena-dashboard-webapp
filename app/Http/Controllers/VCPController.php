@@ -46,7 +46,7 @@ class VCPController extends Controller
             ->join("districts", "districts.id", "sub_districts.district_id")
             ->join("cities", "cities.id", "districts.city_id")
             ->join("provinces", "provinces.id", "cities.province_id")
-            ->select(DB::raw("t_evc.code AS evc_code, t_vch.code AS vch_code, t_vcp.code AS code, t_vcp.address, t_vcp.latitude, t_vcp.longitude, sub_districts.name AS sub_district, districts.name AS district, cities.name AS city, provinces.name AS province"))->get();
+            ->select(DB::raw("t_evc.code AS evc_code, t_vch.code AS vch_code, t_vcp.code AS code, t_vcp.address, t_vcp.latitude, t_vcp.longitude, sub_districts.name AS sub_district, districts.name AS district, cities.name AS city, provinces.name AS province"))->orderBy("t_vcp.code", "ASC")->get();
         } catch(\Exception $e){
             \Log::error($e->getMessage());
             \Log::error($e->getTraceAsString());

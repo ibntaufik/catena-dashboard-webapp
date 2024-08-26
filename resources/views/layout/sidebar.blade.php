@@ -12,12 +12,13 @@
   <div class="sidebar-body">
     <ul class="nav">
       <li class="nav-item nav-category">Main</li>
-      <li class="nav-item {{ active_class(['/']) }}" style="display: none;">
+      <li class="nav-item {{ active_class(['/']) }}">
         <a href="{{ url('/') }}" class="nav-link">
           <i class="link-icon" data-feather="box"></i>
           <span class="link-title">Dashboard</span>
         </a>
       </li>
+      @if(\Auth::user()->isA('admin'))
       <li class="nav-item {{ active_class(['account/*']) }}">
         <a class="nav-link" data-bs-toggle="collapse" href="#account" role="button" aria-expanded="{{ is_active_route(['account/*']) }}" aria-controls="account">
           <i class="link-icon" data-feather="layers"></i>
@@ -26,18 +27,26 @@
         </a>
         <div class="collapse {{ show_class(['account/*']) }}" id="account">
           <ul class="nav sub-menu">
+            @if(\Auth::user()->isA('admin'))
             <li class="nav-item">
               <a href="{{ url('/account/farmer') }}" class="nav-link {{ active_class(['account/farmer']) }}">Create Farmer Account</a>
             </li>
+            @endif
+            @if(\Auth::user()->isA('admin'))
             <li class="nav-item">
               <a href="{{ url('/account/vcp') }}" class="nav-link {{ active_class(['account/vcp']) }}">Create VCP Account</a>
             </li>
+            @endif
+            @if(\Auth::user()->isA('admin'))
             <li class="nav-item">
               <a href="{{ url('/account/vch') }}" class="nav-link {{ active_class(['account/vch']) }}">Create VCH Account</a>
             </li>
+            @endif
           </ul>
         </div>
       </li>
+      @endif
+      @if(\Auth::user()->isA('admin') || \Auth::user()->can('po-maker'))
       <li class="nav-item {{ active_class(['transaction/*']) }}">
         <a class="nav-link" data-bs-toggle="collapse" href="#transaction" role="button" aria-expanded="{{ is_active_route(['transaction/*']) }}" aria-controls="transaction">
           <i class="link-icon" data-feather="file-text"></i>
@@ -46,18 +55,26 @@
         </a>
         <div class="collapse {{ show_class(['transaction/*']) }}" id="transaction">
           <ul class="nav sub-menu">
+            @if(\Auth::user()->isA('admin'))
             <li class="nav-item">
               <a href="{{ url('/transaction/purchase-order') }}" class="nav-link {{ active_class(['transaction/purchase-order']) }}">Create Purchase Order</a>
             </li>
+            @endif
+            @if(\Auth::user()->isA('admin') || \Auth::user()->can('po-maker'))
             <li class="nav-item">
               <a href="{{ url('/transaction/purchase-order/release') }}" class="nav-link {{ active_class(['transaction/purchase-order/release']) }}">Purchase Order Release</a>
             </li>
+            @endif
+            @if(\Auth::user()->isA('admin'))
             <li class="nav-item">
               <a href="{{ url('/transaction/farmer-and-vcp') }}" class="nav-link {{ active_class(['transaction/farmer-and-vcp']) }}">Farmer &amp; VCP Transaction</a>
             </li>
+            @endif
           </ul>
         </div>
       </li>
+      @endif
+      @if(\Auth::user()->isA('admin'))
       <li class="nav-item {{ active_class(['master-data/*']) }}">
         <a class="nav-link" data-bs-toggle="collapse" href="#master-data" role="button" aria-expanded="{{ is_active_route(['master-data/*']) }}" aria-controls="master-data">
           <i class="link-icon" data-feather="folder"></i>
@@ -66,30 +83,45 @@
         </a>
         <div class="collapse {{ show_class(['master-data/*']) }}" id="master-data">
           <ul class="nav sub-menu">
+            @if(\Auth::user()->isA('admin'))
             <li class="nav-item">
               <a href="{{ url('/master-data/ho-approval') }}" class="nav-link {{ active_class(['master-data/ho-approval']) }}">HO Approval</a>
             </li>
+            @endif
+            @if(\Auth::user()->isA('admin'))
             <li class="nav-item">
               <a href="{{ url('/master-data/location') }}" class="nav-link {{ active_class(['master-data/location']) }}">Location</a>
             </li>
+            @endif
+            @if(\Auth::user()->isA('admin'))
             <li class="nav-item">
               <a href="{{ url('/master-data/user') }}" class="nav-link {{ active_class(['master-data/user']) }}">HO Account</a>
             </li>
+            @endif
+            @if(\Auth::user()->isA('admin'))
             <li class="nav-item">
               <a href="{{ url('/master-data/evc') }}" class="nav-link {{ active_class(['master-data/evc']) }}">EVC</a>
             </li>
+            @endif
+            @if(\Auth::user()->isA('admin'))
             <li class="nav-item">
               <a href="{{ url('/master-data/vch') }}" class="nav-link {{ active_class(['master-data/vch']) }}">VCH</a>
             </li>
+            @endif
+            @if(\Auth::user()->isA('admin'))
             <li class="nav-item">
               <a href="{{ url('/master-data/vcp') }}" class="nav-link {{ active_class(['master-data/vcp']) }}">VCP</a>
             </li>
+            @endif
+            @if(\Auth::user()->isA('admin'))
             <li class="nav-item">
               <a href="{{ url('/master-data/accounts') }}" class="nav-link {{ active_class(['master-data/accounts']) }}">Accounts</a>
             </li>
+            @endif
           </ul>
         </div>
       </li>
+      @endif
 
       <!-- li class="nav-item nav-category">web apps</li>
       <li class="nav-item {{ active_class(['email/*']) }}">

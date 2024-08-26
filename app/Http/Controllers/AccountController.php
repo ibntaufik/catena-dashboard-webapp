@@ -43,7 +43,7 @@ class AccountController extends Controller
             $response["code"] = 200;
             $response["message"] = "Success";
 
-            $response["data"] = Account::join("users", "accounts.user_id", "users.id")->select(DB::raw("users.name, users.email, users.phone, accounts.code, accounts.status"))->get();
+            $response["data"] = Account::join("users", "accounts.user_id", "users.id")->select(DB::raw("users.name, users.email, users.phone, accounts.code, accounts.status"))->orderBy("accounts.created_at", "DESC")->get();
         } catch(\Exception $e){
             \Log::error($e->getMessage());
             \Log::error($e->getTraceAsString());

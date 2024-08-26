@@ -48,7 +48,7 @@ class VcpAccountController extends Controller
             ->join("districts", "districts.id", "sub_districts.district_id")
             ->join("cities", "cities.id", "districts.city_id")
             ->join("provinces", "provinces.id", "cities.province_id")
-            ->select(DB::raw("t_vcp.code AS vcp_code, users.email, CONCAT(sub_districts.name, ' <br> ', districts.name, ' <br> ', cities.name, ' <br> ', provinces.name) AS location, t_vcp.address, t_vcp.latitude, t_vcp.longitude, accounts.code AS field_coordinator_id, users.name AS field_coordinator_name"))->get();
+            ->select(DB::raw("t_vcp.code AS vcp_code, users.email, CONCAT(sub_districts.name, ' <br> ', districts.name, ' <br> ', cities.name, ' <br> ', provinces.name) AS location, t_vcp.address, t_vcp.latitude, t_vcp.longitude, accounts.code AS field_coordinator_id, users.name AS field_coordinator_name"))->orderBy("t_vcp.code", "ASC")->get();
         } catch(\Exception $e){
             \Log::error($e->getMessage());
             \Log::error($e->getTraceAsString());

@@ -147,6 +147,7 @@
                 <th>VCH Code</th>
                 <th>Vendor</th>
                 <th>PO Number</th>
+                <th>Status</th>
                 <th>PO Date</th>
                 <th>Expected Shipping Date</th>
                 <th>Item Name</th>
@@ -245,26 +246,37 @@
             { "targets": 0, "data": "vch_code", "className": "text-center" },
             { "targets": 1, "data": "vendor" },
             { "targets": 2, "data": "po_number", "className": "text-center" },
-            { "targets": 3, "data": "po_date", "className": "text-center" },
-            { "targets": 4, "data": "expected_shipping_date", "className": "text-center" },
-            { "targets": 5, "data": "item_name" },
-            { "targets": 6, "data": "item_type", "className": "text-center" },
-            { "targets": 7, "data": "item_description" },
-            { "targets": 8, "data": "item_quantity", "className": "text-end",
+            { "targets": 3, "className": "text-center", "data": function( data, type, row, meta ){
+                var classLabel = "fontColorWarning";
+                if(data.status == "approved"){
+                  classLabel = "fontColorApproved";
+                } else if(data.status == "rejected"){
+                  classLabel = "fontColorRejected";
+                }
+                selectedPurchaseOrder = data;
+                return '<label class="'+classLabel+'" style="cursor: pointer;";>'+ucFirstWord(data.status)+'</label>';
+              }
+            },
+            { "targets": 4, "data": "po_date", "className": "text-center" },
+            { "targets": 5, "data": "expected_shipping_date", "className": "text-center" },
+            { "targets": 6, "data": "item_name" },
+            { "targets": 7, "data": "item_type", "className": "text-center" },
+            { "targets": 8, "data": "item_description" },
+            { "targets": 9, "data": "item_quantity", "className": "text-end",
               "render":function( data, type, row, meta ){
                 var val = (data/1).toFixed(0).replace('.', ',');
                 return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
               }
             },
-            { "targets": 9, "data": "item_unit", "className": "text-center" },
-            { "targets": 10, "data": "item_unit_price", "className": "text-end" },
-            { "targets": 11, "data": "item_max_quantity", "className": "text-end",
+            { "targets": 10, "data": "item_unit", "className": "text-center" },
+            { "targets": 11, "data": "item_unit_price", "className": "text-end" },
+            { "targets": 12, "data": "item_max_quantity", "className": "text-end",
               "render":function( data, type, row, meta ){
                 var val = (data/1).toFixed(0).replace('.', ',');
                 return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
               }
             },
-            { "targets": 12, "data": function(data, type, row, meta){
+            { "targets": 13, "data": function(data, type, row, meta){
                   return '<a href="#" onclick=$(this).delete("'+data.po_number+'") style="cursor: pointer;"><i data-feather="trash-2"></i>';
               }
             },

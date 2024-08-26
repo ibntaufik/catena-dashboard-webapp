@@ -78,7 +78,7 @@
               <tr>
                 <th>Status</th>
                 <th>VCH Code</th>
-                <th>Vendor</th>
+                <th class="text-center">Vendor</th>
                 <th>PO Number</th>
                 <th>PO Date</th>
                 <th>Expected Shipping Date</th>
@@ -100,86 +100,99 @@
 </div>
 
 <div class="modal fade" id="waitingModal" tabindex="-1" aria-labelledby="waitingModalLabel" aria-hidden="true">
-  <div class="modal-dialog" style="width: 700px; max-width: 1200px;">
+  <div class="modal-dialog" style="width: 900px; max-width: 1200px;">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Approval Process</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="btn-close"></button>
       </div>
       <div class="modal-body">
-        <p>Status: <strong id="labelWarning"></strong></p>
+        <div class="col-md-12">
+          <div class="row">
+            <div class="col-md-8">
+              <p>Status: <strong id="labelWarning"></strong></p>
+              <table id="detailPo" class="w-100 table table-bordered mt-2">
+                <tr>
+                  <td class="w-50">
+                    <label>VCH Code</label><br>
+                    <label class="fw-bolder" id="labelVchCode"></label>
+                  </td>
+                  <td class="w-50">
+                    <label>Vendor</label><br>
+                    <label class="fw-bolder" id="labelVendor"></label>
+                  </td>
+                </tr> 
+                <tr> 
+                  <td class="w-50">
+                    <label>PO Number</label><br>
+                    <label class="fw-bolder" id="labelPoNumber"></label>
+                  </td>
+                  <td class="w-50">
+                    <label>Item</label><br>
+                    <label class="fw-bolder" id="labelItem"></label>
+                  </td>
+                </tr> 
+                <tr>
+                  <td class="w-50">
+                    <label>PO Date</label><br>
+                    <label class="fw-bolder" id="labelPoDate"></label>
+                  </td>
+                  <td class="w-50">
+                    <label>Expected Shipping Date</label><br>
+                    <label class="fw-bolder" id="labelExpectedShippingDate"></label>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="w-50">
+                    <label>Item Unit</label><br>
+                    <label class="fw-bolder" id="labelItemUnit"></label>
+                  </td>
+                  <td class="w-50">
+                    <label>Item Unit Price</label><br>
+                    <label class="fw-bolder" id="labelItemUnitPrice"></label>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="w-50">
+                    <label>Item Type</label><br>
+                    <label class="fw-bolder" id="labelItemType"></label>
+                  </td>
+                  <td class="w-50">
+                    <label>Item Description</label><br>
+                    <label class="fw-bolder" id="labelItemDescription"></label>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="w-50">
+                    <label>Item Quantity</label><br>
+                    <label class="fw-bolder" id="labelItemQuantity"></label>
+                  </td>
+                  <td class="w-50">
+                    <label>Item Max. Quantity</label><br>
+                    <label class="fw-bolder" id="labelItemMaxQuantity"></label>
+                  </td>
+                </tr>
+              </table>
+              <br>
+              <br>
+              <strong>Reason for rejection</strong>
+              <br>
+              <textarea id="reason" class="w-100" rows="3"></textarea>
+            </div>
+            <div class="col-md-4">
+              <strong>List Approval</strong>
+              <table id="historyApproval" class="w-100 table mt-2" style="background-color: #F7F7F7;">
+                <tbody>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div> 
 
-        <table id="detailPo" class="w-100 table table-bordered mt-2">
-          <tr>
-            <td class="w-50">
-              <label>VCH Code</label>
-              <label id="labelVchCode"></label>
-            </td>
-            <td class="w-50">
-              <label>Vendor</label>
-              <label id="labelVendorId"></label>
-            </td>
-          </tr> 
-          <tr> 
-            <td class="w-50">
-              <label>PO Number</label>
-              <label id="labelPoNumber"></label>
-            </td>
-            <td class="w-50">
-              <label>Item</label>
-              <label id="labelPoNumber"></label>
-            </td>
-          </tr> 
-          <tr>
-            <td class="w-50">
-              <label>PO Date</label>
-              <label id="labelPoDate"></label>
-            </td>
-            <td class="w-50">
-              <label>Expected Shipping Date</label>
-              <label id="labelExpectedShippingDate"></label>
-            </td>
-          </tr>
-          <tr>
-            <td class="w-50">
-              <label>Item Unit</label>
-              <label id="labelItemUnit"></label>
-            </td>
-            <td class="w-50">
-              <label>Item Unit Price</label>
-              <label id="labelItemUnitPrice"></label>
-            </td>
-          </tr>
-          <tr>
-            <td class="w-50">
-              <label>Item Type</label>
-              <label id="labelItemType"></label>
-            </td>
-            <td class="w-50">
-              <label>Item Description</label>
-              <label id="labelItemDescription"></label>
-            </td>
-          </tr>
-          <tr>
-            <td class="w-50">
-              <label>Item Quantity</label>
-              <label id="labelItemQuantity"></label>
-            </td>
-            <td class="w-50">
-              <label>Item Max. Quantity</label>
-              <label id="labelItemMaxQuantity"></label>
-            </td>
-          </tr>
-        </table>
-        <br>
-        <br>
-        <strong>Reason for rejection</strong>
-        <br>
-        <textarea id="reason" class="w-100" rows="3"></textarea>
-      </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+        <button type="button" class="btn btn-primary" id="reject" onclick="submit('rejected')" style="display: none;">Reject</button>
+        <button type="button" class="btn btn-success" id="approve" onclick="submit('approved')" style="display: none;">Approve</button>
       </div>
     </div>
   </div>
@@ -195,6 +208,8 @@
     var start = 0;
     var limit = 10;
     var poStatus = "waiting";
+    var selectedPurchaseOrder = null;
+    var listApprover = null;
 
     $(document).ready(function() {
       $('#gridDataTable').DataTable( {
@@ -224,19 +239,25 @@
           },
                                 
           "columnDefs" : [
-            { "targets": 0, "data": "status", "className": "text-center",
-              "render":function( data, type, row, meta ){
+            { "targets": 0, "className": "text-center", "data": function( data, type, row, meta ){
                 var classLabel = "fontColorWarning";
-                if(data == "approved"){
+                if(data.status == "approved"){
                   classLabel = "fontColorApproved";
-                } else if(data == "rejected"){
+                } else if(data.status == "rejected"){
                   classLabel = "fontColorRejected";
                 }
-                return '<a href="#" onclick=showDetail("'+data+'")><label class="'+classLabel+'" style="cursor: pointer;";>'+ucFirstWord(data)+'</label>';
+                selectedPurchaseOrder = data;
+                return '<a href="#" onclick=showDetail("'+data.status+'")><label class="'+classLabel+'" style="cursor: pointer;";>'+ucFirstWord(data.status)+'</label></a>';
               }
             },
-            { "targets": 1, "data": "vch_code", "className": "text-center" },
-            { "targets": 2, "data": "vendor" },
+            { "targets": 1, "className": "text-center", "data": function(data, type, row, meta){
+                  return data.evc_code+' - '+data.vch_code;
+              }
+            },
+            { "targets": 2, "data": function(data, type, row, meta){
+                  return '('+data.vendor_code+') '+data.vendor;
+              }
+            },
             { "targets": 3, "data": "po_number", "className": "text-center" },
             { "targets": 4, "data": "po_date", "className": "text-center" },
             { "targets": 5, "data": "expected_shipping_date", "className": "text-center" },
@@ -288,20 +309,123 @@
       };
     });
 
-    function submit(){
+    function submit(status){
+      $("#reason").attr('style', '');
+      if(status == "rejected" && $("#reason").val().length == 0){
+        $("#reason").attr('style', 'border: 1px solid #d57171 !important');
+        alert("Silakan isi alasan terlebih dahulu");
+      } else {
         
+        $.ajax({
+            type: "POST",
+            url: "{{ route('purchase-order.update') }}",
+            data: {
+              _token: "{{ csrf_token() }}",
+              po_number: $("#labelPoNumber").text(),
+              po_status: status,
+              reason: $("#reason").val()
+            },
+            dataType: "json",
+            timeout: 300000
+        }).done(function(data){
+            if(data.code == 200){
+              $("#reason").val("");
+              $('#waitingModal').modal('hide');
+              setTimeout(function() {
+                $('#gridDataTable').DataTable().ajax.reload();
+              }, 500);
+            }
+        }).fail(function(data){
+            
+        });
+      };
     }
 
     function showDetail(status){
       $("#labelWarning").html(ucFirstWord(status));
+
       var classLabel = "fontColorWarning";
+      $("#reason").removeAttr("readonly");
+      $("#reject, #approve").hide();
+      latestHistory(status);
+
       if(status == "approved"){
         classLabel = "fontColorApproved";
       } else if(status == "rejected"){
         classLabel = "fontColorRejected";
       }
+
+      if(["waiting"].includes(status)){
+        $("#reason").val('');
+      } else {
+        $("#reject, #approve").hide();
+        $("#reason").attr("readonly", "readonly");
+      }
+
+      $('#historyApproval tbody').empty();
+      if(listApprover.length > 0){
+        renderApproval(listApprover);
+      }
+      $("#labelVchCode").html(selectedPurchaseOrder.evc_code+' - '+selectedPurchaseOrder.vch_code);
+      $("#labelVendor").html('('+selectedPurchaseOrder.vendor_code+') '+selectedPurchaseOrder.vendor);
+      $("#labelPoNumber").html(selectedPurchaseOrder.po_number);
+      $("#labelItem").html(selectedPurchaseOrder.item_name);
+      $("#labelPoDate").html(selectedPurchaseOrder.po_date);
+      $("#labelExpectedShippingDate").html(selectedPurchaseOrder.po_date);
+      $("#labelItemUnit").html(selectedPurchaseOrder.item_unit);
+      $("#labelItemUnitPrice").html(formatPrice(selectedPurchaseOrder.item_unit_price, 0));
+      $("#labelItemType").html(selectedPurchaseOrder.item_type);
+      $("#labelItemDescription").html(selectedPurchaseOrder.item_description);
+      $("#labelItemQuantity").html(formatPrice(selectedPurchaseOrder.item_quantity, 0));
+      $("#labelItemMaxQuantity").html(formatPrice(selectedPurchaseOrder.item_max_quantity, 0));
       $("#labelWarning").addClass(classLabel);
       $('#waitingModal').modal('show');
+    }
+
+    function latestHistory(status){
+        $.ajax({
+          type: "GET",
+          url: "{{ route('purchase-order.latest-history') }}",
+          data: {
+            _token: "{{ csrf_token() }}",
+            po_number: selectedPurchaseOrder.po_number,
+            po_status: status
+          },
+          dataType: "json",
+          timeout: 300000,
+          async:false,
+      }).done(function(response){
+          $("#reason").val(response.data.reason);
+          if((response.data.show_approval_buttons)){
+            $("#reject, #approve").show();
+          } else {
+            $("#reject, #approve").hide();
+          }
+          listApprover = response.data.approver;
+
+      }).fail(function(response){
+          
+      });
+    }
+
+    function renderApproval(data){
+      $.each(data, function(key, value){
+
+        var label = '<span class="label label-waiting">Waiting</span>';
+        if(value.status == "approved"){
+          label = '<span class="label label-approved">Approved</span>';
+        } else if(value.status == "rejected"){
+          label = '<span class="label label-rejected">Reject</span>';
+        }
+
+        $('#historyApproval > tbody:last-child').append('<tr>'+
+                  '<td style="text-align: center;padding: 5px;vertical-align: middle;">'+value.text+'</td>'+
+                  '<td style="text-align: center;padding: 5px;">'
+                  +label+
+                  '<br>'+(value.updated_at == null ? "-" : moment(value.updated_at).format("DD/MM/YYYY HH:mm:ss"))+
+                  '</td>'+
+        '</tr>');
+      });
     }
 
     function search(status){

@@ -45,7 +45,7 @@ class UserController extends Controller
             $response["code"] = 200;
             $response["message"] = "Success";
 
-            $response["data"] = User::join("ho_account", "ho_account.user_id", "users.id")->whereNull("ho_account.deleted_at")->select(DB::raw("users.name, users.email"))->get();
+            $response["data"] = User::join("ho_account", "ho_account.user_id", "users.id")->whereNull("ho_account.deleted_at")->select(DB::raw("users.name, users.email"))->orderBy("users.name", "ASC")->get();
         } catch(\Exception $e){
             \Log::error($e->getMessage());
             \Log::error($e->getTraceAsString());

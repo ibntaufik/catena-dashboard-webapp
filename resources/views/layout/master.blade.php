@@ -36,6 +36,16 @@
   <!-- end common css -->
 
   @stack('style')
+
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <script>
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.init({
+        appId: "6e35f10b-f0b4-40c4-b7ca-a0b988f38cfc",
+      });
+    });
+  </script>
 </head>
 <body data-base-url="{{url('/')}}" class="sidebar-dark">
 

@@ -31,7 +31,7 @@ class ApprovalController extends Controller
         try{
             $response["code"] = 200;
             $response["message"] = "Success";
-            $response["data"] = Approval::join("users", "users.id", "ho_approval.user_id")->select("users.id", "users.name")->get();
+            $response["data"] = Approval::join("users", "users.id", "ho_approval.user_id")->orderBy("ho_approval.created_at", "DESC")->select("users.id", "users.name")->get();
         } catch(\Exception $e){
             
         }
@@ -81,7 +81,7 @@ class ApprovalController extends Controller
             "data"      => []
         ];
         
-        try{\Log::debug($request->input("user_id"));
+        try{
             Approval::where("user_id", $request->input("user_id"))->delete();
 
             CommonHelper::forgetCache("approval");
@@ -108,7 +108,7 @@ class ApprovalController extends Controller
 
             $result = User::join("ho_account", "ho_account.user_id", "users.id")
             ->when(count($approver) > 0, function($builder) use($approver){
-                return $builder->whereNotIn("id", $approver);
+                return $builder->whereNotIn("users.id", $approver);
             })->select(DB::raw("users.id, name AS text"))->get()->toArray();
             $candidate = array_merge($candidate, $result);
 

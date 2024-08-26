@@ -18,9 +18,9 @@ class VCH extends Model
 
     public static function listCombo(){
         return Cache::remember("vch.list_combo", config("constant.ttl"), function(){
-            $result = VCH::select(DB::raw("code"))->get()->toArray();
+            $result = VCH::join("t_evc", "t_evc.id", "t_vch.evc_id")->select(DB::raw("t_evc.code AS evc_code, t_vch.code"))->get()->toArray();
             return collect($result)->map(function ($item) {
-                return ["id" => $item['code'], "text" => $item['code']];
+                return ["id" => $item['code'], "text" => $item['evc_code'].'-'.$item['code']];
             });
         });
     }

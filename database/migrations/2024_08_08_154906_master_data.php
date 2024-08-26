@@ -13,6 +13,7 @@ return new class extends Migration
     protected $tableVchAccount = "account_vch";
     protected $tableVcpAccount = "account_vcp";
     protected $tableEvcAccount = "account_evc";
+    protected $tableBank = "bank";
 
     /**
      * Run the migrations.
@@ -20,6 +21,20 @@ return new class extends Migration
      * @return void
      */
     public function up(){
+
+        if(!Schema::hasTable($this->tableBank)){
+            Schema::create($this->tableBank, function (Blueprint $table) {
+                $table->engine = 'InnoDB';
+                $table->increments('id');
+                $table->string('code', 20)->index();
+                $table->string('name', 255)->index();
+                $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'))->index();
+                $table->string('created_by', 255)->default("System");
+                $table->timestamp('updated_at')->nullable();
+                $table->string('updated_by', 255)->nullable();
+                $table->softDeletes();
+            });
+        }
 
         if(!Schema::hasTable($this->tableEvc)){
             Schema::create($this->tableEvc, function (Blueprint $table) {
