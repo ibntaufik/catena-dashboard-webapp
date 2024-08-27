@@ -14,6 +14,7 @@ use App\Model\PurchaseOrder;
 use App\Model\PurchaseOrderApproval;
 use App\Model\VCH;
 use App\Model\VchAccount;
+use App\Helpers\BaseClient;
 use App\Helpers\CommonHelper;
 use App\Http\Requests\PurchaseOrderPostRequest;
 use App\Http\Requests\RemovePurchaseOrderPostRequest;
@@ -142,6 +143,10 @@ class PurchaseOrderController extends Controller
             }
             
             PurchaseOrderApproval::insert($approver);
+
+
+            $client = new BaseClient();
+            $client->pushNotificationOneSignal("An purchase order ".$input["po_number"]." have been created.");
             CommonHelper::forgetCache("datalist.purchase_order");
 
             $response["code"] = 200;
@@ -197,6 +202,9 @@ class PurchaseOrderController extends Controller
 
                 if(count($checkApproval) == count($approvers)){
                     PurchaseOrder::where("po_number", $input["po_number"])->update(["status" => "approved"]);
+
+                    $client = new BaseClient();
+                    $client->pushNotificationOneSignal("An purchase order ".$input["po_number"]." have been approved.");
                 }
             }
             CommonHelper::forgetCache("datalist.purchase_order");
