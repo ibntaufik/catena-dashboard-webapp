@@ -328,7 +328,7 @@
             dataType: "json",
             timeout: 300000
         }).done(function(response){
-            if(data.code == 200){
+            if(response.code == 200){
               $("#reason").val("");
               $('#waitingModal').modal('hide');
               setTimeout(function() {

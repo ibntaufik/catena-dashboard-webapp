@@ -303,7 +303,7 @@
             dataType: "json",
             timeout: 300000
         }).done(function(response){
-            if(data.code == 200){
+            if(response.code == 200){
               $('#response_message').removeClass('alert-danger');
               $('#response_message').addClass('alert-success');
               reset();
@@ -312,7 +312,7 @@
               $('#response_message').addClass('alert-danger');
             }
             $("#response_message").attr("style", '');
-            $("#success").html(data.message);
+            $("#success").html(response.message);
 
             $('#response_message').fadeTo(3000, 500).slideUp(500, function() {
               $("#success-alert").slideUp(500);

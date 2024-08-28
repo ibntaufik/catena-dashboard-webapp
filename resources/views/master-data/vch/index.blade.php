@@ -242,7 +242,7 @@
             dataType: "json",
             timeout: 300000
         }).done(function(response){
-            if(data.code == 200){
+            if(response.code == 200){
               $('#response_message').removeClass('alert-danger');
               $('#response_message').addClass('alert-success');
               reset();
@@ -250,16 +250,12 @@
               $('#response_message').removeClass('alert-success');
               $('#response_message').addClass('alert-danger');
 
-              if(data.message.includes("Email already registered")){
-                $("#email_user").attr('style', 'border: 1px solid #d57171 !important');
-              }
-
             }
             $("#response_message").attr("style", '');
             $('#response_message').fadeTo(3000, 500).slideUp(500, function() {
               $("#success-alert").slideUp(500);
             });
-            $("#success").html(data.message);
+            $("#success").html(response.message);
         }).fail(function(response){
             var message = "";
 

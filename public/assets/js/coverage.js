@@ -18,6 +18,8 @@
               timeout: 300000
           }).done(function(response){
             $('#city').empty();
+            $('#district').empty();
+            $('#sub_district').empty();
             $('#city').select2({ width: '100%', data: response.data });
           }).fail(function(data){
               
@@ -38,6 +40,7 @@
               timeout: 300000
           }).done(function(response){
             $('#district').empty();
+            $('#sub_district').empty();
             $('#district').select2({ width: '100%', data: response.data });
           }).fail(function(data){
               
