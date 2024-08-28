@@ -26,9 +26,8 @@ class EvcPostRequest extends FormRequest
         return [
             "sub_district_id"   => "required|numeric",
             "code"              => "required|max:255",
-            "latitude"          => "required|numeric",
-            "longitude"         => "required|numeric",
-            "address"           => "required",
+            "latitude"          => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
+            "longitude"         => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
         ];
     }
 
@@ -42,7 +41,6 @@ class EvcPostRequest extends FormRequest
             'latitude.numeric'          => 'Latitude is not valid',
             'longitude.required'        => 'Longitude is required',
             'longitude.numeric'         => 'Longitude is not valid',
-            'address.required'          => 'Address is required',
         ];
     }
 }

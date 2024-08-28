@@ -24,26 +24,26 @@
         </a>
         <div class="dropdown-menu p-0" aria-labelledby="profileDropdown">
           <ul class="list-unstyled p-1">
-            <li class="dropdown-item py-2">
+            <li class="dropdown-item py-2" style="display: none;">
               <a href="{{ url('/general/profile') }}" class="text-body ms-0">
                 <i class="me-2 icon-md" data-feather="user"></i>
                 <span>Profile</span>
               </a>
             </li>
-            <li class="dropdown-item py-2">
+            <li class="dropdown-item py-2" style="display: none;">
               <a href="javascript:;" class="text-body ms-0">
                 <i class="me-2 icon-md" data-feather="edit"></i>
                 <span>Edit Profile</span>
               </a>
             </li>
-            <li class="dropdown-item py-2">
+            <li class="dropdown-item py-2" style="display: none;">
               <a href="javascript:;" class="text-body ms-0">
                 <i class="me-2 icon-md" data-feather="repeat"></i>
                 <span>Switch User</span>
               </a>
             </li>
-            <li class="dropdown-item py-2">
-              <a href="#" onclick="event.preventDefault();document.getElementById('logout-form').submit();">
+            <li class="dropdown-item py-2" onclick="event.preventDefault();document.getElementById('logout-form').submit();" style="cursor: pointer;">
+              <a href="#" >
                   <i class="ti-power-off m-r-10"></i> Logout
               </a>
               <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">

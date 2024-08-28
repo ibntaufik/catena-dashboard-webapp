@@ -112,6 +112,15 @@ function isNumericAndDot(evt){
     }
 }
 
+function latitude(evt){
+  var regex = new RegExp("^[0-9.-]*$");
+    var key = String.fromCharCode(evt.charCode ? evt.which : evt.charCode);
+    if (!regex.test(key)) {
+        evt.preventDefault();
+        return false;
+    }
+}
+
 function validateAddress(evt){
 	var regex = new RegExp("^[a-zA-Z0-9\s,$# \(\)\/.-]*$");
     var key = String.fromCharCode(evt.charCode ? evt.which : evt.charCode);

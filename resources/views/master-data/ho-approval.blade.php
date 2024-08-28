@@ -186,7 +186,7 @@
             data: submitData,
             dataType: "json",
             timeout: 300000
-        }).done(function(data){
+        }).done(function(response){
             if(data.code == 200){
               $('#response_message').removeClass('alert-danger');
               $('#response_message').addClass('alert-success');
@@ -205,10 +205,23 @@
             // change combo select2 after submit
             $("#user option[value='"+$('#user').val()+"']").remove();
             $("#user").val('select').select2();
-        }).fail(function(data){
+        }).fail(function(response){
+            var message = "";
+
+            if(response.status == 422){
+              message = parseErrorMessage(response);
+            } else {
+              message = "Koneksi ke server terkendala. Silakan coba lagi.";
+            }
+
+            $("#success").html(message);
+            $("#response_message").attr("style", '');
+            $('#response_message').fadeTo(3000, 500).slideUp(500, function() {
+              $("#success-alert").slideUp(500);
+            });
+
             $('#response_message').removeClass('alert-success');
             $('#response_message').addClass('alert-danger');
-            $("#success").html("Koneksi ke server terkendala. Silakan coba lagi.");
         });
       }
 

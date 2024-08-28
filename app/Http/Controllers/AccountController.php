@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Bouncer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -92,6 +93,10 @@ class AccountController extends Controller
                 "code"          => $input["user_id"],
                 "created_by"    => "System Administrator"
             ]);
+
+            if(config("constant.account_status.".$input["status_account"]) == "vendor"){
+                Bouncer::allow($user)->to("po-maker");
+            }
 
             CommonHelper::forgetCache("account");
 

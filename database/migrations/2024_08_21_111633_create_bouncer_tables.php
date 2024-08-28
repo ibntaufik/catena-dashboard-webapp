@@ -57,8 +57,6 @@ class CreateBouncerTables extends Migration
             $table->foreign('role_id')
                   ->references('id')->on(Models::table('roles'))
                   ->onUpdate('cascade')->onDelete('cascade');
-
-            $table->foreign('entity_id')->references('id')->on("users");
         });
 
         Schema::create(Models::table('permissions'), function (Blueprint $table) {

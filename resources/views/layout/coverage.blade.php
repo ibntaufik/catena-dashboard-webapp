@@ -34,7 +34,7 @@
             <div class="col-sm-3">
               <div class="mb-3">
                 <label for="latitude" class="form-label">Latitude</label>
-                <input type="text" class="form-control" id="latitude" maxlength="255" placeholder="Latitude" onkeypress="return isNumericAndDot(event);">
+                <input type="text" class="form-control" id="latitude" maxlength="255" placeholder="Latitude" onkeypress="return latitude(event);">
               </div>
             </div>
             <div class="col-sm-3">

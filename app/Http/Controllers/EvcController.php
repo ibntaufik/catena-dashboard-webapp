@@ -49,7 +49,7 @@ class EvcController extends Controller
         } catch(\Exception $e){
             \Log::error($e->getMessage());
             \Log::error($e->getTraceAsString());
-            $response["message"] = "Failed to save VCP ".$input["vch_code"];
+            $response["message"] = "Failed to save VCP ".$input["code"];
         }
 
         return response()->json($response);

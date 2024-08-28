@@ -14,7 +14,7 @@
       <div class="card">
           <div class="col-md-12 ps-md-0">
             <div class="auth-form-wrapper px-4 py-5">
-              <label class="noble-ui-logo d-block mb-2" style="color: #B91202;">Welcome In Catena</label>
+              <label class="noble-ui-logo d-block mb-2" style="color: #B91202;">Welcome to Catena</label>
               <h5 class="text-muted fw-normal mb-4">Please login to your account for enjoy all features.</h5>
 
               <form class="forms-sample" method="POST" action="{{ route('login') }}">

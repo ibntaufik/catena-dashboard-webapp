@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Bouncer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -88,14 +89,16 @@ class UserController extends Controller
                 "email" => $input["email"],
                 "password" => Hash::make($input["password"]),
                 "name" => $input["name"],
-                "created_by" => "System Administrator"
+                "created_by" => Auth::user()->name,
             ];
 
             $user = User::create($dataUser);
             HOAccount::create([
                 "user_id" => $user->id
             ]);
-
+            if($user){
+                Bouncer::assign('ho-staff')->to($user);
+            }
             $response["code"] = 200;
             $response["message"] = "Success";
             
