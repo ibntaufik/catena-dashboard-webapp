@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Helpers\CommonHelper;
@@ -114,7 +115,7 @@ class VchAccountController extends Controller
             $input["account_id"]  = $account->id;
             $input["vch_id"]  = $vch->id;
             $input["bank_id"] = $bank->id;
-
+            $input["created_by"] = Auth::user()->name;
             VchAccount::create($input);
 
             CommonHelper::forgetCache("account");

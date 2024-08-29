@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Model\Province;
 use App\Model\Evc;
@@ -55,6 +56,7 @@ class VCHController extends Controller
             
             $input["evc_id"] = $evc->id;
             unset($input["evc_code"]);
+            $input["created_by"] = Auth::user()->name;
             $user = VCH::create($input);
 
             CommonHelper::forgetCache("vch");

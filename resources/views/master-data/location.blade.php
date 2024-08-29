@@ -129,12 +129,6 @@
 
     // add by faisal
     // used for coverage.js file
-    var comboDefault = [{
-      id: "select",
-      text: '-- Select --',
-      disabled: true
-    }];
-
     var province = {!! json_encode($province) !!};
     var url_coverage_city = "{{ route('coverage.city') }}";
     var url_coverage_district = "{{ route('coverage.district') }}";

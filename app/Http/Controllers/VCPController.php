@@ -12,6 +12,7 @@ use App\Helpers\CommonHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class VCPController extends Controller
 {
@@ -80,6 +81,8 @@ class VCPController extends Controller
             }
             $input["vch_id"] = $vch->id;
             unset($input["vch_code"]);
+
+            $input["created_by"] = Auth::user()->name;
             $user = VCP::create($input);
 
             CommonHelper::forgetCache("*vcp*");

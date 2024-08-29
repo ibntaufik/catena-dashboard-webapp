@@ -1,3 +1,10 @@
+    
+    var comboDefault = [{
+      id: "select",
+      text: '-- Select --',
+      disabled: true,
+      selected: true,
+    }];
 
     $(document).ready(function() {
 
@@ -20,7 +27,10 @@
             $('#city').empty();
             $('#district').empty();
             $('#sub_district').empty();
+            
             $('#city').select2({ width: '100%', data: response.data });
+            $('#district').select2({ width: '100%', data: comboDefault });
+            $('#sub_district').select2({ width: '100%', data: comboDefault });
           }).fail(function(data){
               
           });
@@ -42,6 +52,7 @@
             $('#district').empty();
             $('#sub_district').empty();
             $('#district').select2({ width: '100%', data: response.data });
+            $('#sub_district').select2({ width: '100%', data: comboDefault });
           }).fail(function(data){
               
           });

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Model\Province;
 use App\Model\Evc;
@@ -38,7 +39,7 @@ class EvcController extends Controller
                 $response["message"] = "Evc with code ".$input["code"]." already registered.";
                 return response()->json($response);
             }
-
+            $input["created_by"] = Auth::user()->name;
             $user = Evc::create($input);
 
             CommonHelper::forgetCache("evc");

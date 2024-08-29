@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use App\Model\Location;
 use App\Model\Province;
 use App\Model\City;
@@ -73,7 +75,7 @@ class LocationController extends Controller
                 }
             }
 
-            $input["created_by"] = "Admin";
+            $input["created_by"] = Auth::user()->name;
             Subdistrict::create($input);
 
             CommonHelper::forgetCache("coverage");
@@ -216,6 +218,35 @@ class LocationController extends Controller
             \Log::error($e->getMessage());
             \Log::error($e->getTraceAsString());
         }
+        return response()->json($response);
+    }
+
+    public function coverage(){
+        $response = [
+            "code"      => 400,
+            "message"   => "Failed to complete request",
+            "data"      => []
+        ];
+        try{
+            $response["data"]["province"] = Cache::remember("location.api.coverage.province", config("constant.ttl"), function(){
+                return Province::select(DB::raw("id, name, code"))->get()->toArray();
+            });
+            $response["data"]["city"] = Cache::remember("location.api.coverage.city", config("constant.ttl"), function(){
+                return City::select(DB::raw("id, name, code, province_id"))->get()->toArray();
+            });
+            $response["data"]["district"] = Cache::remember("location.api.coverage.district", config("constant.ttl"), function(){
+                return District::select(DB::raw("id, name, code, city_id"))->get()->toArray();
+            });
+            $response["data"]["sub_district"] = Cache::remember("location.api.coverage.sub_district", config("constant.ttl"), function(){
+                return Subdistrict::select(DB::raw("id, name, code, district_id, latitude, longitude"))->get()->toArray();
+            });
+
+            $response["message"] = "done";
+        } catch (\Exception $e) {
+            \Log::error($e->getMessage());
+            \Log::error($e->getTraceAsString());
+        }
+
         return response()->json($response);
     }
 }
