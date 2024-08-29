@@ -241,6 +241,7 @@ class LocationController extends Controller
                 return Subdistrict::select(DB::raw("id, name, code, district_id, latitude, longitude"))->get()->toArray();
             });
 
+            $response["code"] = 200;
             $response["message"] = "done";
         } catch (\Exception $e) {
             \Log::error($e->getMessage());

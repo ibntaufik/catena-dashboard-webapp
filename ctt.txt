@@ -43,8 +43,8 @@ ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'zMmdCj6C
         CustomLog /var/www/logs/varion-webapp-access.log combined
 </VirtualHost>
 
-sudo find /var/www/varion-webapp -type f -exec chmod 664 {} \;
-sudo find /var/www/varion-webapp -type d -exec chmod 775 {} \;
+sudo find /var/www/catena-dashboard-webapp -type f -exec chmod 664 {} \;
+sudo find /var/www/catena-dashboard-webapp -type d -exec chmod 775 {} \;
 
 
 faisal@cognizest.com
