@@ -107,8 +107,8 @@ class PurchaseOrderController extends Controller
         ];
 
         try{
-            $page = $request->input("start", 0);
-            $limit = $request->input("limit", 10);
+            $page = $request->input("start");
+            $limit = $request->input("limit");
             $vchCode = $request->input("vch_code");
             $status = $request->input("status", "approved");
 
@@ -133,7 +133,7 @@ class PurchaseOrderController extends Controller
                     ->count();
                 });
 
-                $response["data"] = Cache::remember("list.po.vch_$vchCode.status_$status", 120, function() use($status, $vchCode){
+                $response["data"] = Cache::remember("list.po.vch_$vchCode.status_$status", 120, function() use($status, $vchCode, $page, $limit){
                     return PurchaseOrder::join("account_vch", "purchase_order.account_vch_id", "account_vch.id")
                     ->join("accounts", "account_vch.account_id", "accounts.id")
                     ->join("users", "accounts.user_id", "users.id")
@@ -146,6 +146,9 @@ class PurchaseOrderController extends Controller
                         return $builder->where("purchase_order.status", $status);
                     })
                     ->where("t_vch.code", $vchCode)
+                    ->when(!empty($page) && !empty($limit), function($builder) use($page, $limit){
+                        return $builder->offset($page)->limit($limit);
+                    })
                     ->select(DB::raw("t_evc.code AS evc_code, t_vch.code AS vch_code, accounts.code AS vendor_code, users.name AS vendor, po_number, po_date, expected_shipping_date, item.name AS item_name, item_type.name AS item_type, item_unit.name AS item_unit, item_description, item_quantity, item_unit_price, item_max_quantity, purchase_order.status"))
                     ->orderBy("purchase_order.created_at", "DESC")
                     ->get();
