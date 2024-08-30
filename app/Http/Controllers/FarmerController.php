@@ -67,8 +67,8 @@ class FarmerController extends Controller
 
         try{
 
-            $page = $request->input("start", 0);
-            $limit = $request->input("limit", 10);
+            $page = $request->input("start");
+            $limit = $request->input("limit");
 
             $response["code"] = 200;
             $response["message"] = "Success";
@@ -87,7 +87,9 @@ class FarmerController extends Controller
                 ->join("districts", "districts.id", "sub_districts.district_id")
                 ->join("cities", "cities.id", "districts.city_id")
                 ->join("provinces", "provinces.id", "cities.province_id")
-                ->offset($page)->limit($limit)
+                ->when(!empty($page) && !empty($limit), function($builder) use($page, $limit){
+                    return $builder->offset($page)->limit($limit);
+                })
                 ->select(DB::raw("account_farmer.code AS farmer_code, users.name, users.email, account_farmer.address, account_farmer.latitude, account_farmer.longitude, users.phone, account_farmer.id_number, sub_districts.code AS sub_district_code, sub_districts.name AS sub_district, districts.name AS district, cities.name AS city, provinces.name AS province"))->orderBy("account_farmer.created_at", "DESC")
                 ->get();
             });
