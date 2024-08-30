@@ -59,6 +59,8 @@ class MobileController extends Controller
                     } else {
                         $response["message"] = "Welcome ".$result->name." to Catena";
                         $response["code"] = 200;
+                        $response["data"]["name"] = $result->name;
+                        $response["data"]["email"] = $user;
                         $response["data"]["vch"] = $result->code;
                     }
                 }
