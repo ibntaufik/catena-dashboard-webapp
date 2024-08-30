@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -40,12 +41,56 @@ class FarmerController extends Controller
         try{
             $response["code"] = 200;
             $response["message"] = "Success";
-            $response["data"] = Farmer::join("sub_districts", "sub_districts.id", "account_farmer.sub_district_id")
-            ->leftJoin("users", "account_farmer.user_id", "users.id")
-            ->join("districts", "districts.id", "sub_districts.district_id")
-            ->join("cities", "cities.id", "districts.city_id")
-            ->join("provinces", "provinces.id", "cities.province_id")
-            ->select(DB::raw("CONCAT(account_farmer.code, '<br>', users.name) AS name, users.email, account_farmer.address, account_farmer.latitude, account_farmer.longitude, users.phone, account_farmer.id_number, CONCAT(sub_districts.code, ' <br> ', sub_districts.name, ' <br> ', districts.name, ' <br> ', cities.name, ' <br> ', provinces.name) AS location"))->orderBy("account_farmer.created_at", "DESC")->get();
+            $response["data"] = Cache::remember("data.list.farmer", config("constant.ttl"), function(){
+                return Farmer::join("sub_districts", "sub_districts.id", "account_farmer.sub_district_id")
+                ->leftJoin("users", "account_farmer.user_id", "users.id")
+                ->join("districts", "districts.id", "sub_districts.district_id")
+                ->join("cities", "cities.id", "districts.city_id")
+                ->join("provinces", "provinces.id", "cities.province_id")
+                ->select(DB::raw("account_farmer.code AS farmer_code, users.name, users.email, account_farmer.address, account_farmer.latitude, account_farmer.longitude, users.phone, account_farmer.id_number, sub_districts.code AS sub_district_code, CONCAT(sub_districts.name, ' <br> ', districts.name, ' <br> ', cities.name, ' <br> ', provinces.name) AS location"))->orderBy("account_farmer.created_at", "DESC")->get();
+            });
+        } catch(\Exception $e){
+            \Log::error($e->getMessage());
+            \Log::error($e->getTraceAsString());
+        }
+        
+        return response()->json($response);
+    }
+
+    public function list(Request $request){
+        $response = [
+            "code"      => 400,
+            "message"   => "Failed to complete request",
+            "count"     => 0,
+            "data"      => []
+        ];
+
+        try{
+
+            $page = $request->input("start", 0);
+            $limit = $request->input("limit", 10);
+
+            $response["code"] = 200;
+            $response["message"] = "Success";
+            $response["count"] = Cache::remember("data.list.farmer.count", 120, function(){
+                return Farmer::join("sub_districts", "sub_districts.id", "account_farmer.sub_district_id")
+                ->leftJoin("users", "account_farmer.user_id", "users.id")
+                ->join("districts", "districts.id", "sub_districts.district_id")
+                ->join("cities", "cities.id", "districts.city_id")
+                ->join("provinces", "provinces.id", "cities.province_id")
+                ->count();
+            });
+
+            $response["data"] = Cache::remember("data.list.farmer.page_$page.limit_$limit", 120, function() use($page, $limit){
+                return Farmer::join("sub_districts", "sub_districts.id", "account_farmer.sub_district_id")
+                ->leftJoin("users", "account_farmer.user_id", "users.id")
+                ->join("districts", "districts.id", "sub_districts.district_id")
+                ->join("cities", "cities.id", "districts.city_id")
+                ->join("provinces", "provinces.id", "cities.province_id")
+                ->offset($page)->limit($limit)
+                ->select(DB::raw("account_farmer.code AS farmer_code, users.name, users.email, account_farmer.address, account_farmer.latitude, account_farmer.longitude, users.phone, account_farmer.id_number, sub_districts.code AS sub_district_code, sub_districts.name AS sub_district, districts.name AS district, cities.name AS city, provinces.name AS province"))->orderBy("account_farmer.created_at", "DESC")
+                ->get();
+            });
         } catch(\Exception $e){
             \Log::error($e->getMessage());
             \Log::error($e->getTraceAsString());

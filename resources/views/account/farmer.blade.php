@@ -111,11 +111,13 @@
           <table id="gridDataTable" class="table">
             <thead>
               <tr>
-                <th>ID - Name</th>
+                <th>ID</th>
+                <th>Name</th>
                 <th>Email</th>
                 <th>ID Number</th>
                 <th>Phone</th>
                 <th>Address</th>
+                <th>Sub District Code</th>
                 <th>Latitude</th>
                 <th>Longitude</th>
                 <th></th>
@@ -162,6 +164,7 @@
               var info = $('#gridDataTable').DataTable().page.info();
               d.start = info.start;
               d.limit = limit;
+              d.eager = false;
             },
             "dataSrc": function(json){
               
@@ -173,20 +176,22 @@
           },
                                 
           "columnDefs" : [
-            { "targets": 0, "data": "name" },
-            { "targets": 1, "data": "email" },
-            { "targets": 2, "data": "id_number" },
-            { "targets": 3, "data":  function(data, type, row, meta){
+            { "targets": 0, "data": "farmer_code" },
+            { "targets": 1, "data": "name" },
+            { "targets": 2, "data": "email" },
+            { "targets": 3, "data": "id_number" },
+            { "targets": 4, "data":  function(data, type, row, meta){
                   return data.phone ? data.phone : "-";
               }
             },
-            { "targets": 4, "data":  function(data, type, row, meta){
+            { "targets": 5, "data":  function(data, type, row, meta){
                   return data.address+"<br>"+data.location;
               }
             },
-            { "targets": 5, "data": "latitude" },
-            { "targets": 6, "data": "longitude" },
-            { "targets": 7, "data": function(data, type, row, meta){
+            { "targets": 6, "data": "sub_district_code" },
+            { "targets": 7, "data": "latitude" },
+            { "targets": 8, "data": "longitude" },
+            { "targets": 9, "data": function(data, type, row, meta){
                   return '<a href="#" onclick=$(this).delete("'+data.id_number+'") style="cursor: pointer;"><i data-feather="trash-2"></i>';
               }
             },
