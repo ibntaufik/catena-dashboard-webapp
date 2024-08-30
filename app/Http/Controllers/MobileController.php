@@ -53,9 +53,9 @@ class MobileController extends Controller
                     ->select(DB::raw("users.password, t_vch.code, users.name"))->first();
                     
                     if(empty($result)){
-                        $response["message"] = "Email is not registered.";
+                        $response["data"]["email"] = "Email is not registered.";
                     } else if(!Hash::check($password,$result->password)){
-                        $response["message"] = "Password is incorrect";
+                        $response["data"]["password"] = "Password is incorrect";
                     } else {
                         $response["message"] = "Welcome ".$result->name." to Catena";
                         $response["code"] = 200;
