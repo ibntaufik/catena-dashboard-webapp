@@ -30,10 +30,10 @@ class MobileController extends Controller
                 $response["message"] = $message; 
                 $response["data"] = $emptyResponse;
             } else {
-                $user = $request->input("email");
+                $email = $request->input("email");
                 $password = $request->input("password");
                 $pass = true;
-                if(empty($user)){
+                if(empty($email)){
                     $response["data"]["email"] = "Email cannot be empty";
                     $pass = false;
                 }
@@ -44,25 +44,26 @@ class MobileController extends Controller
                 }
 
                 if($pass){
-                    $result = VchAccount::join("accounts", "account_vch.account_id", "accounts.id")
+                    $user = VchAccount::join("accounts", "account_vch.account_id", "accounts.id")
                     ->join("users", "accounts.user_id", "users.id")
                     ->join("t_vch", "t_vch.id", "account_vch.vch_id")
                     ->where([
-                        "users.email"     => $user,
+                        "users.email"     => $email,
                     ])
-                    ->select(DB::raw("users.password, t_vch.code, users.name"))->first();
+                    ->select(DB::raw("users.id, users.password, t_vch.code, users.name"))->first();
                     
-                    if(empty($result)){
+                    if(empty($user)){
                         $response["code"] = 403;
                         $response["data"]["email"] = "Email is not registered.";
-                    } else if(!Hash::check($password,$result->password)){
+                    } else if(!Hash::check($password,$user->password)){
                         $response["data"]["password"] = "Password is incorrect";
                     } else {
-                        $response["message"] = "Welcome ".$result->name." to Catena";
+                        $response["message"] = "Welcome ".$user->name." to Catena";
                         $response["code"] = 200;
-                        $response["data"]["name"] = $result->name;
-                        $response["data"]["email"] = $user;
-                        $response["data"]["vch"] = $result->code;
+                        $response["data"]["name"] = $user->name;
+                        $response["data"]["user_id"] = $user->id;
+                        $response["data"]["email"] = $email;
+                        $response["data"]["vch"] = $user->code;
                     }
                 }
             }
