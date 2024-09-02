@@ -362,6 +362,29 @@ class PurchaseOrderController extends Controller
         return response()->json($response);
     }
 
+    public function item(){
+        $response = [
+            "code"          => 400,
+            "message"       => "Failed to complete request",
+            "data"          => [
+                "item"      => [],
+                "item_type" => []
+            ]
+        ];
+        try{
+            $response["code"] = 200;
+            $response["message"] = "Success";
+
+            $response["data"]["item"] = Item::list();
+            $response["data"]["item_type"] = Item::listType();
+        } catch (\Exception $e){
+            \Log::error($e->getMessage());
+            \Log::error($e->getTraceAsString());
+        }
+        
+        return response()->json($response);
+    }
+
     function vchUserDoneApproval($poNumber){
         $result = null;
         try{

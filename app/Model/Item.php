@@ -33,4 +33,20 @@ class Item extends Model
             return $items;
         });
     }
+
+    public static function list(){
+        return Cache::remember("item.list", config("constant.ttl"), function(){
+            $items = Item::select(DB::raw("id, name AS text"))->get()->toArray();
+            return $items;
+        });
+    }
+
+    public static function listType(){
+        return Cache::remember("item.list.type", config("constant.ttl"), function(){
+            
+            return ItemType::join("item", "item.id", "item_type.item_id")
+            ->select(DB::raw("item_type.id, item.id AS item_id, item_type.name"))
+            ->get()->toArray();
+        });
+    }
 }

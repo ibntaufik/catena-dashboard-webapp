@@ -22,6 +22,10 @@ Route::post('login', 'MobileController@login')->middleware('authapi:mobile');
 Route::group(['prefix' => 'master-data'], function(){
     Route::get('coverage', 'LocationController@coverage')->middleware('authapi:mobile');
     Route::get('farmer', 'FarmerController@list')->middleware('authapi:mobile');
+    Route::group(['prefix' => 'item'], function(){
+        Route::get('', 'PurchaseOrderController@item')->middleware('authapi:mobile');
+        Route::get('type', 'PurchaseOrderController@itemType')->middleware('authapi:mobile');
+    });
     Route::group(['prefix' => 'purchase-order'], function(){
         Route::get('list', 'PurchaseOrderController@list')->middleware('authapi:mobile');
     });
