@@ -53,6 +53,7 @@ class MobileController extends Controller
                     ->select(DB::raw("users.password, t_vch.code, users.name"))->first();
                     
                     if(empty($result)){
+                        $response["code"] = 403;
                         $response["data"]["email"] = "Email is not registered.";
                     } else if(!Hash::check($password,$result->password)){
                         $response["data"]["password"] = "Password is incorrect";
