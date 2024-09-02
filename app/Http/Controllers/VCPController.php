@@ -10,9 +10,10 @@ use App\Model\VCP;
 use App\Model\User;
 use App\Helpers\CommonHelper;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
 
 class VCPController extends Controller
 {
@@ -41,13 +42,46 @@ class VCPController extends Controller
         try{
             $response["code"] = 200;
             $response["message"] = "Success";
-            $response["data"] = VCP::join("t_vch", "t_vch.id", "t_vcp.vch_id")
-            ->join("t_evc", "t_evc.id", "t_vch.evc_id")
-            ->join("sub_districts", "sub_districts.id", "t_vcp.sub_district_id")
-            ->join("districts", "districts.id", "sub_districts.district_id")
-            ->join("cities", "cities.id", "districts.city_id")
-            ->join("provinces", "provinces.id", "cities.province_id")
-            ->select(DB::raw("t_evc.code AS evc_code, t_vch.code AS vch_code, t_vcp.code AS code, t_vcp.address, t_vcp.latitude, t_vcp.longitude, sub_districts.name AS sub_district, districts.name AS district, cities.name AS city, provinces.name AS province"))->orderBy("t_vcp.code", "ASC")->get();
+            $response["data"] = Cache::remember("datalist.vcp", config("constant.ttl"), function() {
+               return VCP::join("t_vch", "t_vch.id", "t_vcp.vch_id")
+                    ->join("t_evc", "t_evc.id", "t_vch.evc_id")
+                    ->join("sub_districts", "sub_districts.id", "t_vcp.sub_district_id")
+                    ->join("districts", "districts.id", "sub_districts.district_id")
+                    ->join("cities", "cities.id", "districts.city_id")
+                    ->join("provinces", "provinces.id", "cities.province_id")
+                    ->select(DB::raw("t_evc.code AS evc_code, t_vch.code AS vch_code, t_vcp.code AS code, t_vcp.address, t_vcp.latitude, t_vcp.longitude, sub_districts.name AS sub_district, districts.name AS district, cities.name AS city, provinces.name AS province"))->orderBy("t_vcp.code", "ASC")->get();
+            });
+        } catch(\Exception $e){
+            \Log::error($e->getMessage());
+            \Log::error($e->getTraceAsString());
+        }
+        
+        return response()->json($response);
+    }
+
+    public function list(Request $request){
+        $response = [
+            "code"      => 400,
+            "message"   => "Failed to complete request",
+            "data"      => []
+        ];
+
+        try{
+            $response["code"] = 200;
+            $response["message"] = "Success";
+            $response["data"] = Cache::remember("mobile.list.vcp", config("constant.ttl"), function() {
+                 return VCP::join("account_vcp", "t_vcp.id", "account_vcp.vcp_id")
+                    ->join("t_vch", "t_vch.id", "t_vcp.vch_id")
+                    ->join("accounts", "account_vcp.account_id", "accounts.id")
+                    ->join("users", "users.id", "accounts.user_id")
+                    ->join("t_evc", "t_evc.id", "t_vch.evc_id")
+                    ->join("sub_districts", "sub_districts.id", "t_vcp.sub_district_id")
+                    ->join("districts", "districts.id", "sub_districts.district_id")
+                    ->join("cities", "cities.id", "districts.city_id")
+                    ->join("provinces", "provinces.id", "cities.province_id")
+                    ->select(DB::raw("CONCAT(t_evc.code, '-', t_vch.code, '-', t_vcp.code) AS vcp_code, t_vcp.address, t_vcp.latitude, t_vcp.longitude, users.name AS field_coordinator_name, accounts.code AS field_coordinator_id, sub_districts.name AS sub_district, districts.name AS district, cities.name AS city, provinces.name AS province"))
+                    ->orderBy("t_vcp.code", "ASC")->get();
+            });
         } catch(\Exception $e){
             \Log::error($e->getMessage());
             \Log::error($e->getTraceAsString());

@@ -137,7 +137,10 @@
           },
                                 
           "columnDefs" : [
-            { "targets": 0, "data": "vcp_code" },
+            { "targets": 0, "data": function(data, type, row, meta){
+                  return data.evc_code+'-'+data.vch_code+'-'+data.vcp_code;
+              }
+            },
             { "targets": 1, "data": "email" },
             { "targets": 2, "data": function(data, type, row, meta){
                   return data.address+', <br>'+data.location;

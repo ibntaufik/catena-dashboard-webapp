@@ -42,13 +42,15 @@ class VcpAccountController extends Controller
             $response["code"] = 200;
             $response["message"] = "Success";
             $response["data"] = VcpAccount::join("t_vcp", "account_vcp.vcp_id", "t_vcp.id")
+            ->join("t_vch", "t_vch.id", "t_vcp.vch_id")
+            ->join("t_evc", "t_evc.id", "t_vch.evc_id")
             ->join("accounts", "account_vcp.account_id", "accounts.id")
             ->join("users", "accounts.user_id", "users.id")
             ->join("sub_districts", "sub_districts.id", "t_vcp.sub_district_id")
             ->join("districts", "districts.id", "sub_districts.district_id")
             ->join("cities", "cities.id", "districts.city_id")
             ->join("provinces", "provinces.id", "cities.province_id")
-            ->select(DB::raw("t_vcp.code AS vcp_code, users.email, CONCAT(sub_districts.name, ' <br> ', districts.name, ' <br> ', cities.name, ' <br> ', provinces.name) AS location, t_vcp.address, t_vcp.latitude, t_vcp.longitude, accounts.code AS field_coordinator_id, users.name AS field_coordinator_name"))->orderBy("t_vcp.code", "ASC")->get();
+            ->select(DB::raw("t_evc.code AS evc_code, t_vch.code AS vch_code, t_vcp.code AS vcp_code, users.email, CONCAT(sub_districts.name, ' <br> ', districts.name, ' <br> ', cities.name, ' <br> ', provinces.name) AS location, t_vcp.address, t_vcp.latitude, t_vcp.longitude, accounts.code AS field_coordinator_id, users.name AS field_coordinator_name"))->orderBy("t_vcp.code", "ASC")->get();
         } catch(\Exception $e){
             \Log::error($e->getMessage());
             \Log::error($e->getTraceAsString());
