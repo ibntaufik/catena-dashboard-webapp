@@ -67,9 +67,15 @@ class VCPController extends Controller
         ];
 
         try{
+            $vchCode = $request->input("vch_code");
             $response["code"] = 200;
             $response["message"] = "Success";
-            $response["data"] = Cache::remember("mobile.list.vcp", config("constant.ttl"), function() {
+
+            $cacheName = "mobile.list.vcp";
+            if(!empty($vchCode)){
+                $cacheName .= ".vcp_code_$vchCode";
+            }
+            $response["data"] = Cache::remember($cacheName, config("constant.ttl"), function() use($vchCode) {
                  return VCP::join("account_vcp", "t_vcp.id", "account_vcp.vcp_id")
                     ->join("t_vch", "t_vch.id", "t_vcp.vch_id")
                     ->join("accounts", "account_vcp.account_id", "accounts.id")
@@ -79,7 +85,9 @@ class VCPController extends Controller
                     ->join("districts", "districts.id", "sub_districts.district_id")
                     ->join("cities", "cities.id", "districts.city_id")
                     ->join("provinces", "provinces.id", "cities.province_id")
-                    ->select(DB::raw("CONCAT(t_evc.code, '-', t_vch.code, '-', t_vcp.code) AS vcp_code, t_vcp.address, t_vcp.latitude, t_vcp.longitude, users.name AS field_coordinator_name, accounts.code AS field_coordinator_id, sub_districts.name AS sub_district, districts.name AS district, cities.name AS city, provinces.name AS province"))
+                    ->when(!empty($vchCode), function($builder) use($vchCode){
+                        return $builder->where("t_vch.code", $vchCode);
+                    })->select(DB::raw("CONCAT(t_evc.code, '-', t_vch.code, '-', t_vcp.code) AS vcp_code, t_vcp.address, t_vcp.latitude, t_vcp.longitude, users.name AS field_coordinator_name, accounts.code AS field_coordinator_id, sub_districts.name AS sub_district, districts.name AS district, cities.name AS city, provinces.name AS province"))
                     ->orderBy("t_vcp.code", "ASC")->get();
             });
         } catch(\Exception $e){
