@@ -14,6 +14,7 @@ use App\Model\Bank;
 use App\Model\VCH;
 use App\Model\VchAccount;
 use App\Model\User;
+use Bouncer;
 
 class VchAccountController extends Controller
 {
@@ -31,7 +32,7 @@ class VchAccountController extends Controller
         // List of Account
         $account = array_merge([
             ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
-        ], json_decode(Account::listVendor(), true));
+        ], json_decode(Account::listCombo(), true));
 
         // Get list of Bank
         $bank = Bank::select(DB::raw("code, name"))->get()->toArray();
@@ -117,6 +118,11 @@ class VchAccountController extends Controller
             $input["bank_id"] = $bank->id;
             $input["created_by"] = Auth::user()->name;
             VchAccount::create($input);
+
+            $user = User::find($account->user_id);
+            if(!empty($user)){
+                Bouncer::allow($user)->to("po-maker"); 
+            }
 
             CommonHelper::forgetCache("account");
             $response["code"] = 200;

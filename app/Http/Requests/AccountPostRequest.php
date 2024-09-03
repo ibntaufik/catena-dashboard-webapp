@@ -28,7 +28,6 @@ class AccountPostRequest extends FormRequest
             "name"              => "required|max:255",
             "password"          => "required|max:255",
             "email"             => "required|email",
-            "status_account"    => "required",
             "phone"             => "required|numeric",
         ];
     }
@@ -41,7 +40,6 @@ class AccountPostRequest extends FormRequest
             'password.required'         => 'Identity Number is required',
             'email.required'            => 'Email is required',
             'email.email'               => 'Email is not valid',
-            'status_account.required'   => 'status is required',
             'phone.numeric'             => 'Phone number is not valid',
         ];
     }

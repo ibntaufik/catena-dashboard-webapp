@@ -59,14 +59,6 @@
                 <input type="text" class="form-control" id="phone" maxlength="255" placeholder="Phone" onkeypress="return isNumber(event);">
               </div>
             </div>
-            <div class="col-sm-3">
-              <div class="mb-3">
-                <label for="status_account" class="form-label">Status</label>
-                <select id="status_account" class="form-control" name="status_account">
-                  <option value="select" disabled selected>-- Select --</option>
-                </select>
-              </div>
-            </div>
           </div>
       </div>
       <div class="card-footer">
@@ -101,7 +93,6 @@
                 <th>Name</th>
                 <th>Email</th>
                 <th>Phone</th>
-                <th>Status</th>
                 <th></th>
               </tr>
             </thead>
@@ -120,7 +111,7 @@
     var statusAccount = {!! json_encode($statusAccount) !!};
 
   $(document).ready(function() {
-      console.log(statusAccount);
+      
       $("#response_message").hide();
 
       $("#role").select2().on("change", function(e){
@@ -166,8 +157,7 @@
             { "targets": 1, "data": "name" },
             { "targets": 2, "data": "email" },
             { "targets": 3, "data": "phone" },
-            { "targets": 4, "data": "status" },
-            { "targets": 5, "data": function(data, type, row, meta){
+            { "targets": 4, "data": function(data, type, row, meta){
                   return '<a href="#" onclick=$(this).delete("'+data.code+'") style="cursor: pointer;"><i data-feather="trash-2"></i>';
               }
             }

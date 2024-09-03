@@ -15,7 +15,7 @@ class CommonHelper
     {
         $keys = Redis::connection('cache')->keys("*$pattern*");
         foreach($keys as $key){
-            $result = explode(':', $key);\Log::debug($result);
+            $result = explode(':', $key);
             Cache::forget($result[1]);
         }
     }

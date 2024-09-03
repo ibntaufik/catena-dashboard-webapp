@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Bouncer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -44,7 +43,7 @@ class AccountController extends Controller
             $response["code"] = 200;
             $response["message"] = "Success";
 
-            $response["data"] = Account::join("users", "accounts.user_id", "users.id")->select(DB::raw("users.name, users.email, users.phone, accounts.code, accounts.status"))->orderBy("accounts.created_at", "DESC")->get();
+            $response["data"] = Account::join("users", "accounts.user_id", "users.id")->select(DB::raw("users.name, users.email, users.phone, accounts.code"))->orderBy("accounts.created_at", "DESC")->get();
         } catch(\Exception $e){
             \Log::error($e->getMessage());
             \Log::error($e->getTraceAsString());
@@ -89,14 +88,9 @@ class AccountController extends Controller
             $user = User::create($dataUser);
             Account::create([
                 "user_id"       => $user->id,
-                "status"        => config("constant.account_status.".$input["status_account"]),
                 "code"          => $input["user_id"],
                 "created_by"    => "System Administrator"
             ]);
-
-            if(config("constant.account_status.".$input["status_account"]) == "vendor"){
-                Bouncer::allow($user)->to("po-maker");
-            }
 
             CommonHelper::forgetCache("account");
 

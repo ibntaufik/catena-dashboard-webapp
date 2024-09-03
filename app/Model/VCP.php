@@ -17,8 +17,10 @@ class VCP extends Model
     protected $guarded = ['id'];
 
     public static function listCombo(){
-        return Cache::remember("vcp.list_combo.vch", config("constant.ttl"), function(){
-            $result = VCP::select(DB::raw("code"))->get()->toArray();
+        return Cache::remember("vcp.list_combo", config("constant.ttl"), function(){
+            $result = VCP::join("t_vch", "t_vch.id", "t_vcp.vch_id")
+            ->join("t_evc", "t_evc.id", "t_vch.evc_id")
+            ->select(DB::raw("CONCAT(t_evc.code, '-', t_vch.code, '-', t_vcp.code) AS code"))->get()->toArray();
             return collect($result)->map(function ($item) {
                 return ["id" => $item['code'], "text" => $item['code']];
             });

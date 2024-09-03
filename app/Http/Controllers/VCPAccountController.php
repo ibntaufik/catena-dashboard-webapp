@@ -9,6 +9,7 @@ use App\Model\Account;
 use App\Model\User;
 use App\Model\VcpAccount;
 use App\Model\VCP;
+use Bouncer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -26,7 +27,7 @@ class VcpAccountController extends Controller
 
         $account = array_merge([
             ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
-        ], json_decode(Account::listFieldCoordinator()));
+        ], json_decode(Account::listCombo()));
 
         return view("account.vcp", compact("vcp", "account"));
     }
@@ -69,7 +70,8 @@ class VcpAccountController extends Controller
         $input = $request->except(["_token"]);
         
         try{
-            $vcp = VCP::findActiveByCode($input["vcp_code"]);
+            $arrayVcpCode = explode('-', $input["vcp_code"]);
+            $vcp = VCP::findActiveByCode($arrayVcpCode[2]);
             if(empty($vcp)){
                 $response["message"] = "VCP Code ".$input["vcp_code"]." is not listed on system";
                 return response()->json($response);
@@ -95,7 +97,12 @@ class VcpAccountController extends Controller
                 "vcp_id" => $vcp->id,
                 "account_id" => $account->id
             ]);
-            
+
+            $user = User::find($account->user_id);
+            if(!empty($user)){\Log::debug("here");
+                Bouncer::allow($user)->to("po-maker"); 
+            }
+
             CommonHelper::forgetCache("vcp");
 
             $response["code"] = 200;
