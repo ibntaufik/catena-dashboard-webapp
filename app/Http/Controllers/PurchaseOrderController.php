@@ -115,8 +115,6 @@ class PurchaseOrderController extends Controller
             if(empty($vchCode)){
                 $response["message"] = "VCH user cannot be empty.";
             } else {
-                $response["code"] = 200;
-                $response["message"] = "Success";
                 $response["count"] = Cache::remember("count.po.vch_$vchCode.status_$status", 120, function() use($status, $vchCode){
                     return PurchaseOrder::join("account_vch", "purchase_order.account_vch_id", "account_vch.id")
                     ->join("accounts", "account_vch.account_id", "accounts.id")
@@ -194,6 +192,14 @@ class PurchaseOrderController extends Controller
 
                     return $result;
                 });
+
+                if($response["count"] > 0){
+                    $response["code"] = 200;
+                    $response["message"] = "Success";
+                } else {
+                    $response["code"] = 404;
+                    $response["message"] = "Not found";
+                }
             }
         } catch(\Exception $e){
             \Log::error($e->getMessage());
