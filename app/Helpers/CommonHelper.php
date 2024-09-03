@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Helpers;
+
+use DateTime;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
@@ -16,6 +18,12 @@ class CommonHelper
             $result = explode(':', $key);\Log::debug($result);
             Cache::forget($result[1]);
         }
+    }
+
+    public static function isValidDate($date, $format = 'Y-m-d'){
+        $d = DateTime::createFromFormat($format, $date);
+        // Check if date was successfully parsed and is not just any valid date
+        return $d && $d->format($format) === $date;
     }
 
 }

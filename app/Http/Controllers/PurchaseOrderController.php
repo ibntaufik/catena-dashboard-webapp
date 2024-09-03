@@ -134,7 +134,7 @@ class PurchaseOrderController extends Controller
                 });
 
                 $response["data"] = Cache::remember("list.po.vch_$vchCode.status_$status", 120, function() use($status, $vchCode, $page, $limit){
-                    return PurchaseOrder::join("account_vch", "purchase_order.account_vch_id", "account_vch.id")
+                    $result = PurchaseOrder::join("account_vch", "purchase_order.account_vch_id", "account_vch.id")
                     ->join("accounts", "account_vch.account_id", "accounts.id")
                     ->join("users", "accounts.user_id", "users.id")
                     ->join("t_vch", "t_vch.id", "account_vch.vch_id")
@@ -142,6 +142,7 @@ class PurchaseOrderController extends Controller
                     ->join("item_type", "item_type.id", "purchase_order.item_type_id")
                     ->join("item", "item.id", "item_type.item_id")
                     ->join("item_unit", "item_unit.id", "purchase_order.item_unit_id")
+                    ->leftJoin("purchase_order_transaction", "purchase_order_transaction.purchase_order_id", "purchase_order.id")
                     ->when(!empty($status) && in_array($status, ["waiting", "approved", "rejected"]), function($builder) use($status){
                         return $builder->where("purchase_order.status", $status);
                     })
@@ -149,9 +150,49 @@ class PurchaseOrderController extends Controller
                     ->when(!empty($page) && !empty($limit), function($builder) use($page, $limit){
                         return $builder->offset($page)->limit($limit);
                     })
-                    ->select(DB::raw("t_evc.code AS evc_code, t_vch.code AS vch_code, accounts.code AS vendor_code, users.name AS vendor, po_number, po_date, expected_shipping_date, item.name AS item_name, item_type.name AS item_type, item_unit.name AS item_unit, item_description, item_quantity, item_unit_price, item_max_quantity, purchase_order.status"))
+                    ->select(DB::raw("t_evc.code 
+                        AS evc_code, 
+                        t_vch.code AS vch_code, 
+                        accounts.code AS vendor_code, 
+                        users.name AS vendor, 
+                        po_number, 
+                        po_date, 
+                        expected_shipping_date, 
+                        item.name AS item_name, 
+                        item_type.name AS item_type, 
+                        item_unit.name AS item_unit, 
+                        purchase_order.item_description, 
+                        purchase_order.item_quantity, 
+                        purchase_order.item_unit_price, 
+                        purchase_order.item_max_quantity, 
+                        purchase_order.status, 
+                        SUM(purchase_order_transaction.item_quantity) AS 'weight_fulfilled'"))
+                    ->groupBy(DB::raw("t_evc.code, 
+                        t_vch.code, 
+                        accounts.code, 
+                        users.name, 
+                        po_number, 
+                        po_date, 
+                        expected_shipping_date, 
+                        item.name, 
+                        item_type.name, 
+                        item_unit.name, 
+                        purchase_order.item_description, 
+                        purchase_order.item_quantity, 
+                        purchase_order.item_unit_price, 
+                        purchase_order.item_max_quantity, 
+                        purchase_order.status,
+                        purchase_order.created_at"))
                     ->orderBy("purchase_order.created_at", "DESC")
                     ->get();
+
+                    foreach($result as $r){
+                        if($r->weight_fulfilled == null){
+                            $r->weight_fulfilled = 0;
+                        }
+                    }
+
+                    return $result;
                 });
             }
         } catch(\Exception $e){
