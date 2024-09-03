@@ -15,8 +15,16 @@ class Farmer extends Model
     protected $primaryKey = 'id';
     protected $guarded = ['id'];
 
-    public static function isIdNumberExist($IdNumber){
-        $user = Farmer::where("id_number", $IdNumber)->first();
+    public static function isIdNumberExist($idNumber){
+        $user = Cache::remember("farmer.id_number|$idNumber", config("constant.ttl"), function(){
+            return Farmer::where("id_number", $idNumber)->first();
+        }); 
         return empty($user) ? false : true;
+    }
+
+    public static function findByCode($code){
+        return empty($code) ? null : Cache::remember("farmer.code|$code", config("constant.ttl"), function() use($code){
+            return Farmer::where("code", $code)->first();
+        }); 
     }
 }
