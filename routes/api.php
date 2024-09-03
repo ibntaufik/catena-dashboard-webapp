@@ -20,15 +20,15 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::post('login', 'MobileController@login')->middleware('authapi:mobile');
 
 Route::group(['prefix' => 'master-data'], function(){
-    Route::get('coverage', 'LocationController@coverage')->middleware('authapi:mobile');
-    Route::get('farmer', 'FarmerController@list')->middleware('authapi:mobile');
-    Route::get('vcp', 'VCPController@list')->middleware('authapi:mobile');
+    Route::post('coverage', 'LocationController@coverage')->middleware('authapi:mobile');
+    Route::post('farmer', 'FarmerController@list')->middleware('authapi:mobile');
+    Route::post('vcp', 'VCPController@list')->middleware('authapi:mobile');
     Route::group(['prefix' => 'item'], function(){
-        Route::get('', 'PurchaseOrderController@item')->middleware('authapi:mobile');
-        Route::get('type', 'PurchaseOrderController@itemType')->middleware('authapi:mobile');
+        Route::post('', 'PurchaseOrderController@item')->middleware('authapi:mobile');
+        Route::post('type', 'PurchaseOrderController@itemType')->middleware('authapi:mobile');
     });
     Route::group(['prefix' => 'purchase-order'], function(){
-        Route::get('list', 'PurchaseOrderController@list')->middleware('authapi:mobile');
+        Route::post('list', 'PurchaseOrderController@list')->middleware('authapi:mobile');
     });
 });
 
