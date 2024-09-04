@@ -21,7 +21,10 @@ Route::post('login', 'MobileController@login')->middleware('authapi:mobile');
 
 Route::group(['prefix' => 'master-data'], function(){
     Route::post('coverage', 'LocationController@coverage')->middleware('authapi:mobile');
-    Route::post('farmer', 'FarmerController@list')->middleware('authapi:mobile');
+    Route::group(['prefix' => 'farmer'], function(){
+        Route::post('', 'FarmerController@list')->middleware('authapi:mobile');
+        Route::post('submit', 'FarmerController@submit')->middleware('authapi:mobile');
+    });
     Route::post('vcp', 'VCPController@list')->middleware('authapi:mobile');
     Route::group(['prefix' => 'item'], function(){
         Route::post('', 'PurchaseOrderController@item')->middleware('authapi:mobile');
