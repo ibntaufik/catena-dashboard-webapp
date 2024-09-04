@@ -199,42 +199,49 @@ class FarmerController extends Controller
             $limit = $request->input("limit");
             $vchCode = $request->input("vch_code");
 
-            $response["code"] = 200;
-            $response["message"] = "Success";
 
             $cacheName = "";
             if(!empty($vchCode)){
-                $cacheName .= "vch_code_$vchCode.";
+                if(is_array($vchCode) && (count($vchCode) > 0)){
+                    $cacheName .= "vch_code_".implode("|", $vchCode).".";
+                } else {
+                    $response['data']["vch_code"] = "VCH code must be in array";
+                    return response()->json($response);
+                }
             }
-            $response["count"] = Cache::remember($cacheName."data.list.farmer.count", 120, function() use($vchCode){
-                $vch = VCH::findActiveByCode($vchCode);
+            $response["count"] = (int)Cache::remember($cacheName."data.list.farmer.count", 120, function() use($vchCode){
                 return Farmer::join("sub_districts", "sub_districts.id", "account_farmer.sub_district_id")
                 ->leftJoin("users", "account_farmer.user_id", "users.id")
+                ->join("t_vch", "t_vch.id", "account_farmer.vch_id")
                 ->join("districts", "districts.id", "sub_districts.district_id")
                 ->join("cities", "cities.id", "districts.city_id")
                 ->join("provinces", "provinces.id", "cities.province_id")
-                ->when(!empty($vch), function($builder) use($vch){
-                    return $builder->where("vch_id", $vch->id);
+                ->when(count($vchCode) > 0, function($builder) use($vchCode){
+                    return $builder->whereIn("t_vch.code", $vchCode);
                 })
                 ->count();
             });
 
             $response["data"] = Cache::remember($cacheName."data.list.farmer.page_$page.limit_$limit", 120, function() use($page, $limit, $vchCode){
-                $vch = VCH::findActiveByCode($vchCode);
+
                 return Farmer::join("sub_districts", "sub_districts.id", "account_farmer.sub_district_id")
                 ->leftJoin("users", "account_farmer.user_id", "users.id")
+                ->join("t_vch", "t_vch.id", "account_farmer.vch_id")
                 ->join("districts", "districts.id", "sub_districts.district_id")
                 ->join("cities", "cities.id", "districts.city_id")
                 ->join("provinces", "provinces.id", "cities.province_id")
                 ->when(!empty($page) && !empty($limit), function($builder) use($page, $limit){
                     return $builder->offset($page)->limit($limit);
                 })
-                ->when(!empty($vch), function($builder) use($vch){
-                    return $builder->where("vch_id", $vch->id);
+                ->when(count($vchCode) > 0, function($builder) use($vchCode){
+                    return $builder->whereIn("t_vch.code", $vchCode);
                 })
                 ->select(DB::raw("account_farmer.code AS farmer_code, users.name, users.email, account_farmer.address, account_farmer.latitude, account_farmer.longitude, users.phone, account_farmer.id_number, sub_districts.code AS sub_district_code, sub_districts.name AS sub_district, districts.name AS district, cities.name AS city, provinces.name AS province"))->orderBy("account_farmer.created_at", "DESC")
                 ->get();
             });
+            
+            $response["code"] = 200;
+            $response["message"] = "Success";
         } catch(\Exception $e){
             \Log::error($e->getMessage());
             \Log::error($e->getTraceAsString());
@@ -243,7 +250,7 @@ class FarmerController extends Controller
         return response()->json($response);
     }
 
-    public function submit(Request $request){
+    public function register(Request $request){
         
         $response = [
             "code"      => 400,
@@ -253,17 +260,12 @@ class FarmerController extends Controller
 
         $input = $request->except(["_token"]);
         $file = $request->input('file');
-
-        if(User::isEmailExist($input["email"])){
-            $response["message"] = "Email already registered, please use other email";
-            return response()->json($response);
-        }
-
+/*
         if(!empty($input["phone"]) && User::isPhoneExist($input["phone"])){
             $response["message"] = "Phone ".$input["phone"]." already registered, please use other number";
             return response()->json($response);
         }
-
+*/
         if(!empty($input["id_number"])  && Farmer::isIdNumberExist($input["id_number"])){
             $response["message"] = "ID number ".$input["id_number"]." already registered.";
             return response()->json($response);
