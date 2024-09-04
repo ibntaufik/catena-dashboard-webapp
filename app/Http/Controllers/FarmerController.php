@@ -277,14 +277,21 @@ class FarmerController extends Controller
             $fileType = explode(';', $data[0]);
             $isImage = explode(':', $fileType[0]);
             if(strpos($isImage['1'], 'image') === false){
-                $output['response']['message'] = 'ID photo must be an image';
-                return response()->json($output);
+                $response['data']["photo"] = 'ID photo must be an image';
+                return response()->json($response);
             }
             
+            $input["file_type"] = str_replace("image/", ".", $isImage['1']);
+            
+            if(!in_array($input["file_type"], [".png", ".jpeg", ".jpg"])){
+                $response['data']["photo"] = "Photo's extention must be .png, .jpeg, or .jpg";
+                return response()->json($response);
+            }
+
             $decode = base64_decode($data[1]);
             if (!$decode){
-                $output['response']['message'] = 'ID photo is not valid';
-                return response()->json($output);
+                $response['data']['photo'] = 'ID photo is not valid';
+                return response()->json($response);
             }
         } catch (\Exception $e){
             $response['response']['message'] = 'Failed to store ID photo';
