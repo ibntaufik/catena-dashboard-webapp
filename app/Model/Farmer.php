@@ -16,7 +16,7 @@ class Farmer extends Model
     protected $guarded = ['id'];
 
     public static function isIdNumberExist($idNumber){
-        $user = Cache::remember("farmer.id_number|$idNumber", config("constant.ttl"), function(){
+        $user = Cache::remember("farmer.id_number|$idNumber", config("constant.ttl"), function() use($idNumber){
             return Farmer::where("id_number", $idNumber)->first();
         }); 
         return empty($user) ? false : true;

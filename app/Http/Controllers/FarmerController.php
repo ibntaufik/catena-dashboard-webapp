@@ -239,9 +239,10 @@ class FarmerController extends Controller
                 ->select(DB::raw("account_farmer.code AS farmer_code, users.name, users.email, account_farmer.address, account_farmer.latitude, account_farmer.longitude, users.phone, account_farmer.id_number, sub_districts.code AS sub_district_code, sub_districts.name AS sub_district, districts.name AS district, cities.name AS city, provinces.name AS province"))->orderBy("account_farmer.created_at", "DESC")
                 ->get();
             });
-            
+
             $response["code"] = 200;
             $response["message"] = "Success";
+
         } catch(\Exception $e){
             \Log::error($e->getMessage());
             \Log::error($e->getTraceAsString());
@@ -259,7 +260,7 @@ class FarmerController extends Controller
         ];
 
         $input = $request->except(["_token"]);
-        $file = $request->input('file');
+        $file = $request->input('photo');
 /*
         if(!empty($input["phone"]) && User::isPhoneExist($input["phone"])){
             $response["message"] = "Phone ".$input["phone"]." already registered, please use other number";
@@ -286,7 +287,7 @@ class FarmerController extends Controller
                 return response()->json($output);
             }
         } catch (\Exception $e){
-            $response['response']['message'] = 'ID photo is not valid';
+            $response['response']['message'] = 'Failed to store ID photo';
             return response()->json($response);
         }
 
@@ -311,9 +312,9 @@ class FarmerController extends Controller
 
             $dataUser = [
                 "email" => $input["email"],
-                "password" => Hash::make($input["password"]),
+                "password" => Hash::make("password"),
                 "name" => $input["name"],
-                "phone" => $input["phone"],
+                "phone" => "-",
                 "created_by" => "System Administrator"
             ];
 
@@ -326,8 +327,10 @@ class FarmerController extends Controller
                 "id_number"         => $input["id_number"],
                 "latitude"          => $input["latitude"],
                 "longitude"         => $input["longitude"],
-                "address"           => $input["address"],
-                "created_by"        => "System Administrator"
+                "address"           => '-',
+                "thumb_finger"      => array_key_exists("thumb_finger", $input) ? $input["thumb_finger"] : null,
+                "index_finger"      => array_key_exists("index_finger", $input) ? $input["index_finger"] : null,
+                "created_by"        => "Desktop App"
             ];
             
             if(!empty($file)){

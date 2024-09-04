@@ -22,4 +22,10 @@ class Subdistrict extends Model
             return $result;
         });
     }
+    
+    public static function findById($id){
+        return empty($id) ? [] : Cache::remember("coverage.sub_district.id|$id", config("constant.ttl"), function() use($id){
+            return Subdistrict::find($id);
+        });
+    }
 }
