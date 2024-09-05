@@ -90,12 +90,12 @@
             @endif
             @if(\Auth::user()->isA('admin'))
             <li class="nav-item">
-              <a href="{{ url('/master-data/location') }}" class="nav-link {{ active_class(['master-data/location']) }}">Location</a>
+              <a href="{{ url('/master-data/user') }}" class="nav-link {{ active_class(['master-data/user']) }}">HO Account</a>
             </li>
             @endif
             @if(\Auth::user()->isA('admin'))
             <li class="nav-item">
-              <a href="{{ url('/master-data/user') }}" class="nav-link {{ active_class(['master-data/user']) }}">HO Account</a>
+              <a href="{{ url('/master-data/location') }}" class="nav-link {{ active_class(['master-data/location']) }}">Location</a>
             </li>
             @endif
             @if(\Auth::user()->isA('admin'))

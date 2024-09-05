@@ -26,6 +26,39 @@ class CommonHelper
         return $d && $d->format($format) === $date;
     }
 
+    public static function validateImage($file){
+
+        $result = [
+            "is_valid"  => false,
+            "message"   => "",
+            "file_type" => ""
+        ];
+
+        try{
+            $data = explode(',', $file);
+            $fileType = explode(';', $data[0]);
+            $decode = base64_decode($data[1]);
+            $isImage = explode(':', $fileType[0]);
+
+            if(strpos($isImage['1'], 'image') === false){
+                $result["message"] = 'ID photo must be an image';
+            } else if(!in_array($isImage['1'], ["image/png", "image/jpeg", "image/jpg"])){
+                $result["message"] = "Photo's extention must be .png, .jpeg, or .jpg";
+            } else if (!$decode){
+                $result["message"] = 'ID photo is not valid';
+            } else {
+                $result["is_valid"] = true;
+                $result["file_type"] = str_replace("image/", ".", $isImage['1']);
+            }
+        } catch (\Exception $e){
+            $result["message"] = 'Failed to validating image file';
+            \Log::error($e->getMessage());
+            \Log::error($e->getTraceAsString());
+        }
+
+        return $result;
+    }
+
 }
 
 ?>

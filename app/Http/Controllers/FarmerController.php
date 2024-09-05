@@ -261,6 +261,7 @@ class FarmerController extends Controller
 
         $input = $request->except(["_token"]);
         $file = $request->input('photo');
+        $fileIdNumberImage = $request->input('id_number_image');
 /*
         if(!empty($input["phone"]) && User::isPhoneExist($input["phone"])){
             $response["message"] = "Phone ".$input["phone"]." already registered, please use other number";
@@ -272,31 +273,21 @@ class FarmerController extends Controller
             return response()->json($response);
         }
 
-        try{
-            $data = explode(',', $file);
-            $fileType = explode(';', $data[0]);
-            $isImage = explode(':', $fileType[0]);
-            if(strpos($isImage['1'], 'image') === false){
-                $response['data']["photo"] = 'ID photo must be an image';
-                return response()->json($response);
-            }
-            
-            $input["file_type"] = str_replace("image/", ".", $isImage['1']);
-            
-            if(!in_array($input["file_type"], [".png", ".jpeg", ".jpg"])){
-                $response['data']["photo"] = "Photo's extention must be .png, .jpeg, or .jpg";
-                return response()->json($response);
-            }
-
-            $decode = base64_decode($data[1]);
-            if (!$decode){
-                $response['data']['photo'] = 'ID photo is not valid';
-                return response()->json($response);
-            }
-        } catch (\Exception $e){
-            $response['response']['message'] = 'Failed to store ID photo';
+        // validate image photo
+        $result = CommonHelper::validateImage($file);
+        if(!$result["is_valid"]){
+            $response['data']["photo"] = $result["message"];
             return response()->json($response);
         }
+        $input["file_type_photo"] = $result["file_type"];
+
+        // validate image id number
+        $result = CommonHelper::validateImage($fileIdNumberImage);
+        if(!$result["is_valid"]){
+            $response['data']["id_number_image"] = $result["message"];
+            return response()->json($response);
+        }
+        $input["file_type_id_number"] = $result["file_type"];
 
         try{
             $prefix = Subdistrict::where("sub_districts.id", $input["sub_district_id"])
@@ -341,7 +332,15 @@ class FarmerController extends Controller
             ];
             
             if(!empty($file)){
-                Storage::disk("farmerId")->put($input["id_number"].$input["file_type"], file_get_contents($file));
+                $fileName = date("Ymd")."_photo_".$input["id_number"].$input["file_type_photo"];
+                Storage::disk("farmerId")->put($fileName, file_get_contents($file));
+                $dataFarmer["image_photo_name"] = $fileName;
+            }
+            
+            if(!empty($fileIdNumberImage)){
+                $fileName = date("Ymd")."_id_number_".$input["id_number"].$input["file_type_id_number"];
+                Storage::disk("farmerId")->put($fileName, file_get_contents($fileIdNumberImage));
+                $dataFarmer["image_id_number_name"] = $fileName;
             }
 
             Farmer::create($dataFarmer);
