@@ -273,21 +273,25 @@ class FarmerController extends Controller
             return response()->json($response);
         }
 
-        // validate image photo
-        $result = CommonHelper::validateImage($file);
-        if(!$result["is_valid"]){
-            $response['data']["photo"] = $result["message"];
-            return response()->json($response);
+        if(!empty($file)){
+            // validate image photo
+            $result = CommonHelper::validateImage($file);
+            if(!$result["is_valid"]){
+                $response['data']["photo"] = $result["message"];
+                return response()->json($response);
+            }
+            $input["file_type_photo"] = $result["file_type"];
         }
-        $input["file_type_photo"] = $result["file_type"];
-
-        // validate image id number
-        $result = CommonHelper::validateImage($fileIdNumberImage);
-        if(!$result["is_valid"]){
-            $response['data']["id_number_image"] = $result["message"];
-            return response()->json($response);
+        
+        if(!empty($fileIdNumberImage)){
+            // validate image id number
+            $result = CommonHelper::validateImage($fileIdNumberImage);
+            if(!$result["is_valid"]){
+                $response['data']["id_number_image"] = $result["message"];
+                return response()->json($response);
+            }
+            $input["file_type_id_number"] = $result["file_type"];
         }
-        $input["file_type_id_number"] = $result["file_type"];
 
         try{
             $prefix = Subdistrict::where("sub_districts.id", $input["sub_district_id"])
