@@ -89,7 +89,7 @@ class MobileController extends Controller
                                 ->toArray();
 
                                 foreach ($vcps as $vcp) {
-                                    $response["data"]["vcp"][$vch["code"]][] = $vcp["code"];
+                                    $response["data"]["vcp"][] = $vcp["code"];
                                 }
                             }
                         } else {
