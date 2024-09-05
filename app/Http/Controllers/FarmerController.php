@@ -268,9 +268,23 @@ class FarmerController extends Controller
             return response()->json($response);
         }
 */
-        if(!empty($input["id_number"])  && Farmer::isIdNumberExist($input["id_number"])){
+        if(!empty($input["id_number"]) && Farmer::isIdNumberExist($input["id_number"])){
             $response["message"] = "ID number ".$input["id_number"]." already registered.";
             return response()->json($response);
+        }
+
+        if(empty($input["vch_code"]) || empty($request->input("vch_code"))){
+            $response["data"]["vch_code"] = "VCH Code is required.";
+            return response()->json($response);
+        }
+
+        $vch = VCH::findByCode($input["vch_code"]);
+        if(empty($vch)){
+            $response["data"]["vch_code"] = "VCH Code ".$input["vch_code"]." is registered.";
+            return response()->json($response);
+        } else {
+            $input["vch_id"] = $vch->id;
+            unset($input["vch_code"]);
         }
 
         if(!empty($file)){
@@ -282,7 +296,7 @@ class FarmerController extends Controller
             }
             $input["file_type_photo"] = $result["file_type"];
         }
-        
+
         if(!empty($fileIdNumberImage)){
             // validate image id number
             $result = CommonHelper::validateImage($fileIdNumberImage);
@@ -329,6 +343,7 @@ class FarmerController extends Controller
                 "id_number"         => $input["id_number"],
                 "latitude"          => $input["latitude"],
                 "longitude"         => $input["longitude"],
+                "vch_id"            => $input["vch_id"],
                 "address"           => '-',
                 "thumb_finger"      => array_key_exists("thumb_finger", $input) ? $input["thumb_finger"] : null,
                 "index_finger"      => array_key_exists("index_finger", $input) ? $input["index_finger"] : null,
@@ -347,8 +362,15 @@ class FarmerController extends Controller
                 $dataFarmer["image_id_number_name"] = $fileName;
             }
 
-            Farmer::create($dataFarmer);
-
+            $farmer = Farmer::create($dataFarmer);
+            $response["data"] = Farmer::join("sub_districts", "sub_districts.id", "account_farmer.sub_district_id")
+                ->leftJoin("users", "account_farmer.user_id", "users.id")
+                ->join("t_vch", "t_vch.id", "account_farmer.vch_id")
+                ->join("districts", "districts.id", "sub_districts.district_id")
+                ->join("cities", "cities.id", "districts.city_id")
+                ->join("provinces", "provinces.id", "cities.province_id")
+                ->where("account_farmer.id", $farmer->id)
+                ->select(DB::raw("account_farmer.code AS farmer_code, users.name, account_farmer.thumb_finger, account_farmer.index_finger, users.email, account_farmer.address, account_farmer.latitude, account_farmer.longitude, users.phone, account_farmer.id_number, sub_districts.code AS sub_district_code, sub_districts.name AS sub_district, districts.name AS district, cities.name AS city, provinces.name AS province"))->orderBy("account_farmer.created_at", "DESC")->first();
             $response["code"] = 200;
             $response["message"] = "Success";
             
