@@ -32,7 +32,17 @@ class TransactionController extends Controller
             if(empty($vchCode)){
                 $response["message"] = "VCH user cannot be empty.";
             } else {
-                $response["count"] = Cache::remember("count.purchase_order_transaction.vch_$vchCode", 120, function() use($vchCode){
+
+                $cacheName = "";
+
+                if(is_array($vchCode) && (count($vchCode) > 0)){
+                    $cacheName .= "vch_code_".implode("|", $vchCode).".";
+                } else {
+                    $response['message'] = "VCH code must be in array";
+                    return response()->json($response);
+                }
+
+                $response["count"] = Cache::remember("count.purchase_order_transaction.$cacheName", 120, function() use($vchCode){
                     return PurchaseOrderTransaction::join("purchase_order", "purchase_order_transaction.purchase_order_id", "purchase_order.id")
                     ->join("account_farmer", "purchase_order_transaction.account_farmer_id", "account_farmer.id")
                     ->join("users", "users.id", "account_farmer.user_id")
@@ -41,11 +51,13 @@ class TransactionController extends Controller
                     ->join("item_type", "item_type.id", "purchase_order.item_type_id")
                     ->join("item", "item.id", "item_type.item_id")
                     ->join("item_unit", "item_unit.id", "purchase_order.item_unit_id")
-                    ->where("t_vch.code", $vchCode)
+                    ->when(count($vchCode) > 0, function($builder) use($vchCode){
+                        return $builder->whereIn("t_vch.code", $vchCode);
+                    })
                     ->count();
                 });
 
-                $response["data"] = Cache::remember("list.purchase_order_transaction.vch_$vchCode", 120, function() use($vchCode, $page, $limit){
+                $response["data"] = Cache::remember("list.purchase_order_transaction.$cacheName", 120, function() use($vchCode, $page, $limit){
                     return PurchaseOrderTransaction::join("purchase_order", "purchase_order_transaction.purchase_order_id", "purchase_order.id")
                     ->join("account_farmer", "purchase_order_transaction.account_farmer_id", "account_farmer.id")
                     ->join("users", "users.id", "account_farmer.user_id")
@@ -54,7 +66,9 @@ class TransactionController extends Controller
                     ->join("item_type", "item_type.id", "purchase_order.item_type_id")
                     ->join("item", "item.id", "item_type.item_id")
                     ->join("item_unit", "item_unit.id", "purchase_order.item_unit_id")
-                    ->where("t_vch.code", $vchCode)
+                    ->when(count($vchCode) > 0, function($builder) use($vchCode){
+                        return $builder->whereIn("t_vch.code", $vchCode);
+                    })
                     ->select(DB::raw("transaction_id, receipt_number, transaction_date, floating_rate, po_number, users.name AS farmer_name, account_farmer.code AS farmer_code, total_item_price AS total_price"))
                     ->get();
                 });

@@ -115,7 +115,16 @@ class PurchaseOrderController extends Controller
             if(empty($vchCode)){
                 $response["message"] = "VCH user cannot be empty.";
             } else {
-                $response["count"] = Cache::remember("count.po.vch_$vchCode.status_$status", 120, function() use($status, $vchCode){
+                $cacheName = "status_$status";
+
+                if(is_array($vchCode) && (count($vchCode) > 0)){
+                    $cacheName .= "vch_code_".implode("|", $vchCode).".";
+                } else {
+                    $response['message'] = "VCH code must be in array";
+                    return response()->json($response);
+                }
+                
+                $response["count"] = Cache::remember("count.po.$cacheName", 120, function() use($status, $vchCode){
                     return PurchaseOrder::join("account_vch", "purchase_order.account_vch_id", "account_vch.id")
                     ->join("accounts", "account_vch.account_id", "accounts.id")
                     ->join("users", "accounts.user_id", "users.id")
@@ -127,11 +136,13 @@ class PurchaseOrderController extends Controller
                     ->when(!empty($status) && in_array($status, ["waiting", "approved", "rejected"]), function($builder) use($status){
                         return $builder->where("purchase_order.status", $status);
                     })
-                    ->where("t_vch.code", $vchCode)
+                    ->when(count($vchCode) > 0, function($builder) use($vchCode){
+                        return $builder->whereIn("t_vch.code", $vchCode);
+                    })
                     ->count();
                 });
 
-                $response["data"] = Cache::remember("list.po.vch_$vchCode.status_$status", 120, function() use($status, $vchCode, $page, $limit){
+                $response["data"] = Cache::remember("list.po.$cacheName", 120, function() use($status, $vchCode, $page, $limit){
                     $result = PurchaseOrder::join("account_vch", "purchase_order.account_vch_id", "account_vch.id")
                     ->join("accounts", "account_vch.account_id", "accounts.id")
                     ->join("users", "accounts.user_id", "users.id")
@@ -144,7 +155,9 @@ class PurchaseOrderController extends Controller
                     ->when(!empty($status) && in_array($status, ["waiting", "approved", "rejected"]), function($builder) use($status){
                         return $builder->where("purchase_order.status", $status);
                     })
-                    ->where("t_vch.code", $vchCode)
+                    ->when(count($vchCode) > 0, function($builder) use($vchCode){
+                        return $builder->whereIn("t_vch.code", $vchCode);
+                    })
                     ->when(!empty($page) && !empty($limit), function($builder) use($page, $limit){
                         return $builder->offset($page)->limit($limit);
                     })

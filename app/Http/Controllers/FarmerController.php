@@ -199,7 +199,6 @@ class FarmerController extends Controller
             $limit = $request->input("limit");
             $vchCode = $request->input("vch_code");
 
-
             $cacheName = "";
             if(!empty($vchCode)){
                 if(is_array($vchCode) && (count($vchCode) > 0)){
@@ -209,6 +208,7 @@ class FarmerController extends Controller
                     return response()->json($response);
                 }
             }
+            
             $response["count"] = (int)Cache::remember($cacheName."data.list.farmer.count", 120, function() use($vchCode){
                 return Farmer::join("sub_districts", "sub_districts.id", "account_farmer.sub_district_id")
                 ->leftJoin("users", "account_farmer.user_id", "users.id")

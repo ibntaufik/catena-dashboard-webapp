@@ -73,7 +73,12 @@ class VCPController extends Controller
 
             $cacheName = "mobile.list.vcp";
             if(!empty($vchCode)){
-                $cacheName .= ".vcp_code_$vchCode";
+                if(is_array($vchCode) && (count($vchCode) > 0)){
+                    $cacheName .= "vch_code_".implode("|", $vchCode).".";
+                } else {
+                    $cacheName .= ".vcp_code_$vchCode";
+                    $vchCode = [$vchCode];
+                }
             }
             $response["data"] = Cache::remember($cacheName, config("constant.ttl"), function() use($vchCode) {
                  return VCP::join("account_vcp", "t_vcp.id", "account_vcp.vcp_id")
