@@ -380,5 +380,7 @@ class FarmerController extends Controller
         }
         
         return response()->json($response);
+    } finally {
+        CommonHelper::forgetCache("farmer");
     }
 }

@@ -123,6 +123,8 @@ class MobileController extends Controller
         } catch (\Exception $e) {
             \Log::error($e->getMessage());
             \Log::error($e->getTraceAsString());
+        } finally {
+            
         }
 
         return response()->json($response);
