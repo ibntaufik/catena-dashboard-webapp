@@ -208,6 +208,7 @@ class TransactionController extends Controller
             \Log::error($e->getTraceAsString());
         } finally {
             CommonHelper::forgetCache("purchase_order_transaction");
+            CommonHelper::forgetCache("po");
         }
         
         return response()->json($response);
