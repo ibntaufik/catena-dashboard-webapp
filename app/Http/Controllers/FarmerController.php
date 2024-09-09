@@ -280,7 +280,7 @@ class FarmerController extends Controller
 
         $vch = VCH::findByCode($input["vch_code"]);
         if(empty($vch)){
-            $response["data"]["vch_code"] = "VCH Code ".$input["vch_code"]." is registered.";
+            $response["message"] = "VCH Code ".$input["vch_code"]." is registered.";
             return response()->json($response);
         } else {
             $input["vch_id"] = $vch->id;
@@ -291,7 +291,7 @@ class FarmerController extends Controller
             // validate image photo
             $result = CommonHelper::validateImage($file);
             if(!$result["is_valid"]){
-                $response['data']["photo"] = $result["message"];
+                $response["message"] = $result["message"];
                 return response()->json($response);
             }
             $input["file_type_photo"] = $result["file_type"];
@@ -301,10 +301,15 @@ class FarmerController extends Controller
             // validate image id number
             $result = CommonHelper::validateImage($fileIdNumberImage);
             if(!$result["is_valid"]){
-                $response['data']["id_number_image"] = $result["message"];
+                $response["message"] = $result["message"];
                 return response()->json($response);
             }
             $input["file_type_id_number"] = $result["file_type"];
+        }
+
+        if(!empty($input["email"]) && User::isEmailExist($input["email"])){
+            $response["message"] = "Email ".$input["email"]." already registered, please use other email.";
+            return response()->json($response);
         }
 
         try{
@@ -330,7 +335,7 @@ class FarmerController extends Controller
                 "email" => $input["email"],
                 "password" => Hash::make("password"),
                 "name" => $input["name"],
-                "phone" => "-",
+                "phone" => empty($input["phone"]) ? "-" : $input["phone"],
                 "created_by" => "System Administrator"
             ];
 
@@ -344,7 +349,7 @@ class FarmerController extends Controller
                 "latitude"          => $input["latitude"],
                 "longitude"         => $input["longitude"],
                 "vch_id"            => $input["vch_id"],
-                "address"           => '-',
+                "address"           => empty($input["address"]) ? "-" : $input["address"],
                 "thumb_finger"      => array_key_exists("thumb_finger", $input) ? $input["thumb_finger"] : null,
                 "index_finger"      => array_key_exists("index_finger", $input) ? $input["index_finger"] : null,
                 "created_by"        => "Desktop App"
