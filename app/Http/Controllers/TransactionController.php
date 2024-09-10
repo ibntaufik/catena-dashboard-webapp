@@ -125,15 +125,15 @@ class TransactionController extends Controller
                 $pass = true;
 
                 if(empty($poNumber)){
-                    $response["data"]["po_number"] = "PO Number cannot be empty.";
+                    $response["message"] = "PO Number cannot be empty.";
                     $pass = false;
                 } else {
                     $po = PurchaseOrder::where(["po_number" => $poNumber])->first();
                     if(empty($po)){
-                        $response["data"]["po_number"] = "PO Number $poNumber is not registered.";
+                        $response["message"] = "PO Number $poNumber is not registered.";
                         $pass = false;
                     } else if($po->status != "approved"){
-                        $response["data"]["po_number"] = "Status PO Number $poNumber is ".$po->status.".";
+                        $response["message"] = "Status PO Number $poNumber is ".$po->status.".";
                         $pass = false;
                     } else {
                         $input["purchase_order_id"] = $po->id;
@@ -143,12 +143,12 @@ class TransactionController extends Controller
                     
                 }
                 if(empty($farmerCode)){
-                    $response["data"]["farmer_code"] = "Farmer code cannot be empty.";
+                    $response["message"] = "Farmer code cannot be empty.";
                     $pass = false;
                 } else {
                     $farmer = Farmer::findByCode($farmerCode);
                     if(empty($farmer)){
-                        $response["data"]["farmer_code"] = "Farmer code $farmerCode is not registered.";
+                        $response["message"] = "Farmer code $farmerCode is not registered.";
                         $pass = false;
                     }
 
@@ -157,31 +157,35 @@ class TransactionController extends Controller
                 }
 
                 if(empty($transactionId)){
-                    $response["data"]["transaction_id"] = "Transaction Id cannot be empty.";
+                    $response["message"] = "Transaction Id cannot be empty.";
                     $pass = false;
                 } else {
                     $isExist = PurchaseOrderTransaction::where("transaction_id", $transactionId)->first();
                     if(!empty($isExist)){
-                        $response["data"]["transaction_id"] = "Transaction Id $transactionId have been registered.";
+                        $response["message"] = "Transaction Id $transactionId have been registered.";
                         $pass = false;
                     }
                 }
                 
+                $formatDate = "d/m/Y";
                 if(empty($transactionDate)){
-                    $response["data"]["transaction_date"] = "Transaction date cannot be empty.";
+                    $response["message"] = "Transaction date cannot be empty.";
                     $pass = false;
-                } else if(!CommonHelper::isValidDate($transactionDate)){
-                    $response["data"]["transaction_date"] = "Format date must be Y-m-d.";
+                } else if(!CommonHelper::isValidDate($transactionDate, $formatDate)){
+                    $response["message"] = "Format date must be $formatDate.";
                     $pass = false;
+                } else {
+                    // parse date to Y-m-d format
+                    $input["transaction_date"] = CommonHelper::parseDate($transactionDate, $formatDate);
                 }
 
                 if(empty($floatingRate) || ($floatingRate < 1)){
-                    $response["data"]["floating_rate"] = "Floating rate minimum 1.";
+                    $response["message"] = "Floating rate minimum 1.";
                     $pass = false;
                 }
 
                 if(empty($itemQuantity) || ($itemQuantity < 1)){
-                    $response["data"]["item_quantity"] = "Item quantity minimum 1.";
+                    $response["message"] = "Item quantity minimum 1.";
                     $pass = false;
                 } else {
                     if(empty($po)){
@@ -196,7 +200,7 @@ class TransactionController extends Controller
                     $allowedQuantity = $po->item_max_quantity - $calcTotalQuantityPo->weight_fulfilled;
 
                     if($allowedQuantity < $itemQuantity){
-                        $response["data"]["item_quantity"] = "Item quantity that can be entered is ".($allowedQuantity).".";
+                        $response["message"] = "Item quantity that can be entered is ".($allowedQuantity).".";
                         $pass = false;
                     }
                 }

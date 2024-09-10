@@ -26,6 +26,11 @@ class CommonHelper
         return $d && $d->format($format) === $date;
     }
 
+    public static function parseDate($date, $format = 'Y-m-d', $expectedFormat = 'Y-m-d'){
+        $d = DateTime::createFromFormat($format, $date);
+        return $d->format($expectedFormat);
+    }
+
     public static function validateImage($file){
 
         $result = [
