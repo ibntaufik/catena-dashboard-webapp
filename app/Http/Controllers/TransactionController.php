@@ -69,7 +69,7 @@ class TransactionController extends Controller
                     ->when(count($vchCode) > 0, function($builder) use($vchCode){
                         return $builder->whereIn("t_vch.code", $vchCode);
                     })
-                    ->select(DB::raw("transaction_id, receipt_number, transaction_date, floating_rate, po_number, users.name AS farmer_name, account_farmer.code AS farmer_code, total_item_price AS total_price"))
+                    ->select(DB::raw("transaction_id, receipt_number, purchase_order_transaction.status, transaction_date, floating_rate, po_number, users.name AS farmer_name, account_farmer.code AS farmer_code, total_item_price AS total_price"))
                     ->get();
                 });
 
