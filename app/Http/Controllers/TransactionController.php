@@ -219,14 +219,14 @@ class TransactionController extends Controller
                     $response["code"] = 200;
                     $response["message"] = "Transaction have been created.";
                     $response["data"] = $poTrx;
+                    
+                    CommonHelper::forgetCache("purchase_order_transaction");
+                    CommonHelper::forgetCache("po");
                 }
             }
         } catch(\Exception $e){
             \Log::error($e->getMessage());
             \Log::error($e->getTraceAsString());
-        } finally {
-            CommonHelper::forgetCache("purchase_order_transaction");
-            CommonHelper::forgetCache("po");
         }
         
         return response()->json($response);

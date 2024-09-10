@@ -208,7 +208,7 @@ class FarmerController extends Controller
                     return response()->json($response);
                 }
             }
-            
+
             $response["count"] = (int)Cache::remember($cacheName."data.list.farmer.count", 120, function() use($vchCode){
                 return Farmer::join("sub_districts", "sub_districts.id", "account_farmer.sub_district_id")
                 ->leftJoin("users", "account_farmer.user_id", "users.id")
@@ -378,12 +378,10 @@ class FarmerController extends Controller
                 ->select(DB::raw("account_farmer.code AS farmer_code, users.name, account_farmer.thumb_finger, account_farmer.index_finger, users.email, account_farmer.address, account_farmer.latitude, account_farmer.longitude, users.phone, account_farmer.id_number, sub_districts.code AS sub_district_code, sub_districts.name AS sub_district, districts.name AS district, cities.name AS city, provinces.name AS province"))->orderBy("account_farmer.created_at", "DESC")->first();
             $response["code"] = 200;
             $response["message"] = "Success";
-            
+            CommonHelper::forgetCache("farmer");
         } catch(\Exception $e){
             \Log::error($e->getMessage());
             \Log::error($e->getTraceAsString());
-        } finally {
-            CommonHelper::forgetCache("farmer");
         }
         
         return response()->json($response);
