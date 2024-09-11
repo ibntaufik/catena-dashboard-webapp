@@ -46,10 +46,10 @@ class MobileController extends Controller
                 }
 
                 if($pass){
-                    $user = User::where([
+                    $user = User::join("accounts", "users.id", "accounts.user_id")->where([
                         "users.email"     => $email,
                     ])
-                    ->select(DB::raw("users.id, users.password, users.name"))
+                    ->select(DB::raw("users.id, users.password, users.name, accounts.code"))
                     ->first();
                     
                     if(empty($user)){
@@ -116,6 +116,7 @@ class MobileController extends Controller
 
                         $response["data"]["name"] = $user->name;
                         $response["data"]["user_id"] = $user->id;
+                        $response["data"]["user_code"] = $user->code;
                         $response["data"]["email"] = $email;
                     }
                 }
