@@ -48,7 +48,7 @@ class FarmerController extends Controller
                 ->join("districts", "districts.id", "sub_districts.district_id")
                 ->join("cities", "cities.id", "districts.city_id")
                 ->join("provinces", "provinces.id", "cities.province_id")
-                ->select(DB::raw("account_farmer.code AS farmer_code, users.name, users.email, account_farmer.address, account_farmer.latitude, account_farmer.longitude, users.phone, account_farmer.id_number, sub_districts.code AS sub_district_code, CONCAT(sub_districts.name, ' <br> ', districts.name, ' <br> ', cities.name, ' <br> ', provinces.name) AS location"))->orderBy("account_farmer.created_at", "DESC")->get();
+                ->select(DB::raw("account_farmer.code AS farmer_code, users.name, users.email, account_farmer.address, account_farmer.latitude, account_farmer.longitude, users.phone, account_farmer.id_number, sub_districts.code AS sub_district_code, account_farmer.image_id_number_name, account_farmer.image_photo_name, CONCAT(sub_districts.name, ' <br> ', districts.name, ' <br> ', cities.name, ' <br> ', provinces.name) AS location"))->orderBy("account_farmer.created_at", "DESC")->get();
             });
         } catch(\Exception $e){
             \Log::error($e->getMessage());
@@ -320,10 +320,12 @@ class FarmerController extends Controller
             $farmer = Farmer::withTrashed()->where("sub_district_id", $input["sub_district_id"])
                 ->orderBy("code", "DESC")->select("code")->first();
 
-            if(empty($farmer)){
-                $input["code"] = $prefix->code.str_pad(1, 5, "0", STR_PAD_LEFT);
-            } else {
-                $input["code"] = $prefix->code.str_pad((substr($farmer->code, 12) + 1), 5, "0", STR_PAD_LEFT);
+            if(empty($input["code"])){
+                if(empty($farmer)){
+                    $input["code"] = $prefix->code.str_pad(1, 5, "0", STR_PAD_LEFT);
+                } else {
+                    $input["code"] = $prefix->code.str_pad((substr($farmer->code, 12) + 1), 5, "0", STR_PAD_LEFT);
+                }
             }
 
             if (empty($input["email"])) {

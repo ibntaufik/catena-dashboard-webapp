@@ -129,6 +129,33 @@
     </div>
   </div>
 </div>
+
+<div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+  <div class="modal-dialog" style="width: 900px; max-width: 1200px;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Picture</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="btn-close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="col-md-12">
+          <div class="row">
+            <div class="col-md-6">
+              <img id="id_number_image" style="max-width: 80%;">
+            </div>
+            <div class="col-md-6">
+              <img id="photo_image" style="max-width: 80%;">
+            </div>
+          </div>
+        </div>
+      </div> 
+
+      <div class="modal-footer">
+        
+      </div>
+    </div>
+  </div>
+</div>
 @endsection
 
 @section('javascript')
@@ -177,7 +204,10 @@
                                 
           "columnDefs" : [
             { "targets": 0, "data": "farmer_code" },
-            { "targets": 1, "data": "name" },
+            { "targets": 1, "data": function( data, type, row, meta ){
+                return '<a href="#" onclick=showDetail("'+data.image_id_number_name+'||'+data.image_photo_name+'")><label style="cursor: pointer;";>'+ucFirstWord(data.name)+'</label></a>';
+              }
+            },
             { "targets": 2, "data": "email" },
             { "targets": 3, "data": "id_number" },
             { "targets": 4, "data":  function(data, type, row, meta){
@@ -374,6 +404,14 @@
             fileType = ".png";
           }
       }
+  }
+
+  function showDetail(image_names){
+    var imageNames = image_names.split("||");
+    $("#id_number_image").attr("src", "{{ url('/storage/farmer/id-number/') }}/"+imageNames[0]);
+    $("#photo_image").attr("src", "{{ url('/storage/farmer/id-number/') }}/"+imageNames[1]);
+    
+    $('#previewModal').modal('show');
   }
 
 
