@@ -29,6 +29,7 @@ class AccountController extends Controller
                 "text"  => $value
             ];
         }
+
         return view("master-data.account.index", compact("statusAccount"));
     }
 
@@ -86,6 +87,11 @@ class AccountController extends Controller
             ];
 
             $user = User::create($dataUser);
+            if(empty($input["user_id"])){
+                $count = Account::count();
+                $input["user_id"] = "ACC".str_pad($count+1, 3, "0", STR_PAD_LEFT);
+            }
+            
             Account::create([
                 "user_id"       => $user->id,
                 "code"          => $input["user_id"],

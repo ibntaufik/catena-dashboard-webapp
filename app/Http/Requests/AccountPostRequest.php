@@ -24,7 +24,6 @@ class AccountPostRequest extends FormRequest
     public function rules()
     {
         return [
-            "user_id"           => "required|max:255",
             "name"              => "required|max:255",
             "password"          => "required|max:255",
             "email"             => "required|email",
@@ -35,7 +34,6 @@ class AccountPostRequest extends FormRequest
     public function messages()
     {
         return [
-            'user_id.required'          => 'Please select sub ditrict first',
             'name.required'             => 'Name is required',
             'password.required'         => 'Identity Number is required',
             'email.required'            => 'Email is required',
