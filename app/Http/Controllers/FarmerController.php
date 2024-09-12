@@ -320,7 +320,7 @@ class FarmerController extends Controller
             $farmer = Farmer::withTrashed()->where("sub_district_id", $input["sub_district_id"])
                 ->orderBy("code", "DESC")->select("code")->first();
 
-            if(empty($input["code"])){
+            if((array_key_exists("code", $input) && empty($input["code"])) || !(array_key_exists("code", $input))){
                 if(empty($farmer)){
                     $input["code"] = $prefix->code.str_pad(1, 5, "0", STR_PAD_LEFT);
                 } else {
