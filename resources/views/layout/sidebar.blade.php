@@ -57,7 +57,7 @@
           <ul class="nav sub-menu">
             @if(\Auth::user()->isA('admin'))
             <li class="nav-item">
-              <a href="{{ url('/transaction/purchase-order') }}" class="nav-link {{ active_class(['transaction/purchase-order']) }}">Create Purchase Order</a>
+              <a href="{{ url('/transaction/purchase-order/create') }}" class="nav-link {{ active_class(['transaction/purchase-order/create']) }}">Create Purchase Order</a>
             </li>
             @endif
             @if(\Auth::user()->isA('admin') || \Auth::user()->can('po-maker'))
@@ -67,7 +67,7 @@
             @endif
             @if(\Auth::user()->isA('admin'))
             <li class="nav-item">
-              <a href="{{ url('/transaction/farmer-and-vcp') }}" class="nav-link {{ active_class(['transaction/farmer-and-vcp']) }}">Farmer &amp; VCP Transaction</a>
+              <a href="{{ url('/transaction/purchase-order') }}" class="nav-link {{ active_class(['transaction/purchase-order']) }}">Farmer &amp; VCP Transaction</a>
             </li>
             @endif
           </ul>
