@@ -93,6 +93,7 @@ class TransactionController extends Controller
                         return $builder->where("purchase_order_transaction.status", $status);
                     })
                     ->select(DB::raw("transaction_id, vcp_id, receipt_number, purchase_order_transaction.status, transaction_date, floating_rate, po_number, users.name AS farmer_name, account_farmer.code AS farmer_code, item_type.name AS item_type, purchase_order.item_unit_price AS item_price, total_item_price AS total_price"))
+                    ->orderBy("purchase_order_transaction.created_at", "DESC")
                     ->get();
 
                     foreach ($transaction as $key => $value) {
