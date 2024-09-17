@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Helpers\CommonHelper;
 use App\Model\Farmer;
+use App\Model\HOAccount;
 use App\Model\PurchaseOrder;
 use App\Model\PurchaseOrderTransaction;
+use App\Model\VCP;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 
@@ -14,6 +17,10 @@ class TransactionController extends Controller
 {
     public function __construct(){
         
+    }
+
+    public function index(Request $request){
+        return view("transactions.purchase-order.transaction");
     }
 
     public function list(Request $request){
@@ -28,21 +35,31 @@ class TransactionController extends Controller
             $page = $request->input("start");
             $limit = $request->input("limit");
             $vchCode = $request->input("vch_code");
-
-            if(empty($vchCode)){
+            $status = $request->input("status");
+            
+            if(!Auth::check() && empty($vchCode)){
                 $response["message"] = "VCH user cannot be empty.";
             } else {
-
+                $isHOUser = null;
+                if(Auth::check()){
+                    $isHOUser = HOAccount::findByUserId(Auth::user()->id);
+                }
                 $cacheName = "";
-
-                if(is_array($vchCode) && (count($vchCode) > 0)){
-                    $cacheName .= "vch_code_".implode("|", $vchCode).".";
+                if(empty($isHOUser)){
+                    if(is_array($vchCode) && (count($vchCode) > 0)){
+                        $cacheName .= "vch_code_".implode("|", $vchCode).".";
+                    } else {
+                        $response['message'] = "VCH code must be in array";
+                        return response()->json($response);
+                    }
                 } else {
-                    $response['message'] = "VCH code must be in array";
-                    return response()->json($response);
+                    if(!empty($status)){
+                        $cacheName .= "status_$status";
+                    }
+                    $vchCode = [];
                 }
 
-                $response["count"] = Cache::remember("count.purchase_order_transaction.$cacheName", 120, function() use($vchCode){
+                $response["count"] = Cache::remember("count.purchase_order_transaction.$cacheName", 120, function() use($vchCode, $status){
                     return PurchaseOrderTransaction::join("purchase_order", "purchase_order_transaction.purchase_order_id", "purchase_order.id")
                     ->join("account_farmer", "purchase_order_transaction.account_farmer_id", "account_farmer.id")
                     ->join("users", "users.id", "account_farmer.user_id")
@@ -53,12 +70,15 @@ class TransactionController extends Controller
                     ->join("item_unit", "item_unit.id", "purchase_order.item_unit_id")
                     ->when(count($vchCode) > 0, function($builder) use($vchCode){
                         return $builder->whereIn("t_vch.code", $vchCode);
+                    })
+                    ->when($status, function($builder) use($status){
+                        return $builder->where("purchase_order_transaction.status", $status);
                     })
                     ->count();
                 });
 
-                $response["data"] = Cache::remember("list.purchase_order_transaction.$cacheName", 120, function() use($vchCode, $page, $limit){
-                    return PurchaseOrderTransaction::join("purchase_order", "purchase_order_transaction.purchase_order_id", "purchase_order.id")
+                $response["data"] = Cache::remember("list.purchase_order_transaction.$cacheName", 120, function() use($vchCode, $status, $page, $limit){
+                    $transaction = PurchaseOrderTransaction::join("purchase_order", "purchase_order_transaction.purchase_order_id", "purchase_order.id")
                     ->join("account_farmer", "purchase_order_transaction.account_farmer_id", "account_farmer.id")
                     ->join("users", "users.id", "account_farmer.user_id")
                     ->join("account_vch", "purchase_order.account_vch_id", "account_vch.id")
@@ -69,8 +89,19 @@ class TransactionController extends Controller
                     ->when(count($vchCode) > 0, function($builder) use($vchCode){
                         return $builder->whereIn("t_vch.code", $vchCode);
                     })
-                    ->select(DB::raw("transaction_id, receipt_number, purchase_order_transaction.status, transaction_date, floating_rate, po_number, users.name AS farmer_name, account_farmer.code AS farmer_code, total_item_price AS total_price"))
+                    ->when($status, function($builder) use($status){
+                        return $builder->where("purchase_order_transaction.status", $status);
+                    })
+                    ->select(DB::raw("transaction_id, vcp_id, receipt_number, purchase_order_transaction.status, transaction_date, floating_rate, po_number, users.name AS farmer_name, account_farmer.code AS farmer_code, item_type.name AS item_type, purchase_order.item_unit_price AS item_price, total_item_price AS total_price"))
                     ->get();
+
+                    foreach ($transaction as $key => $value) {
+                        $vcp = VCP::findById($value->vcp_id);
+
+                        $transaction[$key]["vcp_code"] = $vcp->vcp_code;
+                    }
+
+                    return $transaction;
                 });
 
                 if($response["count"] > 0){
@@ -123,6 +154,20 @@ class TransactionController extends Controller
                 $itemQuantity = $request->input("item_quantity");
                 $itemPrice = 0;
                 $pass = true;
+
+                if(!array_key_exists("vcp_code", $input) || (array_key_exists("vcp_code", $input) && empty($input["vcp_code"]))){
+                    $response["message"] = "VCP Code cannot be empty.";
+                    $pass = false;
+                } else {
+                    $vcp = VCP::findByVcpCode($input["vcp_code"]);
+                    if(empty($vcp)){
+                        $response["message"] = "VCP Code ".$input["vcp_code"]." is not listed on system.";
+                        $pass = false;
+                    }
+
+                    $input["vcp_id"] = $vcp->id;
+                    unset($input["vcp_code"]);
+                }
 
                 if(empty($poNumber)){
                     $response["message"] = "PO Number cannot be empty.";

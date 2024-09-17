@@ -94,13 +94,15 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::group(['prefix' => 'transaction'], function(){
         Route::group(['prefix' => 'purchase-order'], function(){
-            Route::get('', 'PurchaseOrderController@index')->name("purchase-order.index")->middleware("can:administrator");
+            Route::get('create', 'PurchaseOrderController@index')->name("purchase-order.create")->middleware("can:administrator");
             Route::get('grid-list', 'PurchaseOrderController@datatables')->name("purchase-order.grid-list");
             Route::post('submit', 'PurchaseOrderController@save')->name("purchase-order.submit");
             Route::post('update', 'PurchaseOrderController@update')->name("purchase-order.update");
             Route::post('remove', 'PurchaseOrderController@delete')->name("purchase-order.remove");
             Route::get('release', 'PurchaseOrderController@release')->name("purchase-order.release")->middleware("can:po-maker");
             Route::get('latest-history', 'PurchaseOrderController@latestHistory')->name("purchase-order.latest-history");
+            Route::get('', 'TransactionController@index')->name("purchase-order.index")->middleware("can:administrator");
+            Route::get('list', 'TransactionController@list')->name("purchase-order.transaction.grid-list")->middleware("can:administrator");
         });
     });
 });

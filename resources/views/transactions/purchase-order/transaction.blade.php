@@ -55,20 +55,20 @@
 <div class="col-md-12 grid-margin stretch-card">
   <div class="card">
     <div class="card-body">
-      <h6 class="card-title">List of purchase order</h6>
+      <h6 class="card-title">List of transaction</h6>
 
-      <div data-tabs class="tabs mt-5" style="">    
+      <div data-tabs class="tabs mt-5" style="">
          <div class="col-md-2 tab">
-            <input type="radio" name="tabgroup" id="waiting" checked onclick="search('waiting')">
-            <label for="waiting">Waiting</label>
+            <input type="radio" name="tabgroup" id="created" checked onclick="search('created')">
+            <label for="created">Created</label>
          </div>
          <div class="col-md-2 tab">
-            <input type="radio" name="tabgroup" id="approved" onclick="search('approved')">
-            <label for="approved">Approved</label>
+            <input type="radio" name="tabgroup" id="onprocess" onclick="search('on_process')">
+            <label for="onprocess">On Process</label>
          </div>
          <div class="col-md-2 tab">
-            <input type="radio" name="tabgroup" id="rejected" onclick="search('rejected')">
-            <label for="rejected">Rejected</label>
+            <input type="radio" name="tabgroup" id="blockchained" onclick="search('blockchained')">
+            <label for="blockchained">Blockchained</label>
          </div>
       </div>
 
@@ -76,20 +76,16 @@
         <table id="gridDataTable" class="table">
           <thead>
             <tr>
-              <th>Status</th>
-              <th>VCH Code</th>
-              <th class="text-center">Vendor</th>
+              <th>Farmer ID</th>
+              <th>VCP Code</th>
+              <th class="text-center">Transaction ID</th>
+              <th>Transaction Date</th>
               <th>PO Number</th>
-              <th>PO Date</th>
-              <th>Expected Shipping Date</th>
-              <th>Item Name</th>
+              <th>Receipt Number</th>
               <th>Item Type</th>
-              <th>Item Description</th>
-              <th>Item Quantity</th>
-              <th>Item Unit</th>
-              <th>Item Unit Price</th>
-              <th>Item Max. Quantity</th>
-              <th></th>
+              <th>Item Price (Rp)</th>
+              <th>Floating Rate (Kg)</th>
+              <th>Total Price (Rp)</th>
             </tr>
           </thead>
         </table>
@@ -97,106 +93,6 @@
     </div>
   </div>
 </div>
-
-<div class="modal fade" id="waitingModal" tabindex="-1" aria-labelledby="waitingModalLabel" aria-hidden="true">
-  <div class="modal-dialog" style="width: 900px; max-width: 1200px;">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Approval Process</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="btn-close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="col-md-12">
-          <div class="row">
-            <div class="col-md-8">
-              <p>Status: <strong id="labelWarning"></strong></p>
-              <table id="detailPo" class="w-100 table table-bordered mt-2">
-                <tr>
-                  <td class="w-50">
-                    <label>VCH Code</label><br>
-                    <label class="fw-bolder" id="labelVchCode"></label>
-                  </td>
-                  <td class="w-50">
-                    <label>Vendor</label><br>
-                    <label class="fw-bolder" id="labelVendor"></label>
-                  </td>
-                </tr> 
-                <tr> 
-                  <td class="w-50">
-                    <label>PO Number</label><br>
-                    <label class="fw-bolder" id="labelPoNumber"></label>
-                  </td>
-                  <td class="w-50">
-                    <label>Item</label><br>
-                    <label class="fw-bolder" id="labelItem"></label>
-                  </td>
-                </tr> 
-                <tr>
-                  <td class="w-50">
-                    <label>PO Date</label><br>
-                    <label class="fw-bolder" id="labelPoDate"></label>
-                  </td>
-                  <td class="w-50">
-                    <label>Expected Shipping Date</label><br>
-                    <label class="fw-bolder" id="labelExpectedShippingDate"></label>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="w-50">
-                    <label>Item Unit</label><br>
-                    <label class="fw-bolder" id="labelItemUnit"></label>
-                  </td>
-                  <td class="w-50">
-                    <label>Item Unit Price</label><br>
-                    <label class="fw-bolder" id="labelItemUnitPrice"></label>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="w-50">
-                    <label>Item Type</label><br>
-                    <label class="fw-bolder" id="labelItemType"></label>
-                  </td>
-                  <td class="w-50">
-                    <label>Item Description</label><br>
-                    <label class="fw-bolder" id="labelItemDescription"></label>
-                  </td>
-                </tr>
-                <tr>
-                  <td class="w-50">
-                    <label>Item Quantity</label><br>
-                    <label class="fw-bolder" id="labelItemQuantity"></label>
-                  </td>
-                  <td class="w-50">
-                    <label>Item Max. Quantity</label><br>
-                    <label class="fw-bolder" id="labelItemMaxQuantity"></label>
-                  </td>
-                </tr>
-              </table>
-              <br>
-              <br>
-              <strong>Reason for rejection</strong>
-              <br>
-              <textarea id="reason" class="w-100" rows="3"></textarea>
-            </div>
-            <div class="col-md-4">
-              <strong>List Approval</strong>
-              <table id="historyApproval" class="w-100 table mt-2" style="background-color: #F7F7F7;">
-                <tbody>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div> 
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" id="reject" onclick="submit('rejected')" style="display: none;">Reject</button>
-        <button type="button" class="btn btn-success" id="approve" onclick="submit('approved')" style="display: none;">Approve</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 
 @endsection
 
@@ -206,7 +102,7 @@
 <script type="text/javascript">
     var start = 0;
     var limit = 10;
-    var poStatus = "waiting";
+    var poStatus = "created";
     var selectedPurchaseOrder = null;
     var listApprover = null;
 
@@ -221,7 +117,7 @@
           "searching"     : true,
           "pageLength"    : limit,
           "ajax": {
-            "url": "{{ route('purchase-order.grid-list') }}",
+            "url": "{{ route('purchase-order.transaction.grid-list') }}",
             "data": function ( d ) {
               var info = $('#gridDataTable').DataTable().page.info();
               d.start = info.start;
@@ -239,48 +135,39 @@
                                 
           "columnDefs" : [
             { "targets": 0, "className": "text-center", "data": function( data, type, row, meta ){
-                var classLabel = "fontColorWarning";
-                if(data.status == "approved"){
-                  classLabel = "fontColorApproved";
-                } else if(data.status == "rejected"){
-                  classLabel = "fontColorRejected";
-                }
-                selectedPurchaseOrder = data;
-                return '<a href="#" onclick=showDetail("'+data.status+'")><label class="'+classLabel+'" style="cursor: pointer;";>'+ucFirstWord(data.status)+'</label></a>';
+                return data.farmer_code;
               }
             },
             { "targets": 1, "className": "text-center", "data": function(data, type, row, meta){
-                  return data.evc_code+' - '+data.vch_code;
+                  return data.vcp_code;
               }
             },
-            { "targets": 2, "data": function(data, type, row, meta){
-                  return '('+data.vendor_code+') '+data.vendor;
+            { "targets": 2, "className": "text-center", "data": function(data, type, row, meta){
+                  return data.transaction_id;
               }
             },
-            { "targets": 3, "data": "po_number", "className": "text-center" },
-            { "targets": 4, "data": "po_date", "className": "text-center" },
-            { "targets": 5, "data": "expected_shipping_date", "className": "text-center" },
-            { "targets": 6, "data": "item_name" },
-            { "targets": 7, "data": "item_type", "className": "text-center" },
-            { "targets": 8, "data": "item_description" },
-            { "targets": 9, "data": "item_quantity", "className": "text-end",
+            { "targets": 3, "data": "transaction_date", "className": "text-center" },
+            { "targets": 4, "data": "po_number", "className": "text-center" },
+            { "targets": 5, "data": "receipt_number", "className": "text-center" },
+            { "targets": 6, "data": "item_type", "className": "text-center" },
+            { "targets": 7, "data": "item_price", "className": "text-center",
               "render":function( data, type, row, meta ){
                 var val = (data/1).toFixed(0).replace('.', ',');
                 return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
               }
             },
-            { "targets": 10, "data": "item_unit", "className": "text-center" },
-            { "targets": 11, "data": "item_unit_price", "className": "text-end" },
-            { "targets": 12, "data": "item_max_quantity", "className": "text-end",
+            { "targets": 8, "data": "floating_rate", "className": "text-center",
               "render":function( data, type, row, meta ){
                 var val = (data/1).toFixed(0).replace('.', ',');
                 return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
               }
             },
-            { "targets": 13, "data": function(data, type, row, meta){
-                  return '<a href="#" onclick=$(this).delete("'+data.po_number+'") style="cursor: pointer;"><i data-feather="trash-2"></i>';
+            { "targets": 9, "data": "total_price", "className": "text-end",
+              "render":function( data, type, row, meta ){
+                var val = (data/1).toFixed(0).replace('.', ',');
+                return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
               }
-            },
+            }
           ],
           "drawCallback": function(settings) {
               feather.replace(); // Initialize Feather icons

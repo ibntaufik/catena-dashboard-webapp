@@ -44,4 +44,25 @@ class VCP extends Model
             return VCP::select(DB::raw("code"))->get()->toArray();
         });
     }
+
+    public static function findByVcpCode($code){
+        return Cache::remember("vcp.find_by_code_$code", config("constant.ttl"), function() use($code){
+            
+            return VCP::join("t_vch", "t_vch.id", "t_vcp.vch_id")
+            ->join("t_evc", "t_evc.id", "t_vch.evc_id")
+            ->whereRaw("CONCAT(t_evc.code, '-', t_vch.code, '-', t_vcp.code) = ?", [$code])
+            ->select(DB::raw("t_vcp.id"))
+            ->first();
+        });
+    }
+
+    public static function findById($id){
+        return Cache::remember("vcp.id_$id", config("constant.ttl"), function() use($id){
+            return VCP::join("t_vch", "t_vch.id", "t_vcp.vch_id")
+            ->join("t_evc", "t_evc.id", "t_vch.evc_id")
+            ->whereRaw("t_vcp.id = ?", [$id])
+            ->select(DB::raw("CONCAT(t_evc.code, '-', t_vch.code, '-', t_vcp.code) AS vcp_code"))
+            ->first();
+        });
+    }
 }
