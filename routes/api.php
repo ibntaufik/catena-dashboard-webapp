@@ -38,4 +38,39 @@ Route::group(['prefix' => 'master-data'], function(){
 Route::group(['prefix' => 'transaction'], function(){
     Route::post('list', 'TransactionController@list')->middleware('authapi:mobile');
     Route::post('purchase-order', 'TransactionController@submit')->middleware('authapi:mobile');
+
+    Route::group(['prefix' => 'farmer'], function(){
+        Route::group(['prefix' => 'read-asset'], function(){
+            Route::post('public', 'FarmerController@readAssetPublic')->middleware('authapi:mobile');
+            Route::post('private', 'FarmerController@readAssetPrivate')->middleware('authapi:mobile');
+        });
+    });
+
+    Route::group(['prefix' => 'pulper'], function(){
+        Route::group(['prefix' => 'read-asset'], function(){
+            Route::post('public', 'VCPController@readAssetPublic')->middleware('authapi:mobile');
+            Route::post('private', 'VCPController@readAssetPrivate')->middleware('authapi:mobile');
+        });
+    });
+
+    Route::group(['prefix' => 'huller'], function(){
+        Route::group(['prefix' => 'read-asset'], function(){
+            Route::post('public', 'VCHController@readAssetPublic')->middleware('authapi:mobile');
+            Route::post('private', 'VCHController@readAssetPrivate')->middleware('authapi:mobile');
+        });
+    });
+
+    Route::group(['prefix' => 'export'], function(){
+        Route::group(['prefix' => 'read-asset'], function(){
+            Route::post('public', 'EvcController@readAssetPublic')->middleware('authapi:mobile');
+            Route::post('private', 'EvcController@readAssetPrivate')->middleware('authapi:mobile');
+        });
+    });
+
+    Route::group(['prefix' => 'head-office'], function(){
+        Route::group(['prefix' => 'read-asset'], function(){
+            Route::post('public', 'HeadOfficeController@readAssetPublic')->middleware('authapi:mobile');
+            Route::post('private', 'HeadOfficeController@readAssetPrivate')->middleware('authapi:mobile');
+        });
+    });
 });

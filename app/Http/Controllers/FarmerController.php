@@ -8,6 +8,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use App\Helpers\CommonHelper;
+use App\Helpers\Fabric\FarmerMSP\ReadAsset as FarmerReadAsset;
+use App\Helpers\Fabric\PulperMSP\ReadAsset as PulperReadAsset;
+use App\Helpers\Fabric\HullerMSP\ReadAsset as HullerReadAsset;
+use App\Helpers\Fabric\ExportMSP\ReadAsset as ExportReadAsset;
+use App\Helpers\Fabric\HeadOfficeMSP\ReadAsset as HeadOfficeReadAsset;
 use App\Http\Requests\FarmerPostRequest;
 use App\Http\Requests\RemoveFarmerPostRequest;
 use App\Model\Location;
@@ -386,6 +391,97 @@ class FarmerController extends Controller
             \Log::error($e->getTraceAsString());
         }
         
+        return response()->json($response);
+    }
+
+    public function readAssetPublic(Request $request){
+        
+        $response = [
+            "code"      => 400,
+            "message"   => "Failed to complete request",
+            "data"      => []
+        ];
+
+        $input = $request->except(["_token"]);
+
+        if(array_key_exists("transaction_id", $input)){
+            if(empty($input["transaction_id"])){
+                $response["message"] = "Transaction ID cannot be empty.";
+            } else {
+                try{
+                    $chaincodeName = config("constant.fabric.chaincode.farmer_private");
+                    $channel = config("constant.fabric.channel");
+
+                    if(array_key_exists("org_msp", $input) && !empty($input["org_msp"])){
+                        if($input["org_msp"] == "export"){
+                            $readAsset = new ExportReadAsset();
+                            $response["data"] = $readAsset->public($input["transaction_id"], $channel, $chaincodeName);
+                        }
+                    } else {
+                        $readAsset = new FarmerReadAsset();
+                        $response["data"] = $readAsset->public($input["transaction_id"], $channel, $chaincodeName);
+                    }
+                    $response["code"] = 200;
+                    $response["message"] = "Success";
+                } catch(\Exception $e){
+                    \Log::error($e->getMessage());
+                    \Log::error($e->getTraceAsString());
+                }
+            }
+        } else {
+            $response["message"] = "Transaction ID is required.";
+        }
+
+        return response()->json($response);
+    }
+
+    public function readAssetPrivate(Request $request){
+        
+        $response = [
+            "code"      => 400,
+            "message"   => "Failed to complete request",
+            "data"      => []
+        ];
+
+        $input = $request->except(["_token"]);
+
+        if(array_key_exists("transaction_id", $input)){
+            if(empty($input["transaction_id"])){
+                $response["message"] = "Transaction ID cannot be empty.";
+            } else {
+                $chaincodeName = config("constant.fabric.chaincode.farmer_private");
+                $mspPrivateCollection = "FarmerMSPPrivateCollection";
+
+                try{
+                    if(array_key_exists("org_msp", $input) && !empty($input["org_msp"]) && in_array($input["org_msp"], ["farmer", "pulper", "huller", "headoffice"])){
+                        if($input["org_msp"] == "pulper"){
+                            $readAsset = new PulperReadAsset();
+                            $response["data"] = $readAsset->private($input["transaction_id"], $mspPrivateCollection, $chaincodeName);
+                        } else if($input["org_msp"] == "huller"){
+                            $readAsset = new HullerReadAsset();
+                            $response["data"] = $readAsset->private($input["transaction_id"], $mspPrivateCollection, $chaincodeName);
+                        } else if($input["org_msp"] == "headoffice"){
+                            $readAsset = new HeadOfficeReadAsset();
+                            $response["data"] = $readAsset->private($input["transaction_id"], $mspPrivateCollection, $chaincodeName);
+                        } else {
+                            $readAsset = new FarmerReadAsset();
+                            $response["data"] = $readAsset->private($input["transaction_id"], $mspPrivateCollection, $chaincodeName);
+                        }
+                    } else {
+                        //$readAsset = new FarmerReadAsset();
+                        //$response["data"] = $readAsset->private($input["transaction_id"], $mspPrivateCollection, $chaincodeName);
+                    }
+                    $response["code"] = 200;
+                    $response["message"] = "Success";
+                } catch(\Exception $e){
+                    \Log::error($e->getMessage());
+                    \Log::error($e->getTraceAsString());
+                }
+            }
+        } else {
+            $response["message"] = "Transaction ID is required.";
+        }
+
         return response()->json($response);
     }
 }

@@ -16,5 +16,13 @@ return [
         "url"           => env("ONESIGNAL_URL", "https://api.onesignal.com/notifications?c=push"),
         "token"         => env("ONESIGNAL_TOKEN", "OTczYjgxMmYtZjEzNi00MGE3LTk0N2ItNTM0NWIwMDk1MGI1"),
         "app_id"        => env("ONESIGNAL_APP_ID", "6e35f10b-f0b4-40c4-b7ca-a0b988f38cfc")
-    ]
+    ],
+    "fabric"            => [
+        "channel"       => env("FABRIC_CHANNEL", "varion"),
+        "chaincode"     => [
+            "farmer_private"    => env("FABRIC_FARMER_PRIVATE_CHAINCODE", "farmer_private"),
+            "pulper_private"    => env("FABRIC_PULPER_PRIVATE_CHAINCODE", "pulper_private"),
+            "huller_private"    => env("FABRIC_HULLER_PRIVATE_CHAINCODE", "huller_private"),
+        ]
+    ],
 ];

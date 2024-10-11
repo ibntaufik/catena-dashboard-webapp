@@ -27,4 +27,10 @@ class Farmer extends Model
             return Farmer::where("code", $code)->first();
         }); 
     }
+
+    public static function findById($id){
+        return empty($id) ? null : Cache::remember("farmer.id|$id", config("constant.ttl"), function() use($id){
+            return Farmer::find($id);
+        }); 
+    }
 }
