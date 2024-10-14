@@ -23,7 +23,7 @@ class ReadAsset{
     public function private($assetId, $mspPrivateCollection, $chaincodeName){
         $readAsset = $this->peerEnv()." && peer chaincode query -C ".config("constant.fabric.channel")." -n ".$chaincodeName." -c '{\"function\":\"ReadAssetPrivateDetails\",\"Args\":[\"$mspPrivateCollection\",\"$assetId\"]}'";
         $result = shell_exec($readAsset);
-        \Log::debug($readAsset);
+        
         return json_decode($result, true);
     }
 
