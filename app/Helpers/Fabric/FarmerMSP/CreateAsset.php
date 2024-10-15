@@ -33,6 +33,6 @@ class CreateAsset{
         $base64Asset = base64_encode($asset);
 
         $createAsset = $env.' && peer chaincode invoke -o localhost:7050 --ordererTLSHostnameOverride orderer.varion.com --tls --cafile "'.env("FABRIC_HOME").'/varion/organizations/ordererOrganizations/varion.com/orderers/orderer.varion.com/msp/tlscacerts/tlsca.varion.com-cert.pem" -C '.$channel.' -n '.$chainCode.' -c \'{"function":"CreateAsset","Args":[]}\' --transient "{\"asset_properties\":\"'.$base64Asset.'\"}"';
-        return shell_exec($createAsset);
+        shell_exec($createAsset);
     }
 }

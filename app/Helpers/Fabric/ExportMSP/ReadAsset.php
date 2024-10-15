@@ -13,18 +13,17 @@ class ReadAsset{
         
     }
     
-    public function public($assetId, $channel, $chaincodeName){
-        $readAsset = $this->peerEnv()." && peer chaincode query -C $channel -n $chaincodeName -c '{\"function\":\"ReadAsset\",\"Args\":[\"$assetId\"]}'";
+    public function public($assetId, $chaincode){
+        $readAsset = $this->peerEnv()." && peer chaincode query -C ".config("constant.fabric.channel")." -n ".$chaincode." -c '{\"function\":\"ReadAsset\",\"Args\":[\"$assetId\"]}'";
         $result = shell_exec($readAsset);
 
         return json_decode($result, true);
     }
     
-    public function private($assetId, $msp){
-        
-        $readAsset = $this->peerEnv()." && peer chaincode query -C varion -n private -c '{\"function\":\"ReadAssetPrivateDetails\",\"Args\":[\"$mspPrivateCollection\",\"$assetId\"]}'";
+    public function private($assetId, $mspPrivateCollection, $chaincodeName){
+        $readAsset = $this->peerEnv()." && peer chaincode query -C ".config("constant.fabric.channel")." -n ".$chaincodeName." -c '{\"function\":\"ReadAssetPrivateDetails\",\"Args\":[\"$mspPrivateCollection\",\"$assetId\"]}'";
         $result = shell_exec($readAsset);
-
+        
         return json_decode($result, true);
     }
 

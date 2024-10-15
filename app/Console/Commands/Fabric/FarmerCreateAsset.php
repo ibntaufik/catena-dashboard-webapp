@@ -67,7 +67,7 @@ class FarmerCreateAsset extends Command
                 );
                 
                 try {
-                    $result = CreateAsset::prosess(json_encode($asset));
+                    CreateAsset::prosess(json_encode($asset));
                     $transactionIds[] = $row->transaction_id;
                 } catch (\Exception $e){
 
