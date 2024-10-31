@@ -92,7 +92,7 @@ class TransactionController extends Controller
                     ->when($status, function($builder) use($status){
                         return $builder->where("purchase_order_transaction.status", $status);
                     })
-                    ->select(DB::raw("transaction_id, vcp_id, receipt_number, purchase_order_transaction.status, transaction_date, floating_rate, po_number, users.name AS farmer_name, account_farmer.code AS farmer_code, item_type.name AS item_type, purchase_order_transaction.item_price AS item_price, total_item_price AS total_price"))
+                    ->select(DB::raw("transaction_id, vcp_id, receipt_number, purchase_order_transaction.status, transaction_date, floating_rate, po_number, users.name AS farmer_name, account_farmer.code AS farmer_code, item_type.name AS item_type, purchase_order_transaction.item_price AS item_price, purchase_order_transaction.item_quantity, total_item_price AS total_price"))
                     ->orderBy("purchase_order_transaction.created_at", "DESC")
                     ->get();
 
@@ -153,7 +153,7 @@ class TransactionController extends Controller
                 $floatingRate = $request->input("floating_rate");
                 $totalItemPrice = $request->input("total_item_price");
                 $itemQuantity = $request->input("item_quantity");
-                $itemPrice = 0;
+                $itemPrice = $request->input("item_price");
                 $pass = true;
 
                 if(!array_key_exists("vcp_code", $input) || (array_key_exists("vcp_code", $input) && empty($input["vcp_code"]))){
@@ -183,11 +183,11 @@ class TransactionController extends Controller
                         $pass = false;
                     } else {
                         $input["purchase_order_id"] = $po->id;
-                        $itemPrice = $po->item_unit_price;
                         unset($input["po_number"]);
                     }
                     
                 }
+                
                 if(empty($farmerCode)){
                     $response["message"] = "Farmer code cannot be empty.";
                     $pass = false;
@@ -251,8 +251,13 @@ class TransactionController extends Controller
                     }
                 }
 
+                if(empty($itemPrice) || ($itemPrice < 1)){
+                    $response["message"] = "Item price minimum 1.";
+                    $pass = false;
+                }
+
                 if($pass){
-                    $input["total_item_price"] = $floatingRate * $itemPrice;
+                    $input["total_item_price"] = $itemQuantity * $itemPrice;
                     $trx = PurchaseOrderTransaction::create($input);
 
                     $poTrx = PurchaseOrderTransaction::join("purchase_order", "purchase_order_transaction.purchase_order_id", "purchase_order.id")

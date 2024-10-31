@@ -83,8 +83,9 @@
               <th>PO Number</th>
               <th>Receipt Number</th>
               <th>Item Type</th>
-              <th>Item Price (Rp)</th>
               <th>Floating Rate (Kg)</th>
+              <th>Item Price (Rp)</th>
+              <th>Item Qty</th>
               <th>Total Price (Rp)</th>
             </tr>
           </thead>
@@ -150,19 +151,22 @@
             { "targets": 4, "data": "po_number", "className": "text-center" },
             { "targets": 5, "data": "receipt_number", "className": "text-center" },
             { "targets": 6, "data": "item_type", "className": "text-center" },
-            { "targets": 7, "data": "item_price", "className": "text-center",
+            { "targets": 7, "data": "floating_rate", "className": "text-center",
               "render":function( data, type, row, meta ){
                 var val = (data/1).toFixed(0).replace('.', ',');
                 return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
               }
-            },
-            { "targets": 8, "data": "floating_rate", "className": "text-center",
+            }, { "targets": 8, "data": "item_price", "className": "text-center",
               "render":function( data, type, row, meta ){
                 var val = (data/1).toFixed(0).replace('.', ',');
                 return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
               }
-            },
-            { "targets": 9, "data": "total_price", "className": "text-end",
+            }, { "targets": 9, "data": "item_quantity", "className": "text-center",
+              "render":function( data, type, row, meta ){
+                var val = (data/1).toFixed(0).replace('.', ',');
+                return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+              }
+            }, { "targets": 10, "data": "total_price", "className": "text-end",
               "render":function( data, type, row, meta ){
                 var val = (data/1).toFixed(0).replace('.', ',');
                 return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
