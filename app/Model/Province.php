@@ -23,4 +23,15 @@ class Province extends Model
             })->select(DB::raw("id, name AS text"))->orderBy("name", "ASC")->get()->toArray();
         });
     }
+
+    public static function findBySubdistrictId($subdistrictId){
+        return Cache::remember("coverage.province.sub_district_id|$subdistrictId", config("constant.ttl"), function() use($subdistrictId){
+            return Province::join("cities", "cities.province_id", "provinces.id")
+                ->join("districts", "districts.city_id", "cities.id")
+                ->join("sub_districts", "sub_districts.district_id", "districts.id")
+                ->where("sub_districts.id", $subdistrictId)
+                ->select(DB::raw("provinces.id, provinces.name, provinces.code"))
+                ->first();
+            });
+    }
 }

@@ -42,7 +42,8 @@ class LocationController extends Controller
             $response["data"] = Subdistrict::join("districts", "districts.id", "sub_districts.district_id")
             ->join("cities", "cities.id", "districts.city_id")
             ->join("provinces", "provinces.id", "cities.province_id")
-            ->select(DB::raw("sub_districts.code, sub_districts.name AS sub_district, sub_districts.latitude, sub_districts.longitude, districts.name AS district, cities.name AS city, provinces.name AS province"))->orderby("provinces.name", "ASC")->get();
+            ->join("t_evc", "t_evc.id", "provinces.evc_id")
+            ->select(DB::raw("sub_districts.code, sub_districts.name AS sub_district, sub_districts.latitude, sub_districts.longitude, districts.name AS district, cities.name AS city, provinces.name AS province, t_evc.code AS evc_code"))->orderby("provinces.name", "ASC")->get();
         } catch(\Exception $e){
             
         }
@@ -229,7 +230,7 @@ class LocationController extends Controller
         ];
         try{
             $response["data"]["province"] = Cache::remember("location.api.coverage.province", config("constant.ttl"), function(){
-                return Province::select(DB::raw("id, name, code"))->get()->toArray();
+                return Province::leftJoin("t_evc", "t_evc.id", "provinces.evc_id")->select(DB::raw("provinces.id, provinces.name, provinces.code, t_evc.code AS evc_code, t_evc.id AS evc_id"))->get()->toArray();
             });
             $response["data"]["city"] = Cache::remember("location.api.coverage.city", config("constant.ttl"), function(){
                 return City::select(DB::raw("id, name, code, province_id"))->get()->toArray();

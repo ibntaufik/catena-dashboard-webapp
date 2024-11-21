@@ -30,4 +30,13 @@ class Evc extends Model
             return Evc::withTrashed()->where("code", $code)->first();   
         });
     }
+
+    public static function isExist($code, $provinceId){
+        return empty($code) ? null : Cache::remember("evc.code_$code|provinceid_$provinceId", config("constant.ttl"), function() use($code, $provinceId){
+            return Evc::join("provinces", "provinces.evc_id", "t_evc.id")->withTrashed()->where([
+                "t_evc.code" => $code,
+                "provinces.id" => $provinceId
+            ])->first();   
+        });
+    }
 }

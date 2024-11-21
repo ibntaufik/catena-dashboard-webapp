@@ -108,6 +108,7 @@
                 <th>Kecamatan</th>
                 <th>Desa</th>
                 <th>ID Location</th>
+                <th>EVC Code</th>
                 <th>Latitude</th>
                 <th>Longitude</th>
                 <th></th>
@@ -213,9 +214,13 @@
             { "targets": 2, "data": "district" },
             { "targets": 3, "data": "sub_district" },
             { "targets": 4, "data": "code" },
-            { "targets": 5, "data": "latitude" },
-            { "targets": 6, "data": "longitude" },
-            { "targets": 7, "data": function(data, type, row, meta){
+            { "targets": 5, "data": function(data, type, row, meta){
+                  return data.evc_code ?? "-";
+              }
+            },
+            { "targets": 6, "data": "latitude" },
+            { "targets": 7, "data": "longitude" },
+            { "targets": 8, "data": function(data, type, row, meta){
                   return '<a href="#" onclick=$(this).deleteLocation("'+data.code+'") style="cursor: pointer;"><i data-feather="trash-2"></i>';
               }
             },

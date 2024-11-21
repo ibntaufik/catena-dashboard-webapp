@@ -34,13 +34,15 @@ class EvcController extends Controller
         $input = $request->except(["_token"]);
 
         try{
+            $province = Province::findBySubdistrictId($input["sub_district_id"]);
 
-            if(Evc::findByCode($input["code"])){
-                $response["message"] = "Evc with code ".$input["code"]." already registered.";
+            if(Evc::isExist($input["code"], $province->id)){
+                $response["message"] = "Evc with code ".$input["code"]." on province ".$province->name." already registered.";
                 return response()->json($response);
             }
+            
             $input["created_by"] = Auth::user()->name;
-            $user = Evc::create($input);
+            Evc::create($input);
 
             CommonHelper::forgetCache("evc");
             
