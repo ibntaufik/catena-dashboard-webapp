@@ -236,6 +236,10 @@ class LocationController extends Controller
         try{
 
             $evcCode = $request->input("evc_code");
+            if(is_string($evcCode)){
+                $evcCode = [$evcCode];
+            }
+
             $evcId = $request->input("evc_id");
 
             if(empty($evcCode) && empty($evcId)){
@@ -252,13 +256,14 @@ class LocationController extends Controller
                     return Subdistrict::select(DB::raw("id, name, code, district_id, latitude, longitude"))->get()->toArray();
                 });
             } else {
-                $results = Cache::remember("location.api.coverage.province.evc_code|$evcCode", config("constant.ttl"), function() use($evcCode){
+
+                $results = Cache::remember("location.api.coverage.province.evc_code|".implode("-", $evcCode), config("constant.ttl"), function() use($evcCode){
                     return Province::join("t_evc", "t_evc.id", "provinces.evc_id")
                     ->join("cities", "cities.province_id", "provinces.id")
                     ->join("districts", "districts.city_id", "cities.id")
                     ->join("sub_districts", "sub_districts.district_id", "districts.id")
-                    ->when(!empty($evcCode), function($builder) use($evcCode){
-                        return $builder->where("t_evc.code", $evcCode);
+                    ->when(is_array($evcCode) && (count($evcCode) > 0), function($builder) use($evcCode){
+                        return $builder->whereIn("t_evc.code", $evcCode);
                     })
                     ->select(DB::raw("provinces.id, provinces.name, provinces.code, t_evc.code AS evc_code, t_evc.id AS evc_id, cities.id AS city_id, cities.name AS city_name, cities.code AS city_code,
                         districts.id AS district_id, districts.name AS district_name, districts.code AS district_code,
