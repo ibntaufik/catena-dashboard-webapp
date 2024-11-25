@@ -222,25 +222,96 @@ class LocationController extends Controller
         return response()->json($response);
     }
 
-    public function coverage(){
+    public function coverage(Request $request){
         $response = [
             "code"      => 400,
             "message"   => "Failed to complete request",
-            "data"      => []
+            "data"      => [
+                "province"      => [],
+                "city"          => [],
+                "district"      => [],
+                "sub_district"  => []
+            ]
         ];
         try{
-            $response["data"]["province"] = Cache::remember("location.api.coverage.province", config("constant.ttl"), function(){
-                return Province::leftJoin("t_evc", "t_evc.id", "provinces.evc_id")->select(DB::raw("provinces.id, provinces.name, provinces.code, t_evc.code AS evc_code, t_evc.id AS evc_id"))->get()->toArray();
-            });
-            $response["data"]["city"] = Cache::remember("location.api.coverage.city", config("constant.ttl"), function(){
-                return City::select(DB::raw("id, name, code, province_id"))->get()->toArray();
-            });
-            $response["data"]["district"] = Cache::remember("location.api.coverage.district", config("constant.ttl"), function(){
-                return District::select(DB::raw("id, name, code, city_id"))->get()->toArray();
-            });
-            $response["data"]["sub_district"] = Cache::remember("location.api.coverage.sub_district", config("constant.ttl"), function(){
-                return Subdistrict::select(DB::raw("id, name, code, district_id, latitude, longitude"))->get()->toArray();
-            });
+
+            $evcCode = $request->input("evc_code");
+            $evcId = $request->input("evc_id");
+
+            if(empty($evcCode) && empty($evcId)){
+                $response["data"]["province"] = Cache::remember("location.api.coverage.province", config("constant.ttl"), function(){
+                    return Province::leftJoin("t_evc", "t_evc.id", "provinces.evc_id")->select(DB::raw("provinces.id, provinces.name, provinces.code, t_evc.code AS evc_code, t_evc.id AS evc_id"))->get()->toArray();
+                });
+                $response["data"]["city"] = Cache::remember("location.api.coverage.city", config("constant.ttl"), function(){
+                    return City::select(DB::raw("id, name, code, province_id"))->get()->toArray();
+                });
+                $response["data"]["district"] = Cache::remember("location.api.coverage.district", config("constant.ttl"), function(){
+                    return District::select(DB::raw("id, name, code, city_id"))->get()->toArray();
+                });
+                $response["data"]["sub_district"] = Cache::remember("location.api.coverage.sub_district", config("constant.ttl"), function(){
+                    return Subdistrict::select(DB::raw("id, name, code, district_id, latitude, longitude"))->get()->toArray();
+                });
+            } else {
+                $results = Cache::remember("location.api.coverage.province.evc_code|$evcCode", config("constant.ttl"), function() use($evcCode){
+                    return Province::join("t_evc", "t_evc.id", "provinces.evc_id")
+                    ->join("cities", "cities.province_id", "provinces.id")
+                    ->join("districts", "districts.city_id", "cities.id")
+                    ->join("sub_districts", "sub_districts.district_id", "districts.id")
+                    ->when(!empty($evcCode), function($builder) use($evcCode){
+                        return $builder->where("t_evc.code", $evcCode);
+                    })
+                    ->select(DB::raw("provinces.id, provinces.name, provinces.code, t_evc.code AS evc_code, t_evc.id AS evc_id, cities.id AS city_id, cities.name AS city_name, cities.code AS city_code,
+                        districts.id AS district_id, districts.name AS district_name, districts.code AS district_code,
+                        sub_districts.id AS sub_district_id, sub_districts.name AS sub_district_name, sub_districts.code AS sub_district_code, sub_districts.latitude, sub_districts.longitude"))
+                    ->get()->toArray();
+                });
+
+                $province = [];
+                $city = [];
+                $district = [];
+                $subdistrict = [];
+                foreach ($results as $key => $value) {
+                    if(!in_array($value["name"], $province)){
+                        $province[] = $value["name"];
+                        $response["data"]["province"][] = [
+                            "id"        => $value["id"],
+                            "name"      => $value["name"],
+                            "code"      => $value["code"],
+                            "evc_code"  => $value["evc_code"],
+                            "evc_id"    => $value["evc_id"],
+                        ];
+                    }
+                    if(!in_array($value["city_name"], $city)){
+                        $city[] = $value["city_name"];
+                        $response["data"]["city"][] = [
+                            "id"            => $value["city_id"],
+                            "name"          => $value["city_name"],
+                            "code"          => $value["city_code"],
+                            "province_id"   => $value["id"],
+                        ];
+                    }
+                    if(!in_array($value["district_name"], $district)){
+                        $district[] = $value["district_name"];
+                        $response["data"]["district"][] = [
+                            "id"            => $value["district_id"],
+                            "name"          => $value["district_name"],
+                            "code"          => $value["district_code"],
+                            "city_id"       => $value["city_id"],
+                        ];
+                    }
+                    if(!in_array($value["sub_district_name"], $subdistrict)){
+                        $subdistrict[] = $value["sub_district_name"];
+                        $response["data"]["sub_district"][] = [
+                            "id"            => $value["sub_district_id"],
+                            "name"          => $value["sub_district_name"],
+                            "code"          => $value["sub_district_code"],
+                            "district_id"   => $value["district_id"],
+                            "latitude"      => $value["latitude"],
+                            "longitude"     => $value["longitude"],
+                        ];
+                    }
+                };
+            }
 
             $response["code"] = 200;
             $response["message"] = "done";

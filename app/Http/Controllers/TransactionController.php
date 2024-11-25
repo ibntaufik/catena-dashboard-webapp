@@ -282,4 +282,89 @@ class TransactionController extends Controller
         
         return response()->json($response);
     }
+
+    public function listByUser(Request $request){
+        $response = [
+            "code"      => 400,
+            "message"   => "Failed to complete request",
+            "count"     => 0,
+            "data"      => []
+        ];
+
+        try{
+            $page = $request->input("start");
+            $limit = $request->input("limit");
+            $userId = $request->input("vcp_user_id");
+            $status = $request->input("status");
+            
+            if(!Auth::check() && empty($userId)){
+                $response["message"] = "VCP user id cannot be empty.";
+            } else {
+                $cacheName = "";
+                if(!empty($status)){
+                    $cacheName .= "status_$status";
+                }
+
+                if(!empty($cacheName)){
+                    $cacheName .= "|";
+                }
+                if(!empty($userId)){
+                    $cacheName .= "userId_$userId";
+                }
+
+                $response["count"] = 0 + Cache::remember("count.purchase_order_transaction.$cacheName", 120, function() use($status, $userId){
+                    return PurchaseOrderTransaction::join("purchase_order", "purchase_order_transaction.purchase_order_id", "purchase_order.id")
+                    ->join("account_farmer", "purchase_order_transaction.account_farmer_id", "account_farmer.id")
+                    ->join("users", "users.id", "account_farmer.user_id")
+                    ->join("account_vch", "purchase_order.account_vch_id", "account_vch.id")
+                    ->when($status, function($builder) use($status){
+                        return $builder->where("purchase_order_transaction.status", $status);
+                    })
+                    ->when($userId, function($builder) use($userId){
+                        return $builder->where("users.id", $userId);
+                    })
+                    ->count();
+                });
+
+                $response["data"] = Cache::remember("list.purchase_order_transaction.$cacheName", 120, function() use($status, $userId, $page, $limit){
+                    $transaction = PurchaseOrderTransaction::join("purchase_order", "purchase_order_transaction.purchase_order_id", "purchase_order.id")
+                    ->join("account_farmer", "purchase_order_transaction.account_farmer_id", "account_farmer.id")
+                    ->join("users", "users.id", "account_farmer.user_id")
+                    ->join("account_vch", "purchase_order.account_vch_id", "account_vch.id")
+                    
+                    ->when($status, function($builder) use($status){
+                        return $builder->where("purchase_order_transaction.status", $status);
+                    })
+                    ->when($userId, function($builder) use($userId){
+                        return $builder->where("users.id", $userId);
+                    })
+                    ->select(DB::raw("po_number, account_farmer.code AS farmer_code, users.name AS farmer_name, transaction_id, receipt_number, purchase_order_transaction.item_quantity, purchase_order_transaction.item_price AS item_price, transaction_date, floating_rate, purchase_order_transaction.vcp_id, users.id AS vcp_user_id"))
+                    ->groupBy(DB::raw("po_number, account_farmer.code, users.name, transaction_id, receipt_number, purchase_order_transaction.item_quantity, purchase_order_transaction.item_price, transaction_date, floating_rate, users.id, purchase_order_transaction.created_at, purchase_order_transaction.vcp_id"))
+                    ->orderBy("purchase_order_transaction.created_at", "DESC")
+                    ->get();
+
+                    foreach ($transaction as $key => $value) {
+                        $vcp = VCP::findById($value->vcp_id);
+
+                        $transaction[$key]["vcp_code"] = $vcp->vcp_code;
+                        unset($transaction[$key]["vcp_id"]);
+                    }
+                    return $transaction;
+                });
+
+                if($response["count"] > 0){
+                    $response["code"] = 200;
+                    $response["message"] = "Success";
+                } else {
+                    $response["code"] = 404;
+                    $response["message"] = "Not found";
+                }
+            }
+        } catch(\Exception $e){
+            \Log::error($e->getMessage());
+            \Log::error($e->getTraceAsString());
+        }
+        
+        return response()->json($response);
+    }
 }

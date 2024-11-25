@@ -36,7 +36,11 @@ Route::group(['prefix' => 'master-data'], function(){
 });
 
 Route::group(['prefix' => 'transaction'], function(){
-    Route::post('list', 'TransactionController@list')->middleware('authapi:mobile');
+    Route::group(['prefix' => 'list'], function(){
+        Route::post('', 'TransactionController@list')->middleware('authapi:mobile');
+        Route::post('user', 'TransactionController@listByUser')->middleware('authapi:mobile');
+    });    
+    
     Route::post('purchase-order', 'TransactionController@submit')->middleware('authapi:mobile');
 
     Route::group(['prefix' => 'farmer'], function(){

@@ -15,7 +15,11 @@ class MobileController extends Controller
         $response = [
             "code"      => 400,
             "message"   => "Failed to login.",
-            "data"      => [],
+            "data"      => [
+                "evc"   => [],
+                "vch"   => [],
+                "vcp"   => [],
+            ],
         ];
 
         try {
@@ -68,10 +72,14 @@ class MobileController extends Controller
                         ->where([
                             "accounts.user_id"     => $user->id,
                         ])
-                        ->select(DB::raw("CONCAT(t_evc.code, '-', t_vch.code) AS code"))->get()
+                        ->select(DB::raw("CONCAT(t_evc.code, '-', t_vch.code) AS code, t_evc.code AS evc_code"))->get()
                         ->toArray();
                         if(!empty($vchs)){
                             foreach ($vchs as $key => $vch) {
+                                if(!in_array($vch["evc_code"], $response["data"]["evc"])){
+                                    $response["data"]["evc"][] = $vch["evc_code"];
+                                }
+
                                 $response["data"]["vch"][] = $vch["code"];
 
                                 $vchCode = explode("-", $vch["code"]);
@@ -101,12 +109,15 @@ class MobileController extends Controller
                             ->where([
                                 "accounts.user_id" => $user->id,
                             ])
-                            ->select(DB::raw("CONCAT(t_evc.code, '-', t_vch.code, '-', t_vcp.code) AS code"))
+                            ->select(DB::raw("CONCAT(t_evc.code, '-', t_vch.code, '-', t_vcp.code) AS code, t_evc.code AS evc_code"))
                             ->groupBy(DB::raw("t_evc.code, t_vch.code, t_vcp.code"))
                             ->get()
                             ->toArray();
 
                             foreach ($vcps as $vcp) {
+                                if(!in_array($vcp["evc_code"], $response["data"]["evc"])){
+                                    $response["data"]["evc"][] = $vcp["evc_code"];
+                                }
                                 $response["data"]["vcp"][] = $vcp["code"];
                             }
                         }
