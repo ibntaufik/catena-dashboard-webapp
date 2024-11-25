@@ -2,6 +2,7 @@
 
 namespace App\Model;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -47,5 +48,11 @@ class User extends Authenticatable
     public static function isPhoneExist($phone){
         $user = User::where("phone", $phone)->first();
         return empty($user) ? false : true;
+    }
+
+    public static function findById($id){
+        return empty($id) ? null : Cache::remember("user.id|$id", config("constant.ttl"), function() use($id){
+            return User::find($id);
+        }); 
     }
 }

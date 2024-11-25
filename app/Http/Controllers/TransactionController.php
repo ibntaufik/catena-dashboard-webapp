@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\CommonHelper;
 use App\Model\Farmer;
+use App\Model\User;
 use App\Model\HOAccount;
 use App\Model\PurchaseOrder;
 use App\Model\PurchaseOrderTransaction;
@@ -328,26 +329,30 @@ class TransactionController extends Controller
 
                 $response["data"] = Cache::remember("list.purchase_order_transaction.$cacheName", 120, function() use($status, $userId, $page, $limit){
                     $transaction = PurchaseOrderTransaction::join("purchase_order", "purchase_order_transaction.purchase_order_id", "purchase_order.id")
-                    ->join("account_farmer", "purchase_order_transaction.account_farmer_id", "account_farmer.id")
-                    ->join("users", "users.id", "account_farmer.user_id")
+                    ->join("users", "users.id", "purchase_order_transaction.vcp_user_id")
                     ->join("account_vch", "purchase_order.account_vch_id", "account_vch.id")
-                    
                     ->when($status, function($builder) use($status){
                         return $builder->where("purchase_order_transaction.status", $status);
                     })
                     ->when($userId, function($builder) use($userId){
-                        return $builder->where("users.id", $userId);
+                        return $builder->where("purchase_order_transaction.vcp_user_id", $userId);
                     })
-                    ->select(DB::raw("po_number, account_farmer.code AS farmer_code, users.name AS farmer_name, transaction_id, receipt_number, purchase_order_transaction.item_quantity, purchase_order_transaction.item_price AS item_price, transaction_date, floating_rate, purchase_order_transaction.vcp_id, users.id AS vcp_user_id"))
-                    ->groupBy(DB::raw("po_number, account_farmer.code, users.name, transaction_id, receipt_number, purchase_order_transaction.item_quantity, purchase_order_transaction.item_price, transaction_date, floating_rate, users.id, purchase_order_transaction.created_at, purchase_order_transaction.vcp_id"))
+                    ->select(DB::raw("po_number, users.name AS farmer_name, transaction_id, receipt_number, account_farmer_id, purchase_order_transaction.item_quantity, purchase_order_transaction.item_price AS item_price, transaction_date, floating_rate, purchase_order_transaction.vcp_id, users.id AS vcp_user_id"))
+                    ->groupBy(DB::raw("po_number, users.name, transaction_id, receipt_number, account_farmer_id, purchase_order_transaction.item_quantity, purchase_order_transaction.item_price, transaction_date, floating_rate, users.id, purchase_order_transaction.created_at, purchase_order_transaction.vcp_id"))
                     ->orderBy("purchase_order_transaction.created_at", "DESC")
                     ->get();
 
                     foreach ($transaction as $key => $value) {
-                        $vcp = VCP::findById($value->vcp_id);
 
+                        $vcp = VCP::findById($value->vcp_id);
                         $transaction[$key]["vcp_code"] = $vcp->vcp_code;
                         unset($transaction[$key]["vcp_id"]);
+
+                        $farmer = Farmer::findById($value->account_farmer_id);
+                        $user = User::findById($farmer->user_id);
+                        $transaction[$key]["farmer_name"] = $user->name;
+                        $transaction[$key]["farmer_code"] = $farmer->code;
+                        unset($transaction[$key]["account_farmer_id"]);
                     }
                     return $transaction;
                 });
