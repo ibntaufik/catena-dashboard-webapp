@@ -315,14 +315,13 @@ class TransactionController extends Controller
 
                 $response["count"] = 0 + Cache::remember("count.purchase_order_transaction.$cacheName", 120, function() use($status, $userId){
                     return PurchaseOrderTransaction::join("purchase_order", "purchase_order_transaction.purchase_order_id", "purchase_order.id")
-                    ->join("account_farmer", "purchase_order_transaction.account_farmer_id", "account_farmer.id")
-                    ->join("users", "users.id", "account_farmer.user_id")
+                    ->join("users", "users.id", "purchase_order_transaction.vcp_user_id")
                     ->join("account_vch", "purchase_order.account_vch_id", "account_vch.id")
                     ->when($status, function($builder) use($status){
                         return $builder->where("purchase_order_transaction.status", $status);
                     })
                     ->when($userId, function($builder) use($userId){
-                        return $builder->where("users.id", $userId);
+                        return $builder->where("purchase_order_transaction.vcp_user_id", $userId);
                     })
                     ->count();
                 });
