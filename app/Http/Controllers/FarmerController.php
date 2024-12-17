@@ -394,6 +394,133 @@ class FarmerController extends Controller
         return response()->json($response);
     }
 
+    public function update(Request $request){
+        
+        $response = [
+            "code"      => 400,
+            "message"   => "Failed to complete request",
+            "data"      => []
+        ];
+
+        $input = $request->except(["_token"]);
+        $file = $request->input('photo');
+        $fileIdNumberImage = $request->input('id_number_image');
+
+        if(!Farmer::isIdNumberExist($input["id_number"])){
+            $response["message"] = "ID number ".$input["id_number"]." is not registered.";
+            return response()->json($response);
+        }
+
+        if(!empty($input["code"]) && empty(Farmer::findByCode($input["code"]))){
+            $response["message"] = "Farmer code ".$input["code"]." is not registered.";
+            return response()->json($response);
+        }
+
+        if(empty($input["vch_code"]) || empty($request->input("vch_code"))){
+            $response["data"]["vch_code"] = "VCH Code is required.";
+            return response()->json($response);
+        }
+
+        $vch = VCH::findByCode($input["vch_code"]);
+        if(empty($vch)){
+            $response["message"] = "VCH Code ".$input["vch_code"]." is registered.";
+            return response()->json($response);
+        } else {
+            $input["vch_id"] = $vch->id;
+            unset($input["vch_code"]);
+        }
+
+        if(!empty($file)){
+            // validate image photo
+            $result = CommonHelper::validateImage($file);
+            if(!$result["is_valid"]){
+                $response["message"] = $result["message"];
+                return response()->json($response);
+            }
+            $input["file_type_photo"] = $result["file_type"];
+        }
+
+        if(!empty($fileIdNumberImage)){
+            // validate image id number
+            $result = CommonHelper::validateImage($fileIdNumberImage);
+            if(!$result["is_valid"]){
+                $response["message"] = $result["message"];
+                return response()->json($response);
+            }
+            $input["file_type_id_number"] = $result["file_type"];
+        }
+
+        try{
+            $prefix = Subdistrict::where("sub_districts.id", $input["sub_district_id"])
+                ->select(DB::raw("sub_districts.code"))
+                ->first();
+            
+            $farmer = Farmer::withTrashed()->where("sub_district_id", $input["sub_district_id"])
+                ->orderBy("code", "DESC")->select("code")->first();
+
+            if((array_key_exists("code", $input) && empty($input["code"])) || !(array_key_exists("code", $input))){
+                if(empty($farmer)){
+                    $input["code"] = $prefix->code.str_pad(1, 5, "0", STR_PAD_LEFT);
+                } else {
+                    $input["code"] = $prefix->code.str_pad((substr($farmer->code, 12) + 1), 5, "0", STR_PAD_LEFT);
+                }
+            }
+
+            if (empty($input["email"])) {
+                $count = User::count();
+                $input["email"] = "farmer$count@gmail.com";
+            }
+            
+            $dataFarmer = [
+                "code"              => $input["code"],
+                "sub_district_id"   => $input["sub_district_id"],
+                "latitude"          => $input["latitude"],
+                "longitude"         => $input["longitude"],
+                "vch_id"            => $input["vch_id"],
+                "address"           => empty($input["address"]) ? "-" : $input["address"],
+                "thumb_finger"      => array_key_exists("thumb_finger", $input) ? $input["thumb_finger"] : null,
+                "index_finger"      => array_key_exists("index_finger", $input) ? $input["index_finger"] : null,
+                "updated_by"        => "Desktop App",
+                "updated_at"        => date("Y-m-d H:i:s")
+            ];
+
+            if(!empty($file)){
+                $fileName = date("Ymd")."_photo_".$input["id_number"].$input["file_type_photo"];
+                Storage::disk("farmerId")->put($fileName, file_get_contents($file));
+                $dataFarmer["image_photo_name"] = $fileName;
+            }
+            
+            if(!empty($fileIdNumberImage)){
+                $fileName = date("Ymd")."_id_number_".$input["id_number"].$input["file_type_id_number"];
+                Storage::disk("farmerId")->put($fileName, file_get_contents($fileIdNumberImage));
+                $dataFarmer["image_id_number_name"] = $fileName;
+            }
+
+            Farmer::where([
+                "id_number" => $input["id_number"]
+            ])->update($dataFarmer);
+
+            $response["data"] = Farmer::join("sub_districts", "sub_districts.id", "account_farmer.sub_district_id")
+                ->leftJoin("users", "account_farmer.user_id", "users.id")
+                ->join("t_vch", "t_vch.id", "account_farmer.vch_id")
+                ->join("districts", "districts.id", "sub_districts.district_id")
+                ->join("cities", "cities.id", "districts.city_id")
+                ->join("provinces", "provinces.id", "cities.province_id")
+                ->where([
+                    "id_number" => $input["id_number"]
+                ])
+                ->select(DB::raw("account_farmer.code AS farmer_code, users.name, account_farmer.thumb_finger, account_farmer.index_finger, users.email, account_farmer.address, account_farmer.latitude, account_farmer.longitude, users.phone, account_farmer.id_number, sub_districts.code AS sub_district_code, sub_districts.name AS sub_district, districts.name AS district, cities.name AS city, provinces.name AS province"))->orderBy("account_farmer.created_at", "DESC")->first();
+            $response["code"] = 200;
+            $response["message"] = "Success";
+            CommonHelper::forgetCache("farmer");
+        } catch(\Exception $e){
+            \Log::error($e->getMessage());
+            \Log::error($e->getTraceAsString());
+        }
+        
+        return response()->json($response);
+    }
+
     public function readAssetPublic(Request $request){
         
         $response = [

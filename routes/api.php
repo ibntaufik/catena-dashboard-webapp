@@ -24,6 +24,7 @@ Route::group(['prefix' => 'master-data'], function(){
     Route::group(['prefix' => 'farmer'], function(){
         Route::post('', 'FarmerController@list')->middleware('authapi:mobile');
         Route::post('register', 'FarmerController@register')->middleware('authapi:mobile');
+        Route::post('update', 'FarmerController@update')->middleware('authapi:mobile');
     });
     Route::post('vcp', 'VCPController@list')->middleware('authapi:mobile');
     Route::group(['prefix' => 'item'], function(){
