@@ -417,7 +417,7 @@ class FarmerController extends Controller
         }
 
         if(empty($input["vch_code"]) || empty($request->input("vch_code"))){
-            $response["message"]["vch_code"] = "VCH Code is required.";
+            $response["message"] = "VCH Code is required.";
             return response()->json($response);
         }
 
