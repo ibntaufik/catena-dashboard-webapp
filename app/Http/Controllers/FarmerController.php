@@ -404,8 +404,6 @@ class FarmerController extends Controller
         ];
 
         $input = $request->except(["_token"]);
-        $file = $request->input('photo');
-        $fileIdNumberImage = $request->input('id_number_image');
 
         if(!Farmer::isIdNumberExist($input["id_number"])){
             $response["message"] = "ID number ".$input["id_number"]." is not registered.";
@@ -428,26 +426,6 @@ class FarmerController extends Controller
                 $input["vch_id"] = $vch->id;
                 unset($input["vch_code"]);
             }
-        }
-
-        if(!empty($file)){
-            // validate image photo
-            $result = CommonHelper::validateImage($file);
-            if(!$result["is_valid"]){
-                $response["message"] = $result["message"];
-                return response()->json($response);
-            }
-            $input["file_type_photo"] = $result["file_type"];
-        }
-
-        if(!empty($fileIdNumberImage)){
-            // validate image id number
-            $result = CommonHelper::validateImage($fileIdNumberImage);
-            if(!$result["is_valid"]){
-                $response["message"] = $result["message"];
-                return response()->json($response);
-            }
-            $input["file_type_id_number"] = $result["file_type"];
         }
 
         try{
@@ -485,18 +463,6 @@ class FarmerController extends Controller
 
             if(isset($input["vch_id"]) && !empty($input["vch_id"])){
                 $dataFarmer["vch_id"] = $input["vch_id"];
-            }
-
-            if(!empty($file)){
-                $fileName = date("Ymd")."_photo_".$input["id_number"].$input["file_type_photo"];
-                Storage::disk("farmerId")->put($fileName, file_get_contents($file));
-                $dataFarmer["image_photo_name"] = $fileName;
-            }
-            
-            if(!empty($fileIdNumberImage)){
-                $fileName = date("Ymd")."_id_number_".$input["id_number"].$input["file_type_id_number"];
-                Storage::disk("farmerId")->put($fileName, file_get_contents($fileIdNumberImage));
-                $dataFarmer["image_id_number_name"] = $fileName;
             }
 
             Farmer::where([
