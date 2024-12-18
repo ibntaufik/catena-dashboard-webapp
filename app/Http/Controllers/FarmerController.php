@@ -429,29 +429,9 @@ class FarmerController extends Controller
         }
 
         try{
-            $prefix = Subdistrict::where("sub_districts.id", $input["sub_district_id"])
-                ->select(DB::raw("sub_districts.code"))
-                ->first();
-            
-            $farmer = Farmer::withTrashed()->where("sub_district_id", $input["sub_district_id"])
-                ->orderBy("code", "DESC")->select("code")->first();
-
-            if((array_key_exists("code", $input) && empty($input["code"])) || !(array_key_exists("code", $input))){
-                if(empty($farmer)){
-                    $input["code"] = $prefix->code.str_pad(1, 5, "0", STR_PAD_LEFT);
-                } else {
-                    $input["code"] = $prefix->code.str_pad((substr($farmer->code, 12) + 1), 5, "0", STR_PAD_LEFT);
-                }
-            }
-
-            if (empty($input["email"])) {
-                $count = User::count();
-                $input["email"] = "farmer$count@gmail.com";
-            }
             
             $dataFarmer = [
                 "code"              => $input["code"],
-                "sub_district_id"   => $input["sub_district_id"],
                 "latitude"          => $input["latitude"],
                 "longitude"         => $input["longitude"],
                 "address"           => empty($input["address"]) ? "-" : $input["address"],
