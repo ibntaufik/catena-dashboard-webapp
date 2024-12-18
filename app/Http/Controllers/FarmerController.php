@@ -241,7 +241,8 @@ class FarmerController extends Controller
                 ->when(count($vchCode) > 0, function($builder) use($vchCode){
                     return $builder->whereIn("t_vch.code", $vchCode);
                 })
-                ->select(DB::raw("account_farmer.code AS farmer_code, users.name, account_farmer.thumb_finger, account_farmer.index_finger, users.email, account_farmer.address, account_farmer.latitude, account_farmer.longitude, users.phone, account_farmer.id_number, sub_districts.code AS sub_district_code, sub_districts.name AS sub_district, districts.name AS district, cities.name AS city, provinces.name AS province"))->orderBy("account_farmer.created_at", "DESC")
+                ->select(DB::raw("account_farmer.code AS farmer_code, users.name, account_farmer.thumb_finger, account_farmer.index_finger, users.email, account_farmer.address, account_farmer.latitude, account_farmer.longitude, users.phone, account_farmer.id_number, sub_districts.code AS sub_district_code, sub_districts.name AS sub_district, districts.name AS district, cities.name AS city, provinces.name AS province, t_vch.code AS vch_code"))
+                ->orderBy("account_farmer.created_at", "DESC")
                 ->get();
             });
 
@@ -417,17 +418,16 @@ class FarmerController extends Controller
         }
 
         if(empty($input["vch_code"]) || empty($request->input("vch_code"))){
-            $response["message"] = "VCH Code is required.";
-            return response()->json($response);
-        }
-
-        $vch = VCH::findByCode($input["vch_code"]);
-        if(empty($vch)){
-            $response["message"] = "VCH Code ".$input["vch_code"]." is registered.";
-            return response()->json($response);
+            // Nothing to do
         } else {
-            $input["vch_id"] = $vch->id;
-            unset($input["vch_code"]);
+            $vch = VCH::findByCode($input["vch_code"]);
+            if(empty($vch)){
+                $response["message"] = "VCH Code ".$input["vch_code"]." is not registered.";
+                return response()->json($response);
+            } else {
+                $input["vch_id"] = $vch->id;
+                unset($input["vch_code"]);
+            }
         }
 
         if(!empty($file)){
@@ -476,13 +476,16 @@ class FarmerController extends Controller
                 "sub_district_id"   => $input["sub_district_id"],
                 "latitude"          => $input["latitude"],
                 "longitude"         => $input["longitude"],
-                "vch_id"            => $input["vch_id"],
                 "address"           => empty($input["address"]) ? "-" : $input["address"],
                 "thumb_finger"      => array_key_exists("thumb_finger", $input) ? $input["thumb_finger"] : null,
                 "index_finger"      => array_key_exists("index_finger", $input) ? $input["index_finger"] : null,
                 "updated_by"        => "Desktop App",
                 "updated_at"        => date("Y-m-d H:i:s")
             ];
+
+            if(isset($input["vch_id"]) && !empty($input["vch_id"])){
+                $dataFarmer["vch_id"] = $input["vch_id"];
+            }
 
             if(!empty($file)){
                 $fileName = date("Ymd")."_photo_".$input["id_number"].$input["file_type_photo"];
@@ -509,7 +512,7 @@ class FarmerController extends Controller
                 ->where([
                     "id_number" => $input["id_number"]
                 ])
-                ->select(DB::raw("account_farmer.code AS farmer_code, users.name, account_farmer.thumb_finger, account_farmer.index_finger, users.email, account_farmer.address, account_farmer.latitude, account_farmer.longitude, users.phone, account_farmer.id_number, sub_districts.code AS sub_district_code, sub_districts.name AS sub_district, districts.name AS district, cities.name AS city, provinces.name AS province"))->orderBy("account_farmer.created_at", "DESC")->first();
+                ->select(DB::raw("account_farmer.code AS farmer_code, users.name, account_farmer.thumb_finger, account_farmer.index_finger, users.email, account_farmer.address, account_farmer.latitude, account_farmer.longitude, users.phone, account_farmer.id_number, sub_districts.code AS sub_district_code, sub_districts.name AS sub_district, districts.name AS district, cities.name AS city, provinces.name AS province, t_vch.code AS vch_code"))->orderBy("account_farmer.created_at", "DESC")->first();
             $response["code"] = 200;
             $response["message"] = "Success";
             CommonHelper::forgetCache("farmer");
