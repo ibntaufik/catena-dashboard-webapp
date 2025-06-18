@@ -103,6 +103,7 @@ Route::group(['middleware' => 'auth'], function () {
             Route::get('latest-history', 'PurchaseOrderController@latestHistory')->name("purchase-order.latest-history");
             Route::get('', 'TransactionController@index')->name("purchase-order.index")->middleware("can:administrator");
             Route::get('list', 'TransactionController@list')->name("purchase-order.transaction.grid-list")->middleware("can:administrator");
+            Route::get('detail', 'TransactionController@detail')->name("purchase-order.transaction.detail")->middleware("can:administrator");
         });
     });
 });

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use DateTime;
 use App\Helpers\CommonHelper;
 use App\Model\Farmer;
 use App\Model\User;
@@ -60,7 +61,73 @@ class TransactionController extends Controller
                     $vchCode = [];
                 }
 
-                $response["count"] = Cache::remember("count.purchase_order_transaction.$cacheName", 120, function() use($vchCode, $status){
+                if($page){
+                    $cacheName .= ".page|$page";
+                }
+                
+                $farmerCode = $request->input("farmer_code");
+                if(${"farmerCode"}){
+                    $cacheName .= ".farmer_code|$farmerCode";
+                }
+                
+                $vcpCode = $request->input("vcp_code");
+                if($vcpCode){
+                    $cacheName .= ".vcp_code|$vcpCode";
+                }
+                
+                $transactionId = $request->input("transaction_id");
+                if($transactionId){
+                    $cacheName .= ".transaction_id|$transactionId";
+                }
+                
+                $poNumber = $request->input("po_number");
+                if($poNumber){
+                    $cacheName .= ".po_number|$poNumber";
+                }
+                
+                $receiptNumber = $request->input("receipt_number");
+                if($receiptNumber){
+                    $cacheName .= ".receipt_number|$receiptNumber";
+                }
+                
+                $itemType = $request->input("item_type");
+                if($itemType){
+                    $cacheName .= ".item_type|$itemType";
+                }
+                
+                $floatingRate = $request->input("floating_rate");
+                if($floatingRate){
+                    $cacheName .= ".floating_rate|$floatingRate";
+                }
+                
+                $itemPrice = $request->input("item_price");
+                if($itemPrice){
+                    $cacheName .= ".item_price|$itemPrice";
+                }
+                
+                $itemQuantity = $request->input("item_quantity");
+                if($itemQuantity){
+                    $cacheName .= ".item_quantity|$itemQuantity";
+                }
+
+                $totalPrice = $request->input("total_price");
+                if($totalPrice){
+                    $cacheName .= ".total_price|$totalPrice";
+                }
+
+                $dateRange = $request->input("daterange_transaction");
+                $startDate = "";
+                $endDate = "";
+                if($dateRange){
+                    $dateRange = explode(" to ",$dateRange);
+                    $startDate = DateTime::createFromFormat('d-m-Y', $dateRange[0])->format('Y-m-d');
+                    $endDate = DateTime::createFromFormat('d-m-Y', $dateRange[1])->format('Y-m-d');
+
+                    $cacheName .= ".start_date|$startDate";
+                    $cacheName .= ".end_date|$endDate";
+                }
+
+                $response["count"] = Cache::remember("count.purchase_order_transaction$cacheName", 120, function() use($vchCode, $status, $farmerCode, $vcpCode, $transactionId, $poNumber, $receiptNumber, $itemType, $floatingRate, $itemPrice, $itemQuantity, $totalPrice, $startDate, $endDate){
                     return PurchaseOrderTransaction::join("purchase_order", "purchase_order_transaction.purchase_order_id", "purchase_order.id")
                     ->join("account_farmer", "purchase_order_transaction.account_farmer_id", "account_farmer.id")
                     ->join("users", "users.id", "account_farmer.user_id")
@@ -72,13 +139,50 @@ class TransactionController extends Controller
                     ->when(count($vchCode) > 0, function($builder) use($vchCode){
                         return $builder->whereIn("t_vch.code", $vchCode);
                     })
+                    ->when($farmerCode, function($builder) use($farmerCode){
+                        return $builder->where("account_farmer.code", $farmerCode);
+                    })
+                    ->when($vcpCode, function($builder) use($vcpCode){
+                        return $builder->join("t_vcp", "t_vcp.id", "purchase_order_transaction.vcp_id")
+                        ->where("t_vcp.code", $vcpCode);
+                    })
+                    ->when($transactionId, function($builder) use($transactionId){
+                        return $builder->where("purchase_order_transaction.transaction_id", $transactionId);
+                    })
+                    ->when($poNumber, function($builder) use($poNumber){
+                        return $builder->where("purchase_order.po_number", $poNumber);
+                    })
+                    ->when($receiptNumber, function($builder) use($receiptNumber){
+                        return $builder->where("purchase_order_transaction.receipt_number", $receiptNumber);
+                    })
+                    ->when($receiptNumber, function($builder) use($receiptNumber){
+                        return $builder->where("purchase_order_transaction.receipt_number", $receiptNumber);
+                    })
+                    ->when($itemType, function($builder) use($itemType){
+                        return $builder->whereRaw("UPPER(name) LIKE ?", [strtoupper("$itemType%")]);
+                    })
+                    ->when($floatingRate, function($builder) use($floatingRate){
+                        return $builder->where("purchase_order_transaction.floating_rate", $floatingRate);
+                    })
+                    ->when($itemPrice, function($builder) use($itemPrice){
+                        return $builder->where("purchase_order_transaction.item_price", $itemPrice);
+                    })
+                    ->when($itemQuantity, function($builder) use($itemQuantity){
+                        return $builder->where("purchase_order_transaction.item_quantity", $itemQuantity);
+                    })
+                    ->when($totalPrice, function($builder) use($totalPrice){
+                        return $builder->where("purchase_order_transaction.total_item_price", $totalPrice);
+                    })
+                    ->when($startDate && $endDate, function($builder) use($startDate, $endDate){
+                        return $builder->whereBetween("purchase_order_transaction.transction_date", [$startDate, $endDate]);
+                    })
                     ->when($status, function($builder) use($status){
                         return $builder->where("purchase_order_transaction.status", $status);
                     })
                     ->count();
                 });
 
-                $response["data"] = Cache::remember("list.purchase_order_transaction.$cacheName", 120, function() use($vchCode, $status, $page, $limit){
+                $response["data"] = Cache::remember("list.purchase_order_transaction$cacheName", 120, function() use($vchCode, $status, $farmerCode, $vcpCode, $transactionId, $poNumber, $receiptNumber, $itemType, $floatingRate, $itemPrice, $itemQuantity, $totalPrice, $startDate, $endDate, $page, $limit){
                     $transaction = PurchaseOrderTransaction::join("purchase_order", "purchase_order_transaction.purchase_order_id", "purchase_order.id")
                     ->join("account_farmer", "purchase_order_transaction.account_farmer_id", "account_farmer.id")
                     ->join("users", "users.id", "account_farmer.user_id")
@@ -92,6 +196,46 @@ class TransactionController extends Controller
                     })
                     ->when($status, function($builder) use($status){
                         return $builder->where("purchase_order_transaction.status", $status);
+                    })
+                    ->when($farmerCode, function($builder) use($farmerCode){
+                        return $builder->where("account_farmer.code", $farmerCode);
+                    })
+                    ->when($vcpCode, function($builder) use($vcpCode){
+                        return $builder->join("t_vcp", "t_vcp.id", "purchase_order_transaction.vcp_id")
+                        ->where("t_vcp.code", $vcpCode);
+                    })
+                    ->when($transactionId, function($builder) use($transactionId){
+                        return $builder->where("purchase_order_transaction.transaction_id", $transactionId);
+                    })
+                    ->when($poNumber, function($builder) use($poNumber){
+                        return $builder->where("purchase_order.po_number", $poNumber);
+                    })
+                    ->when($receiptNumber, function($builder) use($receiptNumber){
+                        return $builder->where("purchase_order_transaction.receipt_number", $receiptNumber);
+                    })
+                    ->when($receiptNumber, function($builder) use($receiptNumber){
+                        return $builder->where("purchase_order_transaction.receipt_number", $receiptNumber);
+                    })
+                    ->when($itemType, function($builder) use($itemType){
+                        return $builder->whereRaw("UPPER(name) LIKE ?", [strtoupper("$itemType%")]);
+                    })
+                    ->when($floatingRate, function($builder) use($floatingRate){
+                        return $builder->where("purchase_order_transaction.floating_rate", $floatingRate);
+                    })
+                    ->when($itemPrice, function($builder) use($itemPrice){
+                        return $builder->where("purchase_order_transaction.item_price", $itemPrice);
+                    })
+                    ->when($itemQuantity, function($builder) use($itemQuantity){
+                        return $builder->where("purchase_order_transaction.item_quantity", $itemQuantity);
+                    })
+                    ->when($totalPrice, function($builder) use($totalPrice){
+                        return $builder->where("purchase_order_transaction.total_item_price", $totalPrice);
+                    })
+                    ->when($page, function($builder) use($page){
+                        return $builder->skip($page);
+                    })
+                    ->when($limit, function($builder) use($limit){
+                        return $builder->take($limit);
                     })
                     ->select(DB::raw("transaction_id, vcp_id, receipt_number, purchase_order_transaction.status, transaction_date, floating_rate, po_number, users.name AS farmer_name, account_farmer.code AS farmer_code, item_type.name AS item_type, purchase_order_transaction.item_price AS item_price, purchase_order_transaction.item_quantity, total_item_price AS total_price"))
                     ->orderBy("purchase_order_transaction.created_at", "DESC")
@@ -370,5 +514,64 @@ class TransactionController extends Controller
         }
         
         return response()->json($response);
+    }
+
+    public function detail(Request $request){
+        $response = [
+            "code"      => 400,
+            "message"   => "Failed to complete request",
+            "data"      => []
+        ];
+        
+        try{
+            $response["code"] = 200;
+            $response["message"] = "Success";
+
+            $transactionId = $request->input("trx-id");
+            $farmerCode = $request->input("farmer-code");
+
+            $cacheName = "detail.purchase_order";
+            if($transactionId){
+                $cacheName .= ".transaction_id|$transactionId";
+            }
+            if($farmerCode){
+                $cacheName .= ".farmer_code|$farmerCode";
+            }
+        
+            $result = Cache::remember($cacheName, config("constant.ttl"), function() use($transactionId, $farmerCode){
+
+                return PurchaseOrder::join("account_vch", "purchase_order.account_vch_id", "account_vch.id")
+                    ->join("accounts", "account_vch.account_id", "accounts.id")
+                    ->join("users", "accounts.user_id", "users.id")
+                    ->join("t_vch", "t_vch.id", "account_vch.vch_id")
+                    ->join("t_evc", "t_evc.id", "t_vch.evc_id")
+                    ->join("item_type", "item_type.id", "purchase_order.item_type_id")
+                    ->join("item", "item.id", "item_type.item_id")
+                    ->join("item_unit", "item_unit.id", "purchase_order.item_unit_id")
+                    ->join("purchase_order_transaction", "purchase_order_transaction.purchase_order_id", "purchase_order.id")
+                    ->join("account_farmer", "purchase_order_transaction.account_farmer_id", "account_farmer.id")
+                    ->join("t_vcp", "t_vcp.id", "purchase_order_transaction.vcp_id")
+                    //->join("t_evc", "t_evc.id", "t_vch.evc_id")
+                    //->join("sub_districts", "sub_districts.id", "t_vcp.sub_district_id")
+                    //->join("districts", "districts.id", "sub_districts.district_id")
+                    //->join("cities", "cities.id", "districts.city_id")
+                    //->join("provinces", "provinces.id", "cities.province_id")
+                    ->when($transactionId, function($builder) use($transactionId){
+                        return $builder->where("purchase_order_transaction.transaction_id", $transactionId);
+                    })
+                    ->when($farmerCode, function($builder) use($farmerCode){
+                        return $builder->where("account_farmer.code", $farmerCode);
+                    })
+                    ->select(DB::raw("t_evc.code AS evc_code, t_vch.code AS vch_code, t_vcp.code AS vcp_code, accounts.code AS vendor_code, users.name AS vendor, po_number, po_date, expected_shipping_date, item.name AS item_name, item_type.name AS item_type, item_unit.name AS item_unit, item_description, purchase_order.item_quantity, item_unit_price, item_max_quantity, purchase_order.status, purchase_order_transaction.receipt_number, purchase_order_transaction.transaction_date, purchase_order_transaction.floating_rate, purchase_order_transaction.total_item_price"))
+                    ->first();
+            });
+            $result["farmer_code"] = $farmerCode;
+            $result["transaction_id"] = $transactionId;
+        } catch(\Exception $e){
+            \Log::error($e->getMessage());
+            \Log::error($e->getTraceAsString());
+        }
+\Log::debug($result);
+        return view("transactions.purchase-order.transaction-detail", compact("result"));
     }
 }

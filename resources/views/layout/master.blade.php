@@ -6,7 +6,7 @@
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
   <meta name="description" content="Catena Dashboard">
 	<meta name="author" content="Cognizest">
-	<meta name="keywords" content="catena, bootstrap, bootstrap 5, bootstrap5, admin, dashboard, template, responsive, css, sass, html, laravel, theme, front-end, ui kit, web">
+	<meta name="keywords" content="catena">
 
   <title>Catena Dashboard</title>
 
