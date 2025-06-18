@@ -91,8 +91,8 @@
                     <div class="row">
                       <div class="col-md-3">
                         <div class="form-group">
-                          <label class="form-label">Farmer ID</label>
-                          <input id="farmer_code" class="form-control" name="farmer_code"/>
+                          <label class="form-label">Farmer Name</label>
+                          <input id="farmer_name" class="form-control" name="farmer_name"/>
                         </div>
                         <div class="form-group pt-2">
                           <label class="form-label">VCP Code</label>
@@ -171,12 +171,13 @@
         <table id="gridDataTable" class="table">
           <thead>
             <tr>
-              <th>Farmer ID</th>
-              <th>VCP Code</th>
-              <th class="text-center">Transaction ID</th>
-              <th>Transaction Date</th>
+              <th class="text-center">Transaction No.</th>
+              <th class="text-center">Transaction Date</th>
               <th>PO Number</th>
-              <th>Receipt Number</th>
+              <th>VCP Code</th>
+              <th>Farmer</th>
+              <th>Total Qty</th>
+              <th>Item Price</th>
               <th>Item Type</th>
             </tr>
           </thead>
@@ -215,7 +216,7 @@
               d.start = info.start;
               d.limit = limit;
               d.status = $("#status").val();;
-              d.farmer_code = $("#farmer_code").val();
+              d.farmer_name = $("#farmer_name").val();
               d.vcp_code = $("#vcp_code").val();
               d.transaction_id = $("#transaction_id").val();
               d.daterange_transaction = $("#daterange_transaction").val();
@@ -238,22 +239,25 @@
                                 
           "columnDefs" : [
             { "targets": 0, "className": "text-center", "data": function( data, type, row, meta ){
-                return data.farmer_code;
+                return '<a onclick=$(this).detailTransaction("'+data.transaction_id+'","'+data.farmer_code+'") class="form-label" style="cursor: pointer;">'+data.transaction_id+'</a>';
               }
             },
             { "targets": 1, "className": "text-center", "data": function(data, type, row, meta){
-                  return data.vcp_code;
+                  return data.transaction_date;
               }
             },
             { "targets": 2, "className": "text-center", "data": function(data, type, row, meta){
-                  return '<a onclick=$(this).detailTransaction("'+data.transaction_id+'","'+data.farmer_code+'") class="form-label" style="cursor: pointer;">'+data.transaction_id+'</a>';
-
+                  return data.po_number;
               }
             },
-            { "targets": 3, "data": "transaction_date", "className": "text-center" },
-            { "targets": 4, "data": "po_number", "className": "text-center" },
-            { "targets": 5, "data": "receipt_number", "className": "text-center" },
-            { "targets": 6, "data": "item_type", "className": "text-center" }
+            { "targets": 3, "data": "vcp_code", "className": "text-center" },
+            { "targets": 4, "data": "farmer_name", "className": "text-center" },
+            { "targets": 5, "data": "item_quantity", "className": "text-center" },
+            { "targets": 6, "className": "text-end", "data": function(data, type, row, meta){
+                  return formatPrice(data.item_price, 0);
+              }
+            },
+            { "targets": 7, "data": "item_type", "className": "text-center" }
             
           ],
           "drawCallback": function(settings) {

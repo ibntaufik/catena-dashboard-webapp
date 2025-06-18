@@ -35,6 +35,19 @@
             </div>
           </div>
         </div>
+        
+        <div class="row">
+          <div class="col-md-2">
+            <div class="form-group">
+              <label class="form-label">Farmer Name</label>
+            </div>
+          </div>
+          <div class="col-md-9">
+            <div class="form-group">
+              <label>:&nbsp;</label><label id="farmer_name" class="form-label"></label>
+            </div>
+          </div>
+        </div>
 
         <div class="row">
           <div class="col-md-2">
@@ -45,6 +58,19 @@
           <div class="col-md-9">
             <div class="form-group">
               <label>:&nbsp;</label><label id="vcp_code" class="form-label"></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-2">
+            <div class="form-group">
+              <label class="form-label">Pulper Name</label>
+            </div>
+          </div>
+          <div class="col-md-9">
+            <div class="form-group">
+              <label>:&nbsp;</label><label id="pulper_name" class="form-label"></label>
             </div>
           </div>
         </div>
@@ -171,7 +197,9 @@
     var result = {!! json_encode($result) !!};
     console.log(result);
     $("#farmer_code").html(result.farmer_code);
+    $("#farmer_name").html(result.farmer_name);
     $("#vcp_code").html(result.evc_code+"-"+result.vch_code+"-"+result.vcp_code);
+    $("#pulper_name").html(result.pulper_name);
     $("#transaction_id").html(result.transaction_id);
     $("#po_number").html(result.po_number);
     $("#receipt_number").html(result.receipt_number);

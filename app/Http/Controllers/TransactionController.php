@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use DateTime;
 use App\Helpers\CommonHelper;
+use App\Model\Account;
 use App\Model\Farmer;
 use App\Model\User;
 use App\Model\HOAccount;
 use App\Model\PurchaseOrder;
 use App\Model\PurchaseOrderTransaction;
 use App\Model\VCP;
+use App\Model\VcpAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -65,9 +67,9 @@ class TransactionController extends Controller
                     $cacheName .= ".page|$page";
                 }
                 
-                $farmerCode = $request->input("farmer_code");
-                if(${"farmerCode"}){
-                    $cacheName .= ".farmer_code|$farmerCode";
+                $farmer = $request->input("farmer_name");
+                if($farmer){
+                    $cacheName .= ".farmer_name|$farmer";
                 }
                 
                 $vcpCode = $request->input("vcp_code");
@@ -127,7 +129,7 @@ class TransactionController extends Controller
                     $cacheName .= ".end_date|$endDate";
                 }
 
-                $response["count"] = Cache::remember("count.purchase_order_transaction$cacheName", 120, function() use($vchCode, $status, $farmerCode, $vcpCode, $transactionId, $poNumber, $receiptNumber, $itemType, $floatingRate, $itemPrice, $itemQuantity, $totalPrice, $startDate, $endDate){
+                $response["count"] = Cache::remember("count.purchase_order_transaction$cacheName", 120, function() use($vchCode, $status, $farmer, $vcpCode, $transactionId, $poNumber, $receiptNumber, $itemType, $floatingRate, $itemPrice, $itemQuantity, $totalPrice, $startDate, $endDate){
                     return PurchaseOrderTransaction::join("purchase_order", "purchase_order_transaction.purchase_order_id", "purchase_order.id")
                     ->join("account_farmer", "purchase_order_transaction.account_farmer_id", "account_farmer.id")
                     ->join("users", "users.id", "account_farmer.user_id")
@@ -139,8 +141,8 @@ class TransactionController extends Controller
                     ->when(count($vchCode) > 0, function($builder) use($vchCode){
                         return $builder->whereIn("t_vch.code", $vchCode);
                     })
-                    ->when($farmerCode, function($builder) use($farmerCode){
-                        return $builder->where("account_farmer.code", $farmerCode);
+                    ->when($farmer, function($builder) use($farmer){
+                        return $builder->whereRaw("UPPER(users.name) LIKE ?", [strtoupper("%$farmer%")]);
                     })
                     ->when($vcpCode, function($builder) use($vcpCode){
                         return $builder->join("t_vcp", "t_vcp.id", "purchase_order_transaction.vcp_id")
@@ -182,7 +184,7 @@ class TransactionController extends Controller
                     ->count();
                 });
 
-                $response["data"] = Cache::remember("list.purchase_order_transaction$cacheName", 120, function() use($vchCode, $status, $farmerCode, $vcpCode, $transactionId, $poNumber, $receiptNumber, $itemType, $floatingRate, $itemPrice, $itemQuantity, $totalPrice, $startDate, $endDate, $page, $limit){
+                $response["data"] = Cache::remember("list.purchase_order_transaction$cacheName", 120, function() use($vchCode, $status, $farmer, $vcpCode, $transactionId, $poNumber, $receiptNumber, $itemType, $floatingRate, $itemPrice, $itemQuantity, $totalPrice, $startDate, $endDate, $page, $limit){
                     $transaction = PurchaseOrderTransaction::join("purchase_order", "purchase_order_transaction.purchase_order_id", "purchase_order.id")
                     ->join("account_farmer", "purchase_order_transaction.account_farmer_id", "account_farmer.id")
                     ->join("users", "users.id", "account_farmer.user_id")
@@ -197,8 +199,8 @@ class TransactionController extends Controller
                     ->when($status, function($builder) use($status){
                         return $builder->where("purchase_order_transaction.status", $status);
                     })
-                    ->when($farmerCode, function($builder) use($farmerCode){
-                        return $builder->where("account_farmer.code", $farmerCode);
+                    ->when($farmer, function($builder) use($farmer){
+                        return $builder->whereRaw("UPPER(users.name) LIKE ?", [strtoupper("$farmer%")]);
                     })
                     ->when($vcpCode, function($builder) use($vcpCode){
                         return $builder->join("t_vcp", "t_vcp.id", "purchase_order_transaction.vcp_id")
@@ -539,7 +541,6 @@ class TransactionController extends Controller
             }
         
             $result = Cache::remember($cacheName, config("constant.ttl"), function() use($transactionId, $farmerCode){
-
                 return PurchaseOrder::join("account_vch", "purchase_order.account_vch_id", "account_vch.id")
                     ->join("accounts", "account_vch.account_id", "accounts.id")
                     ->join("users", "accounts.user_id", "users.id")
@@ -567,6 +568,19 @@ class TransactionController extends Controller
             });
             $result["farmer_code"] = $farmerCode;
             $result["transaction_id"] = $transactionId;
+            $result["farmer_name"] = Cache::remember("farmer_name_by_code|$farmerCode", config("constant.ttl"), function() use($farmerCode){
+                $farmer = Farmer::findByCode($farmerCode);
+                $user = User::findById($farmer->user_id);
+
+                return $user->name;
+            });
+            $result["pulper_name"] = Cache::remember("pulper_name_by_code|$result->vcp_code", config("constant.ttl"), function() use($result){
+                $vcp = VCP::join("account_vcp", "t_vcp.id", "account_vcp.vcp_id")
+                ->join("accounts", "accounts.id", "account_vcp.account_id")
+                ->join("users", "users.id", "accounts.user_id")
+                ->select(DB::raw("users.name"))->first();
+                return $vcp->name;
+            });
         } catch(\Exception $e){
             \Log::error($e->getMessage());
             \Log::error($e->getTraceAsString());

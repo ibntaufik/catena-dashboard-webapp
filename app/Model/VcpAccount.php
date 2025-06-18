@@ -15,9 +15,9 @@ class VcpAccount extends Model
     protected $primaryKey = 'id';
     protected $guarded = ['id'];
 
-    public static function findByCode($code){
-        return empty($code) ? null : Cache::remember("vcp.code|$code", config("constant.ttl"), function() use($code){
-            return VCP::where("vcp_code", $code)->first();   
+    public static function findById($id){
+        return empty($code) ? null : Cache::remember("vcp_account.id|$id", config("constant.ttl"), function() use($id){
+            return VcpAccount::find($id);   
         });
     }
 }
