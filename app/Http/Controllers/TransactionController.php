@@ -176,7 +176,7 @@ class TransactionController extends Controller
                         return $builder->where("purchase_order_transaction.total_item_price", $totalPrice);
                     })
                     ->when($startDate && $endDate, function($builder) use($startDate, $endDate){
-                        return $builder->whereBetween("purchase_order_transaction.transction_date", [$startDate, $endDate]);
+                        return $builder->whereRaw("DATE(purchase_order_transaction.transaction_date) BETWEEN ? AND ?", [$startDate, $endDate]);
                     })
                     ->when($status, function($builder) use($status){
                         return $builder->where("purchase_order_transaction.status", $status);
@@ -232,6 +232,9 @@ class TransactionController extends Controller
                     })
                     ->when($totalPrice, function($builder) use($totalPrice){
                         return $builder->where("purchase_order_transaction.total_item_price", $totalPrice);
+                    })
+                    ->when($startDate && $endDate, function($builder) use($startDate, $endDate){
+                        return $builder->whereRaw("DATE(purchase_order_transaction.transaction_date) BETWEEN ? AND ?", [$startDate, $endDate]);
                     })
                     ->when($page, function($builder) use($page){
                         return $builder->skip($page);
