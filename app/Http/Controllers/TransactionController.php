@@ -585,7 +585,7 @@ class TransactionController extends Controller
             \Log::error($e->getMessage());
             \Log::error($e->getTraceAsString());
         }
-\Log::debug($result);
+
         return view("transactions.purchase-order.transaction-detail", compact("result"));
     }
 }

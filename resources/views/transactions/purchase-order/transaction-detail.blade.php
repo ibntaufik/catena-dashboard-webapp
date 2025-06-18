@@ -195,7 +195,7 @@
 <script src="{{ asset('assets/js/format-currency.js') }}"></script>
 <script type="text/javascript">
     var result = {!! json_encode($result) !!};
-    console.log(result);
+    
     $("#farmer_code").html(result.farmer_code);
     $("#farmer_name").html(result.farmer_name);
     $("#vcp_code").html(result.evc_code+"-"+result.vch_code+"-"+result.vcp_code);
