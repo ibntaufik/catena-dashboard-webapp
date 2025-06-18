@@ -360,7 +360,7 @@ class TransactionController extends Controller
                     }
                 }
                 
-                $formatDate = "d/m/Y";
+                $formatDate = "d/m/Y H:i:s";
                 if(empty($transactionDate)){
                     $response["message"] = "Transaction date cannot be empty.";
                     $pass = false;
@@ -369,7 +369,7 @@ class TransactionController extends Controller
                     $pass = false;
                 } else {
                     // parse date to Y-m-d format
-                    $input["transaction_date"] = CommonHelper::parseDate($transactionDate, $formatDate);
+                    $input["transaction_date"] = CommonHelper::parseDate($transactionDate, $formatDate, "Y-m-d H:i:s");
                 }
 
                 if(empty($floatingRate) || ($floatingRate < 1)){
