@@ -57,7 +57,7 @@
     <div class="card-body">
       <h6 class="card-title">List of purchase order</h6>
 
-      <div data-tabs class="tabs mt-5" style="">    
+      <div data-tabs class="tabs mt-5" style="display: none;">    
          <div class="col-md-2 tab">
             <input type="radio" name="tabgroup" id="waiting" checked onclick="search('waiting')">
             <label for="waiting">Waiting</label>
@@ -70,6 +70,109 @@
             <input type="radio" name="tabgroup" id="rejected" onclick="search('rejected')">
             <label for="rejected">Rejected</label>
          </div>
+      </div>
+
+      <div class="accordion" id="accordionFilter">
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="headingOne">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+              Filter
+            </button>
+          </h2>
+          <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+              <div class="card">
+                <div class="card-body">
+                  <div class="col-md-12">
+                    <div class="row">
+                      <div class="col-md-3">
+                        <div class="form-group">
+                          <label class="form-label">Status</label>
+                          <input id="farmer_code" class="form-control" name="status"/>
+                        </div>
+                        <div class="form-group pt-2">
+                          <label class="form-label">VCH Code</label>
+                          <input id="vcp_code" class="form-control" name="vch_code"/>
+                        </div>
+                        <div class="form-group pt-2">
+                          <label class="form-label">Vendor</label>
+                          <input id="transaction_id" class="form-control" name="vendor"/>
+                        </div>
+                        <div class="form-group pt-2">
+                          <label class="form-label">Item Max. Quantity</label>
+                          <input id="item_quantity" class="form-control" name="item_quantity"/>
+                        </div>
+                      </div>
+
+                      <div class="col-md-3">
+                        <div class="form-group">
+                          <label class="form-label">PO Number</label>
+                          <input id="po_number" class="form-control" name="po_number"/>
+                        </div>
+                        <div class="form-group pt-2">
+                          <label for="daterange_po" class="form-label">PO Date</label>
+                          <div class="input-group flatpickr" id="div_daterange_po">
+                            <span class="input-group-text input-group-addon bg-transparent" data-toggle><i data-feather="calendar"></i></span>
+                            <input type="text" class="form-control bg-transparent" id="daterange_po" placeholder="Select date range" data-input>
+                          </div>
+                        </div>
+                        <div class="form-group pt-2">
+                          <label for="daterange_expected_shipping" class="form-label">Expected Shipping Date</label>
+                          <div class="input-group flatpickr" id="div_daterange_expected_shipping">
+                            <span class="input-group-text input-group-addon bg-transparent" data-toggle><i data-feather="calendar"></i></span>
+                            <input type="text" class="form-control bg-transparent" id="daterange_expected_shipping" placeholder="Select date range" data-input>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="col-md-3">
+                        <div class="form-group">
+                          <label class="form-label">Item Type</label>
+                          <input id="item_type" class="form-control" name="item_type"/>
+                        </div>
+                        <div class="form-group pt-2">
+                          <label class="form-label">Item Name</label>
+                          <input id="item_name" class="form-control" name="item_name"/>
+                        </div>
+                        <div class="form-group pt-2">
+                          <label class="form-label">Item Description</label>
+                          <input id="item_description" class="form-control" name="item_description"/>
+                        </div>
+                      </div>
+
+                      <div class="col-md-3">
+                        <div class="form-group">
+                          <label class="form-label">Item Quantity</label>
+                          <input id="item_quantity" class="form-control" name="item_quantity"/>
+                        </div>
+                        <div class="form-group pt-2">
+                          <label class="form-label">Item Unit</label>
+                          <input id="floating_rate" class="form-control" name="floating_rate"/>
+                        </div>
+                        <div class="form-group pt-2">
+                          <label class="form-label">Item Unit Price (Rp)</label>
+                          <input id="item_price" class="form-control" name="item_price"/>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="card-footer">
+                <div class="row">
+                  <div class="col-sm-9">
+                  </div>
+                  <div class="col-sm-3">
+                    <button id="id_btn_filter" class="btn btn-flat btn-primary" style="width: 45% !important;">Filter</button>
+                    <button id="id_btn_clear" class="btn btn-secondary me-2 submit-button" style="width: 45% !important;">Cancel</button>
+                  </div>
+                </div>
+                
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="table-responsive">
@@ -206,7 +309,7 @@
 <script type="text/javascript">
     var start = 0;
     var limit = 10;
-    var poStatus = "waiting";
+    var poStatus = "";
     var selectedPurchaseOrder = null;
     var listApprover = null;
 
@@ -218,7 +321,8 @@
           'info'          : true,
           'autoWidth'     : false,
           "processing"    : true,
-          "searching"     : true,
+          "serverSide"    : true,
+          "searching"     : false,
           "pageLength"    : limit,
           "ajax": {
             "url": "{{ route('purchase-order.grid-list') }}",
@@ -227,12 +331,25 @@
               d.start = info.start;
               d.limit = limit;
               d.status = poStatus;
+              d.vch_code = $("#vch_code").val();
+              d.vendor = $("#vendor").val();
+              d.item_quantity = $("i#tem_quantity").val();
+              d.po_number = $("#po_number").val();
+              d.daterange_po = $("#daterange_po").val();
+              d.daterange_expected_shipping = $("#daterange_expected_shipping").val();
+              d.item_type = $("#item_type").val();
+              d.item_name = $("#item_name").val();
+              d.item_description = $("#item_description").val();
+              d.item_quantity = $("#item_quantity").val();
+              d.floating_rate = $("#floating_rate").val();
+              d.item_price = $("#item_price").val();
+              d.item_max_quantity = $("#item_max_quantity").val();
             },
             "dataSrc": function(json){
               
-              json.recordsTotal = json.data.length;
-              json.recordsFiltered = json.data.length;
-
+              json.recordsTotal = json.count;
+              json.recordsFiltered = json.count;
+              
               return json.data;
             }
           },
@@ -287,6 +404,17 @@
           }
       });
 
+      $('#id_btn_filter').on('click',function(e) {
+          e.stopImmediatePropagation();
+          $('#gridDataTable').DataTable().ajax.reload();
+      });
+
+      $('#id_btn_clear').on('click',function(e) {
+        $("#vch_code, #vendor, #item_quantity, #po_number, #daterange_po, #daterange_expected_shipping, #item_type, #item_name, #item_description, #item_quantity, #floating_rate, #item_price, #item_quantity").val("");
+          e.stopImmediatePropagation();
+          $('#gridDataTable').DataTable().ajax.reload();
+      });
+
       $.fn.delete = function(poNumber) {
         $.ajax({
             type: "POST",
@@ -306,6 +434,24 @@
             
         });
       };
+
+      // Date Picker
+      if($('#div_daterange_po').length) {
+        flatpickr("#div_daterange_po", {
+          wrap: true,
+          dateFormat: "d-m-Y",
+          mode: "range"
+        });
+      }
+
+      // Date Picker
+      if($('#div_daterange_expected_shipping').length) {
+        flatpickr("#div_daterange_expected_shipping", {
+          wrap: true,
+          dateFormat: "d-m-Y",
+          mode: "range"
+        });
+      }
     });
 
     function submit(status){
@@ -440,11 +586,6 @@
                   '</td>'+
         '</tr>');
       });
-    }
-
-    function search(status){
-        poStatus = status;
-        $('#gridDataTable').DataTable().ajax.reload();
     }
 
     (function($, document) {

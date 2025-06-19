@@ -205,7 +205,7 @@
           "columnDefs" : [
             { "targets": 0, "data": "farmer_code" },
             { "targets": 1, "data": function( data, type, row, meta ){
-                return '<a href="#" onclick=showDetail("'+data.image_id_number_name+'||'+data.image_photo_name+'")><label style="cursor: pointer;";>'+ucFirstWord(data.name)+'</label></a>';
+                return '<a href="javascript:void(0)" onclick=showDetail("'+data.image_id_number_name+'||'+data.image_photo_name+'")><label style="cursor: pointer;";>'+ucFirstWord(data.name)+'</label></a>';
               }
             },
             { "targets": 2, "data": "email" },

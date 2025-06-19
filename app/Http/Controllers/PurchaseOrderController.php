@@ -53,19 +53,96 @@ class PurchaseOrderController extends Controller
             "data"      => []
         ];
 
+        $page = $request->input("start");
+        $limit = $request->input("limit");
         $status = $request->input("status", "all");
         $isVchAdmin = Auth::user()->isA('vch_admin');
 
         try{
-            $response["code"] = 200;
-            $response["message"] = "Success";
-
-            $cacheName = "datalist.purchase_order.status_$status";
+            $cacheName = "purchase_order.status_$status";
             if($isVchAdmin){
-                $cacheName .= "user_vch";
+                $cacheName .= ".user_vch";
             }
-        
-            $response["data"] = Cache::remember($cacheName, config("constant.ttl"), function() use($status, $isVchAdmin){
+
+            $vchCode = $request->input("vch_code");
+            if($vchCode){
+                $cacheName .= ".vch_code|$vchCode";
+            }
+            
+            $vendor = $request->input("vendor");
+            if($vendor){
+                $cacheName .= ".vendor|$vendor";
+            }
+            
+            $itemQuantity = $request->input("item_quantity");
+            if($itemQuantity){
+                $cacheName .= ".item_quantity|$itemQuantity";
+            }
+            
+            $poNumber = $request->input("po_number");
+            if($poNumber){
+                $cacheName .= ".po_number|$poNumber";
+            }
+            
+            $dateRangePo = $request->input("daterange_po");
+            $startDatePo = "";
+            $endDatePo = "";
+            if($dateRangePo){
+                $dateRange = explode(" to ",$dateRangePo);
+                $startDatePo = DateTime::createFromFormat('d-m-Y', $dateRange[0])->format('Y-m-d');
+                $endDatePo = DateTime::createFromFormat('d-m-Y', $dateRange[1])->format('Y-m-d');
+
+                $cacheName .= ".start_date_po|$startDatePo";
+                $cacheName .= ".end_date_po|$endDatePo";
+            }
+
+            $dateRangeExpectedShipping = $request->input("daterange_expected_shipping");
+            $startDateExpectedShipping = "";
+            $endDateExpectedShipping = "";
+            if($dateRangeExpectedShipping){
+                $dateRange = explode(" to ",$dateRangeExpectedShipping);
+                $startDateExpectedShipping = DateTime::createFromFormat('d-m-Y', $dateRange[0])->format('Y-m-d');
+                $endDateExpectedShipping = DateTime::createFromFormat('d-m-Y', $dateRange[1])->format('Y-m-d');
+
+                $cacheName .= ".start_date_expected_shipping|$startDateExpectedShipping";
+                $cacheName .= ".end_date_expected_shipping|$endDateExpectedShipping";
+            }
+            
+            $itemType = $request->input("item_type");
+            if($itemType){
+                $cacheName .= ".item_type|$itemType";
+            }
+            
+            $itemName = $request->input("item_name");
+            if($isVchAdmin){
+                $itemName .= ".item_name|$itemName";
+            }
+            
+            $itemDescription = $request->input("item_description");
+            if($itemDescription){
+                $cacheName .= ".item_description|$itemDescription";
+            }
+            
+            $floatingRate = $request->input("floating_rate");
+            if($floatingRate){
+                $cacheName .= ".floating_rate|$floatingRate";
+            }
+            
+            $itemPrice = $request->input("item_price");
+            if($itemPrice){
+                $cacheName .= ".item_price|$itemPrice";
+            }
+
+            $itemMaxQuantity = $request->input("item_max_quantity");
+            if($itemMaxQuantity){
+                $cacheName .= ".item_max_quantity|$itemMaxQuantity";
+            }
+
+            if($page){
+                $cacheName .= ".page|$page";
+            }
+
+            $response["count"] = Cache::remember("count.".$cacheName, config("constant.ttl"), function() use($status, $isVchAdmin, $vchCode, $vendor, $itemQuantity, $poNumber, $startDatePo, $endDatePo, $startDateExpectedShipping, $endDateExpectedShipping, $itemType, $itemName, $itemDescription, $floatingRate, $itemPrice, $itemMaxQuantity){
 
                 return PurchaseOrder::join("account_vch", "purchase_order.account_vch_id", "account_vch.id")
                     ->join("accounts", "account_vch.account_id", "accounts.id")
@@ -81,15 +158,121 @@ class PurchaseOrderController extends Controller
                     ->when(!empty($status) && in_array($status, ["waiting", "approved", "rejected"]), function($builder) use($status){
                         return $builder->where("purchase_order.status", $status);
                     })
-                    //->join("t_evc", "t_evc.id", "t_vch.evc_id")
-                    //->join("sub_districts", "sub_districts.id", "t_vcp.sub_district_id")
-                    //->join("districts", "districts.id", "sub_districts.district_id")
-                    //->join("cities", "cities.id", "districts.city_id")
-                    //->join("provinces", "provinces.id", "cities.province_id")
+                    ->when($vchCode, function($builder) use($vchCode){
+                        return $builder->where("t_vch.code", $vchCode);
+                    })
+                    ->when($vendor, function($builder) use($vendor){
+                        return $builder->where("users.name", $vendor);
+                    })
+                    ->when($itemQuantity, function($builder) use($itemQuantity){
+                        return $builder->where("purchase_order.item_quantity", $itemQuantity);
+                    })
+                    ->when($poNumber, function($builder) use($poNumber){
+                        return $builder->where("purchase_order.po_number", $poNumber);
+                    })
+                    ->when($startDatePo && $endDatePo, function($builder) use($startDatePo, $endDatePo){
+                        return $builder->whereRaw("purchase_order.po_date BETWEEN ? AND ?", [$startDatePo, $endDatePo]);
+                    })
+                    ->when($startDateExpectedShipping && $endDateExpectedShipping, function($builder) use($startDateExpectedShipping, $endDateExpectedShipping){
+                        return $builder->whereRaw("purchase_order.expected_shipping_date BETWEEN ? AND ?", [$startDateExpectedShipping, $endDateExpectedShipping]);
+                    })
+                    ->when($itemType, function($builder) use($itemType){
+                        return $builder->where("item_type.name", $itemType);
+                    })
+                    ->when($itemName, function($builder) use($itemName){
+                        return $builder->where("item.name", $itemName);
+                    })
+                    ->when($itemDescription, function($builder) use($itemDescription){
+                        return $builder->where("purchase_order.item_description", $itemDescription);
+                    })
+                    ->when($itemMaxQuantity, function($builder) use($itemMaxQuantity){
+                        return $builder->where("purchase_order.item_max_quantity", $itemMaxQuantity);
+                    })
+                    ->when($floatingRate, function($builder) use($floatingRate){
+                        return $builder->join("purchase_order_transaction", "purchase_order.id", "purchase_order_transaction.purchase_order_id")
+                        ->where("purchase_order_transaction.floating_rate", $floatingRate);
+                    })
+                    ->when($itemPrice, function($builder) use($itemPrice){
+                        return $builder->where("purchase_order.item_unit_price", $itemPrice);
+                    })
+                    ->count();
+            });
+
+            $response["data"] = Cache::remember("datalist.".$cacheName, config("constant.ttl"), function() use($status, $isVchAdmin, $vchCode, $vendor, $itemQuantity, $poNumber, $startDatePo, $endDatePo, $startDateExpectedShipping, $endDateExpectedShipping, $itemType, $itemName, $itemDescription, $floatingRate, $itemPrice, $itemMaxQuantity, $page, $limit){
+
+                return PurchaseOrder::join("account_vch", "purchase_order.account_vch_id", "account_vch.id")
+                    ->join("accounts", "account_vch.account_id", "accounts.id")
+                    ->join("users", "accounts.user_id", "users.id")
+                    ->join("t_vch", "t_vch.id", "account_vch.vch_id")
+                    ->join("t_evc", "t_evc.id", "t_vch.evc_id")
+                    ->join("item_type", "item_type.id", "purchase_order.item_type_id")
+                    ->join("item", "item.id", "item_type.item_id")
+                    ->join("item_unit", "item_unit.id", "purchase_order.item_unit_id")
+                    ->when($isVchAdmin, function($builder){
+                        return $builder->where("users.id", Auth::user()->id);
+                    })
+                    ->when(!empty($status) && in_array($status, ["waiting", "approved", "rejected"]), function($builder) use($status){
+                        return $builder->where("purchase_order.status", $status);
+                    })
+                    
+                    ->when($vchCode, function($builder) use($vchCode){
+                        return $builder->where("t_vch.code", $vchCode);
+                    })
+                    ->when($vendor, function($builder) use($vendor){
+                        return $builder->where("users.name", $vendor);
+                    })
+                    ->when($itemQuantity, function($builder) use($itemQuantity){
+                        return $builder->where("purchase_order.item_quantity", $itemQuantity);
+                    })
+                    ->when($poNumber, function($builder) use($poNumber){
+                        return $builder->where("purchase_order.po_number", $poNumber);
+                    })
+                    ->when($startDatePo && $endDatePo, function($builder) use($startDatePo, $endDatePo){
+                        return $builder->whereRaw("purchase_order.po_date BETWEEN ? AND ?", [$startDatePo, $endDatePo]);
+                    })
+                    ->when($startDateExpectedShipping && $endDateExpectedShipping, function($builder) use($startDateExpectedShipping, $endDateExpectedShipping){
+                        return $builder->whereRaw("purchase_order.expected_shipping_date BETWEEN ? AND ?", [$startDateExpectedShipping, $endDateExpectedShipping]);
+                    })
+                    ->when($itemType, function($builder) use($itemType){
+                        return $builder->where("item_type.name", $itemType);
+                    })
+                    ->when($itemName, function($builder) use($itemName){
+                        return $builder->where("item.name", $itemName);
+                    })
+                    ->when($itemDescription, function($builder) use($itemDescription){
+                        return $builder->where("purchase_order.item_description", $itemDescription);
+                    })
+                    ->when($itemQuantity, function($builder) use($itemQuantity){
+                        return $builder->where("purchase_order.item_quantity", $itemQuantity);
+                    })
+                    ->when($itemMaxQuantity, function($builder) use($itemMaxQuantity){
+                        return $builder->where("purchase_order.item_max_quantity", $itemMaxQuantity);
+                    })
+                    ->when($floatingRate, function($builder) use($floatingRate){
+                        return $builder->join("purchase_order_transaction", "purchase_order.id", "purchase_order_transaction.purchase_order_id")
+                        ->where("purchase_order_transaction.floating_rate", $floatingRate);
+                    })
+                    ->when($itemPrice, function($builder) use($itemPrice){
+                        return $builder->where("purchase_order.item_unit_price", $itemPrice);
+                    })
+                    ->when($page, function($builder) use($page){
+                        return $builder->skip($page);
+                    })
+                    ->when($limit, function($builder) use($limit){
+                        return $builder->take($limit);
+                    })
                     ->select(DB::raw("t_evc.code AS evc_code, t_vch.code AS vch_code, accounts.code AS vendor_code, users.name AS vendor, po_number, po_date, expected_shipping_date, item.name AS item_name, item_type.name AS item_type, item_unit.name AS item_unit, item_description, item_quantity, item_unit_price, item_max_quantity, purchase_order.status"))
                     ->orderBy("purchase_order.created_at", "DESC")
                     ->get();
             });
+
+            if($response["count"] > 0){
+                $response["code"] = 200;
+                $response["message"] = "Success";
+            } else {
+                $response["code"] = 404;
+                $response["message"] = "Not found";
+            }
         } catch(\Exception $e){
             \Log::error($e->getMessage());
             \Log::error($e->getTraceAsString());
