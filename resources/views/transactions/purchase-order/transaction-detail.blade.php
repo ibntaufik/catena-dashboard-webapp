@@ -17,63 +17,188 @@
   </ol>
 </nav>
 
+<div class="row">
+  <div class="col-md-6 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">
+        <h6 class="card-title">Farmer</h6>
+        <div class="col-md-12">
+          
+          <div class="row">
+            <div class="col-md-2">
+              <div class="form-group">
+                <label class="form-label">Farmer ID</label>
+              </div>
+            </div>
+            <div class="col-md-9">
+              <div class="form-group">
+                <label>:&nbsp;</label><label id="farmer_code" class="form-label"></label>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-2">
+              <div class="form-group">
+                <label class="form-label">Name</label>
+              </div>
+            </div>
+            <div class="col-md-9">
+              <div class="form-group">
+                <label>:&nbsp;</label><label id="farmer_name" class="form-label"></label>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-2">
+              <div class="form-group">
+                <label class="form-label">NIK</label>
+              </div>
+            </div>
+            <div class="col-md-9">
+              <div class="form-group">
+                <label>:&nbsp;</label><label id="id_number" class="form-label"></label>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-2">
+              <div class="form-group">
+                <label class="form-label">Location</label>
+              </div>
+            </div>
+            <div class="col-md-9">
+              <div class="form-group">
+                <label>:&nbsp;</label><label id="location" class="form-label"></label>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-2">
+              <div class="form-group">
+                <label class="form-label">Latitude</label>
+              </div>
+            </div>
+            <div class="col-md-9">
+              <div class="form-group">
+                <label>:&nbsp;</label><label id="latitude" class="form-label"></label>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-2">
+              <div class="form-group">
+                <label class="form-label">Longitude</label>
+              </div>
+            </div>
+            <div class="col-md-9">
+              <div class="form-group">
+                <label>:&nbsp;</label><label id="longitude" class="form-label"></label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">
+        <h6 class="card-title">VCP</h6>
+        <div class="col-md-12">
+          
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label class="form-label">VCP Code</label>
+              </div>
+            </div>
+            <div class="col-md-8">
+              <div class="form-group">
+                <label>:&nbsp;</label><label id="vcp_code" class="form-label"></label>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label class="form-label">Location</label>
+              </div>
+            </div>
+            <div class="col-md-8">
+              <div class="form-group">
+                <label>:&nbsp;</label><label id="vcp_location" class="form-label"></label>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label class="form-label">Latitude</label>
+              </div>
+            </div>
+            <div class="col-md-8">
+              <div class="form-group">
+                <label>:&nbsp;</label><label id="vcp_latitude" class="form-label"></label>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label class="form-label">Longitude</label>
+              </div>
+            </div>
+            <div class="col-md-8">
+              <div class="form-group">
+                <label>:&nbsp;</label><label id="vcp_longitude" class="form-label"></label>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label class="form-label">Field Coordination ID</label>
+              </div>
+            </div>
+            <div class="col-md-8">
+              <div class="form-group">
+                <label>:&nbsp;</label><label id="field_coordinator_id" class="form-label"></label>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label class="form-label">Field Coordination Name</label>
+              </div>
+            </div>
+            <div class="col-md-8">
+              <div class="form-group">
+                <label>:&nbsp;</label><label id="field_coordinator_name" class="form-label"></label>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="col-md-12 grid-margin stretch-card">
   <div class="card">
     <div class="card-body">
       <h6 class="card-title">Detail of transaction</h6>
       <div class="col-md-12">
-        
-        <div class="row">
-          <div class="col-md-2">
-            <div class="form-group">
-              <label class="form-label">Farmer ID</label>
-            </div>
-          </div>
-          <div class="col-md-9">
-            <div class="form-group">
-              <label>:&nbsp;</label><label id="farmer_code" class="form-label"></label>
-            </div>
-          </div>
-        </div>
-        
-        <div class="row">
-          <div class="col-md-2">
-            <div class="form-group">
-              <label class="form-label">Farmer Name</label>
-            </div>
-          </div>
-          <div class="col-md-9">
-            <div class="form-group">
-              <label>:&nbsp;</label><label id="farmer_name" class="form-label"></label>
-            </div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col-md-2">
-            <div class="form-group">
-              <label class="form-label">VCP Code</label>
-            </div>
-          </div>
-          <div class="col-md-9">
-            <div class="form-group">
-              <label>:&nbsp;</label><label id="vcp_code" class="form-label"></label>
-            </div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col-md-2">
-            <div class="form-group">
-              <label class="form-label">Pulper Name</label>
-            </div>
-          </div>
-          <div class="col-md-9">
-            <div class="form-group">
-              <label>:&nbsp;</label><label id="pulper_name" class="form-label"></label>
-            </div>
-          </div>
-        </div>
 
         <div class="row">
           <div class="col-md-2">
@@ -84,6 +209,18 @@
           <div class="col-md-9">
             <div class="form-group">
               <label>:&nbsp;</label><label id="transaction_id" class="form-label"></label>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-2">
+            <div class="form-group">
+              <label class="form-label">Transaction Date</label>
+            </div>
+          </div>
+          <div class="col-md-9">
+            <div class="form-group">
+              <label>:&nbsp;</label><label id="transaction_date" class="form-label"></label>
             </div>
           </div>
         </div>
@@ -114,18 +251,6 @@
         <div class="row">
           <div class="col-md-2">
             <div class="form-group">
-              <label class="form-label">Transaction Date</label>
-            </div>
-          </div>
-          <div class="col-md-9">
-            <div class="form-group">
-              <label>:&nbsp;</label><label id="transaction_date" class="form-label"></label>
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-2">
-            <div class="form-group">
               <label class="form-label">Item Type</label>
             </div>
           </div>
@@ -138,12 +263,12 @@
         <div class="row">
           <div class="col-md-2">
             <div class="form-group">
-              <label class="form-label">Floating Rate (Kg)</label>
+              <label class="form-label">Item Quantity</label>
             </div>
           </div>
           <div class="col-md-9">
             <div class="form-group">
-              <label>:&nbsp;</label><label id="floating_rate" class="form-label"></label>
+              <label>:&nbsp;</label><label id="item_quantity" class="form-label"></label>
             </div>
           </div>
         </div>
@@ -162,12 +287,12 @@
         <div class="row">
           <div class="col-md-2">
             <div class="form-group">
-              <label class="form-label">Item Quantity</label>
+              <label class="form-label">Floating Rate (Kg)</label>
             </div>
           </div>
           <div class="col-md-9">
             <div class="form-group">
-              <label>:&nbsp;</label><label id="item_quantity" class="form-label"></label>
+              <label>:&nbsp;</label><label id="floating_rate" class="form-label"></label>
             </div>
           </div>
         </div>
@@ -195,10 +320,21 @@
 <script src="{{ asset('assets/js/format-currency.js') }}"></script>
 <script type="text/javascript">
     var result = {!! json_encode($result) !!};
-    
-    $("#farmer_code").html(result.farmer_code);
-    $("#farmer_name").html(result.farmer_name);
+    console.log(result);
+    $("#farmer_code").html(result.farmer.farmer_code);
+    $("#farmer_name").html(result.farmer.farmer_name);
+    $("#latitude").html(result.farmer.latitude);
+    $("#longitude").html(result.farmer.longitude);
+    $("#id_number").html(result.farmer.id_number);
+    $("#location").html(result.farmer.location);
+
     $("#vcp_code").html(result.evc_code+"-"+result.vch_code+"-"+result.vcp_code);
+    $("#vcp_latitude").html(result.pulper.latitude);
+    $("#vcp_longitude").html(result.pulper.longitude);
+    $("#vcp_location").html(result.pulper.location);
+    $("#field_coordinator_id").html(result.pulper.field_coordinator_id);
+    $("#field_coordinator_name").html(result.pulper.field_coordinator_name);
+
     $("#pulper_name").html(result.pulper_name);
     $("#transaction_id").html(result.transaction_id);
     $("#po_number").html(result.po_number);

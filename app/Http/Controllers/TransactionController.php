@@ -569,20 +569,32 @@ class TransactionController extends Controller
                     ->select(DB::raw("t_evc.code AS evc_code, t_vch.code AS vch_code, t_vcp.code AS vcp_code, accounts.code AS vendor_code, users.name AS vendor, po_number, po_date, expected_shipping_date, item.name AS item_name, item_type.name AS item_type, item_unit.name AS item_unit, item_description, purchase_order.item_quantity, item_unit_price, item_max_quantity, purchase_order.status, purchase_order_transaction.receipt_number, purchase_order_transaction.transaction_date, purchase_order_transaction.floating_rate, purchase_order_transaction.total_item_price"))
                     ->first();
             });
-            $result["farmer_code"] = $farmerCode;
-            $result["transaction_id"] = $transactionId;
-            $result["farmer_name"] = Cache::remember("farmer_name_by_code|$farmerCode", config("constant.ttl"), function() use($farmerCode){
-                $farmer = Farmer::findByCode($farmerCode);
-                $user = User::findById($farmer->user_id);
 
-                return $user->name;
+            
+            $result["transaction_id"] = $transactionId;
+            $result["farmer"] = Cache::remember("farmer_by_code|$farmerCode", config("constant.ttl"), function() use($farmerCode){
+                
+                return Farmer::join("users", "users.id", "account_farmer.user_id")
+                ->join("sub_districts", "sub_districts.id", "account_farmer.sub_district_id")
+                ->join("districts", "districts.id", "sub_districts.district_id")
+                ->join("cities", "cities.id", "districts.city_id")
+                ->join("provinces", "provinces.id", "cities.province_id")
+                ->where("account_farmer.code", $farmerCode)
+                ->select(DB::raw("account_farmer.code AS farmer_code, users.name AS farmer_name, account_farmer.id_number, account_farmer.latitude, account_farmer.longitude, CONCAT(sub_districts.name, ', ', districts.name, ', ', cities.name, ', ', provinces.name) AS location, account_farmer.address"))
+                ->first();
             });
-            $result["pulper_name"] = Cache::remember("pulper_name_by_code|$result->vcp_code", config("constant.ttl"), function() use($result){
-                $vcp = VCP::join("account_vcp", "t_vcp.id", "account_vcp.vcp_id")
+
+            $result["pulper"] = Cache::remember("pulper_by_code|$result->vcp_code", config("constant.ttl"), function() use($result){
+                
+                return VCP::join("account_vcp", "t_vcp.id", "account_vcp.vcp_id")
                 ->join("accounts", "accounts.id", "account_vcp.account_id")
+                ->join("sub_districts", "sub_districts.id", "t_vcp.sub_district_id")
+                ->join("districts", "districts.id", "sub_districts.district_id")
+                ->join("cities", "cities.id", "districts.city_id")
+                ->join("provinces", "provinces.id", "cities.province_id")
                 ->join("users", "users.id", "accounts.user_id")
-                ->select(DB::raw("users.name"))->first();
-                return $vcp->name;
+                ->select(DB::raw("accounts.code AS field_coordinator_id, users.name AS field_coordinator_name, t_vcp.latitude, t_vcp.longitude, CONCAT(sub_districts.name, ', ', districts.name, ', ', cities.name, ', ', provinces.name) AS location"))->first();
+                
             });
         } catch(\Exception $e){
             \Log::error($e->getMessage());
