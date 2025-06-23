@@ -364,7 +364,7 @@
                   classLabel = "fontColorRejected";
                 }
                 selectedPurchaseOrder = data;
-                return '<a href="#" onclick=showDetail("'+data.status+'")><label class="'+classLabel+'" style="cursor: pointer;";>'+ucFirstWord(data.status)+'</label></a>';
+                return '<a href="javascript:void(0)" onclick=showDetail("'+data.status+'")><label class="'+classLabel+'" style="cursor: pointer;";>'+ucFirstWord(data.status)+'</label></a>';
               }
             },
             { "targets": 1, "className": "text-center", "data": function(data, type, row, meta){
