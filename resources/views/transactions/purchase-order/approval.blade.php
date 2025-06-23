@@ -3,6 +3,7 @@
 @push('plugin-styles')
   <link href="{{ asset('assets/plugins/datatables-net-bs5/dataTables.bootstrap5.css') }}" rel="stylesheet" />
   <link href="{{ asset('assets/plugins/flatpickr/flatpickr.min.css') }}" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endpush
 
 @section('content')
@@ -395,7 +396,7 @@
               }
             },
             { "targets": 13, "data": function(data, type, row, meta){
-                  return '<a href="#" onclick=$(this).delete("'+data.po_number+'") style="cursor: pointer;"><i data-feather="trash-2"></i>';
+                return '<a href="javascript:void(0)" onclick=confirmDelete("'+data.po_number+'") style="cursor: pointer;"><i data-feather="trash-2"></i></a>';
               }
             },
           ],
@@ -501,6 +502,43 @@
       };
     }
 
+    function confirmDelete(poNumber) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You can't undo this action!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                deleteRecord(poNumber);
+            }
+        });
+    }
+    
+    function deleteRecord(poNumber){
+        $.ajax({
+            type: "POST",
+            url: "{{ route('purchase-order.remove') }}",
+            data: {
+              _token: "{{ csrf_token() }}",
+              po_number: poNumber,
+            },
+            dataType: "json",
+            timeout: 300000
+        }).done(function(response){
+            setTimeout(function() {
+              $('#gridDataTable').DataTable().ajax.reload();
+            }, 500);
+            
+        }).fail(function(response){
+            
+        });
+    }
+
     function showDetail(status){
       $("#labelWarning").html(ucFirstWord(status));
 
@@ -597,7 +635,6 @@
       $('[data-tabs]').css('min-height', height + 40 + 'px');
    
     }(jQuery, document));
-
 
 </script>
 @endsection  
