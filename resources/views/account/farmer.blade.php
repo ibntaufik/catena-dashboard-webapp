@@ -19,90 +19,158 @@
   </ol>
 </nav>
 
-<div class="row">
-  <div class="col-md-12 grid-margin stretch-card">
-    <div class="card">
-      <div class="card-body">
-          <h6 class="card-title">Create Farmer Account</h6>
-          <div class="row">
+<div class="accordion" id="accordionFilter">
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="headingTwo">
+      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+        Filter
+      </button>
+    </h2>
+    <div id="collapseTwo" class="accordion-collapse collapse show" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+      <div class="accordion-body">
+        <div class="card">
+          <div class="card-body">
+              <div class="row">
 
-            <div class="col-sm-3">
-              <div class="mb-3">
-                <label for="name" class="form-label">Farmer Name</label>
-                <input type="text" class="form-control" id="name" maxlength="255" placeholder="Farmer Name" onkeypress="return isAlphaNumericAndWhiteSpace(event);">
-              </div>
-            </div>
-            <div class="col-sm-3">
-              <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="text" class="form-control" id="email_user" maxlength="255" autocomplete="off" placeholder="me@mail.co">
-              </div>
-            </div>
-            <div class="col-sm-3">
-              <div class="mb-3">
-                <label for="phone" class="form-label">Phone</label>
-                <input type="text" class="form-control" id="phone" maxlength="15" autocomplete="off" placeholder="08123456789">
-              </div>
-            </div>
-            <div class="col-sm-3" style="display: none;">
-              <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" maxlength="255" autocomplete="new-password" placeholder="Password" onkeypress="return isAlphaNumeric(event);">
-              </div>
-            </div>
-            <div class="col-sm-3">
-              <div class="mb-3">
-                <label for="id_number" class="form-label">Identity Number</label>
-                <input type="text" class="form-control" id="id_number" maxlength="255" placeholder="(SIM, KK, or KTP))" onkeypress="return isNumber(event);">
-              </div>
-            </div>
-            @include("layout.coverage")
-            <div class="col-sm-6">
-              <div class="mb-3">
-                <label for="city" class="form-label">Address</label>
-                <textarea type="text" class="form-control" id="address" rows="3" placeholder="Address" onkeypress="return validateAddress(event);"></textarea>
-              </div>
-            </div>
-            <div class="col-sm-6">
-              <div class="mb-3">
-                <div class="row col-sm-12">
-                  <div class="col-md-6">
-                    <div class="form-group" style="height: 40%;">
-                        <label class="mandatory">Upload ID Photo</label>
-                        <input type="file" id="id_file" name="id_file" style="opacity: 1; position: relative; height: 30px;" onchange="getBase64(this.id)">
-                    </div>
+                <div class="col-sm-3">
+                  <div class="mb-3">
+                    <label for="name" class="form-label">Farmer Name</label>
+                    <input type="text" class="form-control" id="f_name" maxlength="255" placeholder="Farmer Name" onkeypress="return isAlphaNumericAndWhiteSpace(event);">
                   </div>
-                  <div class="col-md-6">
-                      <div class="form-group">
-                          <img id="img-preview-id_file" style="max-width: 100%;height: auto;">
-                          <input type="hidden" id="img-base64-id_file">
-                      </div>
+                </div>
+                <div class="col-sm-3">
+                  <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="text" class="form-control" id="f_email_user" maxlength="255" autocomplete="off" placeholder="me@mail.co">
+                  </div>
+                </div>
+                <div class="col-sm-3">
+                  <div class="mb-3">
+                    <label for="phone" class="form-label">Phone</label>
+                    <input type="text" class="form-control" id="f_phone" maxlength="15" autocomplete="off" placeholder="08123456789">
+                  </div>
+                </div>
+
+                <div class="col-sm-3">
+                  <div class="mb-3">
+                    <label for="id_number" class="form-label">Identity Number</label>
+                    <input type="text" class="form-control" id="f_id_number" maxlength="255" placeholder="(SIM, KK, or KTP))" onkeypress="return isNumber(event);">
+                  </div>
+                </div>
+                @include("layout.coverage-filter")
+              </div>
+          </div>
+          <div class="card-footer">
+              <div class="row">
+                <div class="row">
+                  <div class="col-sm-9">
+                  </div>
+                  <div class="col-sm-3">
+                    <button id="id_btn_filter" class="btn btn-flat btn-primary" style="width: 45% !important;">Filter</button>
+                    <button id="id_btn_clear" class="btn btn-secondary me-2 submit-button" style="width: 45% !important;">Cancel</button>
                   </div>
                 </div>
               </div>
-            </div>
           </div>
-      </div>
-      <div class="card-footer">
-          <div class="row">
-            <div class="col-sm-9">
-              <div id="response_message" class="alert alert-danger alert-dismissible fade show" role="alert" style="">
-                  <strong id="success">Message</strong>
-                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-              </div>
-            </div>
-            <div class="col-sm-3">
-              <button type="submit" class="btn btn-primary submit-button" style="" onclick="submit();">
-                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>Create
-              </button>
-              <button class="btn btn-secondary me-2 submit-button" style="">Cancel</button>
-            </div>
-          </div>
+        </div>
       </div>
     </div>
   </div>
 </div>
-<div class="row">
+
+<div class="accordion pt-3" id="accordionNewFarmer">
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="headingOne">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+        New Farmer
+      </button>
+    </h2>
+    <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+      <div class="accordion-body">
+        <div class="card">
+          <div class="card-body">
+              <div class="row">
+
+                <div class="col-sm-3">
+                  <div class="mb-3">
+                    <label for="name" class="form-label">Farmer Name</label>
+                    <input type="text" class="form-control" id="name" maxlength="255" placeholder="Farmer Name" onkeypress="return isAlphaNumericAndWhiteSpace(event);">
+                  </div>
+                </div>
+                <div class="col-sm-3">
+                  <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="text" class="form-control" id="email_user" maxlength="255" autocomplete="off" placeholder="me@mail.co">
+                  </div>
+                </div>
+                <div class="col-sm-3">
+                  <div class="mb-3">
+                    <label for="phone" class="form-label">Phone</label>
+                    <input type="text" class="form-control" id="phone" maxlength="15" autocomplete="off" placeholder="08123456789">
+                  </div>
+                </div>
+                <div class="col-sm-3" style="display: none;">
+                  <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" maxlength="255" autocomplete="new-password" placeholder="Password" onkeypress="return isAlphaNumeric(event);">
+                  </div>
+                </div>
+                <div class="col-sm-3">
+                  <div class="mb-3">
+                    <label for="id_number" class="form-label">Identity Number</label>
+                    <input type="text" class="form-control" id="id_number" maxlength="255" placeholder="(SIM, KK, or KTP))" onkeypress="return isNumber(event);">
+                  </div>
+                </div>
+                @include("layout.coverage")
+                <div class="col-sm-6">
+                  <div class="mb-3">
+                    <label for="city" class="form-label">Address</label>
+                    <textarea type="text" class="form-control" id="address" rows="3" placeholder="Address" onkeypress="return validateAddress(event);"></textarea>
+                  </div>
+                </div>
+                <div class="col-sm-6">
+                  <div class="mb-3">
+                    <div class="row col-sm-12">
+                      <div class="col-md-6">
+                        <div class="form-group" style="height: 40%;">
+                            <label class="mandatory">Upload ID Photo</label>
+                            <input type="file" id="id_file" name="id_file" style="opacity: 1; position: relative; height: 30px;" onchange="getBase64(this.id)">
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                          <div class="form-group">
+                              <img id="img-preview-id_file" style="max-width: 100%;height: auto;">
+                              <input type="hidden" id="img-base64-id_file">
+                          </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+          </div>
+          <div class="card-footer">
+              <div class="row">
+                <div class="col-sm-9">
+                  <div id="response_message" class="alert alert-danger alert-dismissible fade show" role="alert" style="">
+                      <strong id="success">Message</strong>
+                      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>
+                </div>
+                <div class="col-sm-3">
+                  <button type="submit" class="btn btn-primary submit-button" style="" onclick="submit();">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>Create
+                  </button>
+                  <button class="btn btn-secondary me-2 submit-button" style="">Cancel</button>
+                </div>
+              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row pt-3">
   <div class="col-md-12 grid-margin stretch-card">
     <div class="card">
       <div class="card-body">
@@ -151,7 +219,6 @@
       </div> 
 
       <div class="modal-footer">
-        
       </div>
     </div>
   </div>
@@ -183,7 +250,8 @@
           'info'          : true,
           'autoWidth'     : false,
           "processing"    : true,
-          "searching"     : true,
+          "serverSide"    : true,
+          "searching"     : false,
           "pageLength"    : limit,
           "ajax": {
             "url": "{{ route('farmer.grid-list') }}",
@@ -192,12 +260,22 @@
               d.start = info.start;
               d.limit = limit;
               d.eager = false;
+              d.name = $("#f_name").val();
+              d.email_user = $("#f_email_user").val();
+              d.phone = $("#f_phone").val();
+              d.id_number = $("#f_id_number").val();
+              d.latitude = $("#f_latitude").val();
+              d.longitude = $("#f_longitude").val();
+              d.province_id = $("#f_province").val();
+              d.city_id = $("#f_city").val();
+              d.district_id = $("#f_district").val();
+              d.sub_district_id = $("#f_sub_district").val();
             },
             "dataSrc": function(json){
               
-              json.recordsTotal = json.data.length;
-              json.recordsFiltered = json.data.length;
-
+              json.recordsTotal = json.count;
+              json.recordsFiltered = json.count;
+              
               return json.data;
             }
           },
@@ -246,7 +324,19 @@
         }).fail(function(response){
             
         });
-      };
+      }; 
+
+      $('#id_btn_filter').on('click',function(e) {
+          e.stopImmediatePropagation();
+          $('#gridDataTable').DataTable().ajax.reload();
+      });
+
+      $('#id_btn_clear').on('click',function(e) {
+          $("#f_name, #f_email_user, #f_phone, #f_id_number").val("");
+          resetFilter();
+          e.stopImmediatePropagation();
+          $('#gridDataTable').DataTable().ajax.reload();
+      });
   });
   
   function validateInput(input){
@@ -363,6 +453,15 @@
       $('#city, #district, #sub_district').empty();
       $('#city, #district, #sub_district').select2({ width: '100%', data: comboDefault });
       $('#province, #city, #district, #sub_district').val('select').select2();
+  }
+
+  function resetFilter(){
+      $("#f_name, #f_latitude, #f_longitude").val('');
+      // add by faisal
+      // used to reset coverage combo from coverage.js file
+      $('#f_city, #f_district, #f_sub_district').empty();
+      $('#f_city, #f_district, #f_sub_district').select2({ width: '100%', data: comboDefault });
+      $('#f_province, #f_city, #f_district, #f_sub_district').val('select').select2();
   }
 
   function getBase64(file) {

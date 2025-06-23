@@ -160,7 +160,6 @@
                     <button id="id_btn_clear" class="btn btn-secondary me-2 submit-button" style="width: 45% !important;">Cancel</button>
                   </div>
                 </div>
-                
               </div>
             </div>
           </div>

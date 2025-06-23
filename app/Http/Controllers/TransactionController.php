@@ -129,7 +129,7 @@ class TransactionController extends Controller
                     $cacheName .= ".end_date|$endDate";
                 }
 
-                $response["count"] = Cache::remember("count.purchase_order_transaction$cacheName", 120, function() use($vchCode, $status, $farmer, $vcpCode, $transactionId, $poNumber, $receiptNumber, $itemType, $floatingRate, $itemPrice, $itemQuantity, $totalPrice, $startDate, $endDate){
+                $response["count"] = Cache::remember("count.purchase_order_transaction$cacheName", config("constant.ttl"), function() use($vchCode, $status, $farmer, $vcpCode, $transactionId, $poNumber, $receiptNumber, $itemType, $floatingRate, $itemPrice, $itemQuantity, $totalPrice, $startDate, $endDate){
                     return PurchaseOrderTransaction::join("purchase_order", "purchase_order_transaction.purchase_order_id", "purchase_order.id")
                     ->join("account_farmer", "purchase_order_transaction.account_farmer_id", "account_farmer.id")
                     ->join("users", "users.id", "account_farmer.user_id")
@@ -184,7 +184,7 @@ class TransactionController extends Controller
                     ->count();
                 });
 
-                $response["data"] = Cache::remember("list.purchase_order_transaction$cacheName", 120, function() use($vchCode, $status, $farmer, $vcpCode, $transactionId, $poNumber, $receiptNumber, $itemType, $floatingRate, $itemPrice, $itemQuantity, $totalPrice, $startDate, $endDate, $page, $limit){
+                $response["data"] = Cache::remember("list.purchase_order_transaction$cacheName", config("constant.ttl"), function() use($vchCode, $status, $farmer, $vcpCode, $transactionId, $poNumber, $receiptNumber, $itemType, $floatingRate, $itemPrice, $itemQuantity, $totalPrice, $startDate, $endDate, $page, $limit){
                     $transaction = PurchaseOrderTransaction::join("purchase_order", "purchase_order_transaction.purchase_order_id", "purchase_order.id")
                     ->join("account_farmer", "purchase_order_transaction.account_farmer_id", "account_farmer.id")
                     ->join("users", "users.id", "account_farmer.user_id")

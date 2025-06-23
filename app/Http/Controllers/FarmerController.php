@@ -41,25 +41,179 @@ class FarmerController extends Controller
         $response = [
             "code"      => 400,
             "message"   => "Failed to complete request",
+            "count"     => 0,
             "data"      => []
         ];
 
         try{
             $response["code"] = 200;
             $response["message"] = "Success";
-            $response["data"] = Cache::remember("data.list.farmer", config("constant.ttl"), function(){
+
+            $page = $request->input("start");
+            $limit = $request->input("limit");
+
+            $cacheName = "list.farmer";
+            $name = $request->input("f_name");
+            if($name){
+                $cacheName .= ".name_".strtolower(preg_replace('/\s+/', '', $name));
+
+            }
+
+            $emailUser = $request->input("email_user");
+            if($emailUser){
+                $cacheName .= ".email_user_".strtolower(preg_replace('/\s+/', '', $emailUser));
+
+            }
+
+            $phone = $request->input("phone");
+            if($emailUser){
+                $cacheName .= ".phone_$phone";
+
+            }
+
+            $idNumber = $request->input("id_number");
+            if($idNumber){
+                $cacheName .= ".id_numner_$idNumber";
+
+            }
+
+            $latitude = $request->input("latitude");
+            if($latitude){
+                $cacheName .= ".latitude_$latitude";
+
+            }
+
+            $longitude = $request->input("longitude");
+            if($longitude){
+                $cacheName .= ".longitude_$longitude";
+
+            }
+
+            $provinceId = $request->input("province_id");
+            if($provinceId){
+                $cacheName .= ".province_id_$provinceId";
+
+            }
+
+            $cityId = $request->input("city_id");
+            if($cityId){
+                $cacheName .= ".city_id_$cityId";
+
+            }
+
+            $districtId = $request->input("dictrict_id");
+            if($districtId){
+                $cacheName .= ".dictrict_id_$districtId";
+
+            }
+
+            $subDistrictId = $request->input("sub_dictrict_id");
+            if($subDistrictId){
+                $cacheName .= ".sub_dictrict_id_$subDistrictId";
+
+            }
+
+            if($page){
+                $cacheName .= ".page|$page";
+            }
+
+            $response["count"] = Cache::remember("count.$cacheName", config("constant.ttl"), function() use($name, $emailUser, $phone, $idNumber, $latitude, $longitude, $provinceId, $cityId, $districtId, $subDistrictId){
                 return Farmer::join("sub_districts", "sub_districts.id", "account_farmer.sub_district_id")
                 ->leftJoin("users", "account_farmer.user_id", "users.id")
                 ->join("districts", "districts.id", "sub_districts.district_id")
                 ->join("cities", "cities.id", "districts.city_id")
                 ->join("provinces", "provinces.id", "cities.province_id")
+                ->when($name, function($builder) use($name){
+                    return $builder->whereRaw("UPPER(users.name) LIKE ?", ["%".strtoupper($name)."%"]);
+                })
+                ->when($emailUser, function($builder) use($emailUser){
+                    return $builder->whereRaw("LOWER(users.email) LIKE ?", ["%".strtolower($emailUser)."%"]);
+                })
+                ->when($phone, function($builder) use($phone){
+                    return $builder->whereRaw("users.phone LIKE ?", [$phone]);
+                })
+                ->when($idNumber, function($builder) use($idNumber){
+                    return $builder->whereRaw("account_farmer.id_number LIKE ?", [$idNumber]);
+                })
+                ->when($latitude, function($builder) use($latitude){
+                    return $builder->whereRaw("account_farmer.latitude LIKE ?", [$latitude]);
+                })
+                ->when($longitude, function($builder) use($longitude){
+                    return $builder->whereRaw("account_farmer.longitude LIKE ?", [$longitude]);
+                })
+                ->when($provinceId, function($builder) use($provinceId){
+                    return $builder->whereRaw("provinces.id = ?", [$provinceId]);
+                })
+                ->when($cityId, function($builder) use($cityId){
+                    return $builder->whereRaw("cities.id = ?", [$cityId]);
+                })
+                ->when($districtId, function($builder) use($districtId){
+                    return $builder->whereRaw("districts.id = ?", [$districtId]);
+                })
+                ->when($subDistrictId, function($builder) use($subDistrictId){
+                    return $builder->whereRaw("sub_districts.id = ?", [$subDistrictId]);
+                })
+                ->count();
+            });
+
+            $response["data"] = Cache::remember("data.$cacheName", config("constant.ttl"), function() use($name, $emailUser, $phone, $idNumber, $latitude, $longitude, $provinceId, $cityId, $districtId, $subDistrictId, $page, $limit){
+                return Farmer::join("sub_districts", "sub_districts.id", "account_farmer.sub_district_id")
+                ->leftJoin("users", "account_farmer.user_id", "users.id")
+                ->join("districts", "districts.id", "sub_districts.district_id")
+                ->join("cities", "cities.id", "districts.city_id")
+                ->join("provinces", "provinces.id", "cities.province_id")
+                ->when($name, function($builder) use($name){
+                    return $builder->whereRaw("UPPER(users.name) LIKE ?", ["%".strtoupper($name)."%"]);
+                })
+                ->when($emailUser, function($builder) use($emailUser){
+                    return $builder->whereRaw("LOWER(users.email) LIKE ?", ["%".strtolower($emailUser)."%"]);
+                })
+                ->when($phone, function($builder) use($phone){
+                    return $builder->whereRaw("users.phone LIKE ?", [$phone]);
+                })
+                ->when($idNumber, function($builder) use($idNumber){
+                    return $builder->whereRaw("account_farmer.id_number LIKE ?", [$idNumber]);
+                })
+                ->when($latitude, function($builder) use($latitude){
+                    return $builder->whereRaw("account_farmer.latitude LIKE ?", [$latitude]);
+                })
+                ->when($longitude, function($builder) use($longitude){
+                    return $builder->whereRaw("account_farmer.longitude LIKE ?", [$longitude]);
+                })
+                ->when($provinceId, function($builder) use($provinceId){
+                    return $builder->whereRaw("provinces.id = ?", [$provinceId]);
+                })
+                ->when($cityId, function($builder) use($cityId){
+                    return $builder->whereRaw("cities.id = ?", [$cityId]);
+                })
+                ->when($districtId, function($builder) use($districtId){
+                    return $builder->whereRaw("districts.id = ?", [$districtId]);
+                })
+                ->when($subDistrictId, function($builder) use($subDistrictId){
+                    return $builder->whereRaw("sub_districts.id = ?", [$subDistrictId]);
+                })
+                ->when($page, function($builder) use($page){
+                    return $builder->skip($page);
+                })
+                ->when($limit, function($builder) use($limit){
+                    return $builder->take($limit);
+                })
                 ->select(DB::raw("account_farmer.code AS farmer_code, users.name, users.email, account_farmer.address, account_farmer.latitude, account_farmer.longitude, users.phone, account_farmer.id_number, sub_districts.code AS sub_district_code, account_farmer.image_id_number_name, account_farmer.image_photo_name, CONCAT(sub_districts.name, ' <br> ', districts.name, ' <br> ', cities.name, ' <br> ', provinces.name) AS location"))->orderBy("account_farmer.created_at", "DESC")->get();
             });
+
+
+            if($response["count"] > 0){
+                $response["code"] = 200;
+                $response["message"] = "Success";
+            } else {
+                $response["code"] = 404;
+                $response["message"] = "Not found";
+            }
         } catch(\Exception $e){
             \Log::error($e->getMessage());
             \Log::error($e->getTraceAsString());
         }
-        
+        \Log::debug($response);
         return response()->json($response);
     }
 
