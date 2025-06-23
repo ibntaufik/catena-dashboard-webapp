@@ -213,8 +213,53 @@ class FarmerController extends Controller
             \Log::error($e->getMessage());
             \Log::error($e->getTraceAsString());
         }
-        \Log::debug($response);
+        
         return response()->json($response);
+    }
+
+    public function detail(Request $request){
+        $response = [
+            "code"      => 400,
+            "message"   => "Failed to complete request",
+            "data"      => []
+        ];
+        
+        try{
+            $response["code"] = 200;
+            $response["message"] = "Success";
+
+            $idNumber = $request->input("id");
+            $farmerCode = $request->input("code");
+
+            $cacheName = "detail.farmer";
+            if($idNumber){
+                $cacheName .= ".id_number|$idNumber";
+            }
+            if($farmerCode){
+                $cacheName .= ".farmer_code|$farmerCode";
+            }
+        
+            $result = Cache::remember($cacheName, config("constant.ttl"), function() use($idNumber, $farmerCode){
+                return Farmer::join("sub_districts", "sub_districts.id", "account_farmer.sub_district_id")
+                ->leftJoin("users", "account_farmer.user_id", "users.id")
+                ->join("districts", "districts.id", "sub_districts.district_id")
+                ->join("cities", "cities.id", "districts.city_id")
+                ->join("provinces", "provinces.id", "cities.province_id")
+                ->when($idNumber, function($builder) use($idNumber){
+                    return $builder->whereRaw("account_farmer.id_number LIKE ?", [$idNumber]);
+                })
+                ->when($idNumber, function($builder) use($farmerCode){
+                    return $builder->whereRaw("account_farmer.code LIKE ?", [$farmerCode]);
+                })
+                ->select(DB::raw("account_farmer.code AS farmer_code, users.name, users.email, account_farmer.address, account_farmer.latitude, account_farmer.longitude, users.phone, account_farmer.id_number, sub_districts.code AS sub_district_code, account_farmer.image_id_number_name, account_farmer.image_photo_name, CONCAT(sub_districts.name, ', ', districts.name, ', ', cities.name, ', ', provinces.name) AS location"))->first();
+                
+            });
+        } catch(\Exception $e){
+            \Log::error($e->getMessage());
+            \Log::error($e->getTraceAsString());
+        }
+
+        return view("account.farmer-detail", compact("result"));
     }
 
     public function save(FarmerPostRequest $request){

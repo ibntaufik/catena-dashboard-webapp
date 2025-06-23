@@ -38,7 +38,7 @@
                     <input type="text" class="form-control" id="f_name" maxlength="255" placeholder="Farmer Name" onkeypress="return isAlphaNumericAndWhiteSpace(event);">
                   </div>
                 </div>
-                <div class="col-sm-3">
+                <div class="col-sm-3" style="display: none;">
                   <div class="mb-3">
                     <label for="email" class="form-label">Email</label>
                     <input type="text" class="form-control" id="f_email_user" maxlength="255" autocomplete="off" placeholder="me@mail.co">
@@ -179,15 +179,12 @@
           <table id="gridDataTable" class="table">
             <thead>
               <tr>
-                <th>ID</th>
                 <th>Name</th>
-                <th>Email</th>
                 <th>ID Number</th>
                 <th>Phone</th>
                 <th>Address</th>
                 <th>Sub District Code</th>
-                <th>Latitude</th>
-                <th>Longitude</th>
+                <th>Latitude<br>Longitude</th>
                 <th></th>
               </tr>
             </thead>
@@ -281,25 +278,28 @@
           },
                                 
           "columnDefs" : [
-            { "targets": 0, "data": "farmer_code" },
-            { "targets": 1, "data": function( data, type, row, meta ){
+            { "targets": 0, "data": function( data, type, row, meta ){
                 return '<a href="javascript:void(0)" onclick=showDetail("'+data.image_id_number_name+'||'+data.image_photo_name+'")><label style="cursor: pointer;";>'+ucFirstWord(data.name)+'</label></a>';
               }
             },
-            { "targets": 2, "data": "email" },
-            { "targets": 3, "data": "id_number" },
-            { "targets": 4, "data":  function(data, type, row, meta){
+            { "targets": 1, "data": function( data, type, row, meta ){
+                return '<a onclick=$(this).detail("'+data.id_number+'","'+data.farmer_code+'") class="form-label" style="cursor: pointer;">'+data.id_number+'</a>';
+              }
+            },
+            { "targets": 2, "data":  function(data, type, row, meta){
                   return data.phone ? data.phone : "-";
               }
             },
-            { "targets": 5, "data":  function(data, type, row, meta){
+            { "targets": 3, "data":  function(data, type, row, meta){
                   return data.address+"<br>"+data.location;
               }
             },
-            { "targets": 6, "data": "sub_district_code" },
-            { "targets": 7, "data": "latitude" },
-            { "targets": 8, "data": "longitude" },
-            { "targets": 9, "data": function(data, type, row, meta){
+            { "targets": 4, "data": "sub_district_code" },
+            { "targets": 5, "data":  function(data, type, row, meta){
+                  return data.latitude+"<br>"+data.longitude;
+              }
+            },
+            { "targets": 6, "data": function(data, type, row, meta){
                   return '<a href="#" onclick=$(this).delete("'+data.id_number+'") style="cursor: pointer;"><i data-feather="trash-2"></i>';
               }
             },
@@ -337,6 +337,10 @@
           e.stopImmediatePropagation();
           $('#gridDataTable').DataTable().ajax.reload();
       });
+
+      $.fn.detail = function(id, code) {
+        window.open(('{{ route('farmer.detail') }}?id=' + id +'&code=' + code), '_blank' );
+      };
   });
   
   function validateInput(input){
