@@ -2,6 +2,8 @@
 
 @push('plugin-styles')
   <link href="{{ asset('assets/plugins/datatables-net-bs5/dataTables.bootstrap5.css') }}" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 @endpush
 
 @section('content')
@@ -300,7 +302,8 @@
               }
             },
             { "targets": 6, "data": function(data, type, row, meta){
-                  return '<a href="#" onclick=$(this).delete("'+data.id_number+'") style="cursor: pointer;"><i data-feather="trash-2"></i>';
+                  return '<a href="javascript:void(0)" onclick="confirmDelete('+data.id_number+')" style="cursor: pointer;"><i data-feather="trash-2"></i></a>';
+//'<a href="#" onclick=$(this).delete("'+data.id_number+'") style="cursor: pointer;"><i data-feather="trash-2"></i>';
               }
             },
           ],
@@ -348,8 +351,7 @@
       return re.test(input);
   }
 
-  function submit()
-  {
+  function submit(){
       $("#email_user, #phone, #name, #address, #latitude, #longitude").attr('style', '');
       $("#response_message").attr("style", 'display: none;');
       $(".submit-button").addClass("disabled");
@@ -516,6 +518,41 @@
     
     $('#previewModal').modal('show');
   }
+
+  function confirmDelete(id) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You can't undo this action!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            deleteRecord(id);
+        }
+    });
+
+    function deleteRecord(idNumber){
+      $.ajax({
+            type: "POST",
+            url: "{{ route('farmer.remove') }}",
+            data: {
+              _token: "{{ csrf_token() }}",
+              id_number: idNumber,
+            },
+            dataType: "json",
+            timeout: 300000
+        }).done(function(response){
+            $('#gridDataTable').DataTable().ajax.reload();
+        }).fail(function(response){
+            
+        });
+    }
+}
+
 
 
 </script>

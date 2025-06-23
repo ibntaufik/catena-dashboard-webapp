@@ -371,7 +371,7 @@ class FarmerController extends Controller
             "message"   => "Failed to complete request",
             "data"      => []
         ];
-        
+        \Log::debug($request->all());
         try{
             Farmer::where("id_number", $request->input("id_number"))->delete();
 
