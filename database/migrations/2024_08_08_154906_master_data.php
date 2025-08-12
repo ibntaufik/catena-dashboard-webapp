@@ -44,7 +44,7 @@ return new class extends Migration
                 $table->unsignedInteger('sub_district_id')->index();
                 $table->string('latitude', 255)->index();
                 $table->string('longitude', 255)->index();
-                $table->text("address");
+                $table->text("address")->nullable();
                 $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'))->index();
                 $table->string('created_by', 255)->default("System");
                 $table->timestamp('updated_at')->nullable();
@@ -63,7 +63,7 @@ return new class extends Migration
                 $table->unsignedInteger('sub_district_id')->index();
                 $table->string('latitude', 255)->index();
                 $table->string('longitude', 255)->index();
-                $table->text("address");
+                $table->text("address")->nullable();
                 $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'))->index();
                 $table->string('created_by', 255)->default("System");
                 $table->timestamp('updated_at')->nullable();
@@ -83,7 +83,7 @@ return new class extends Migration
                 $table->unsignedInteger('sub_district_id')->index();
                 $table->string('latitude', 255)->index();
                 $table->string('longitude', 255)->index();
-                $table->text("address");
+                $table->text("address")->nullable();
                 $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'))->index();
                 $table->string('created_by', 255)->default("System");
                 $table->timestamp('updated_at')->nullable();

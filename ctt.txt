@@ -51,6 +51,27 @@ faisal@cognizest.com
 
 i63MvA6Fetbny#f
 
+root
+zMmdCj6Cm3z5a
+
 CREATE USER 'faisal'@'%' IDENTIFIED BY 'c2aqQz#c4t3Na';
 GRANT ALL ON catenadb.* TO 'faisal'@'%';
+GRANT ALL ON catena.* TO 'faisal'@'%';
 FLUSH PRIVILEGES;
+
+CREATE USER 'riwandy'@'%' IDENTIFIED BY 'c2aqQz#c4t3Na';
+GRANT ALL ON catena.* TO 'faisal'@'%';
+FLUSH PRIVILEGES;
+
+CREATE USER 'uvarion'@'%' IDENTIFIED BY 'uV412#c4t3Na';
+GRANT SELECT ON catena.* TO 'uvarion'@'%';
+FLUSH PRIVILEGES;
+
+user: riwandy
+pass: c2aqQz#c4t3Na
+
+user: uvarion
+pass: uV412#c4t3Na
+
+
+list table:

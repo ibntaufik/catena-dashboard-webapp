@@ -18,6 +18,9 @@ class Subdistricts implements ToCollection
 
     public function collection(Collection $rows)
     {
+        $notFoundCity = [];
+        $notFoundDistrict = [];
+
         foreach ($rows as $row) 
         {
             $row = json_decode($row, true);
@@ -29,39 +32,54 @@ class Subdistricts implements ToCollection
                 "cities.name" => $row[1],
                 "districts.name" => $row[2],
                 "sub_districts.name" => $row[3]
-            ])->select(DB::raw("provinces.name AS province, cities.name AS city, districts.id, districts.name AS district, sub_districts.name AS sub_district"))->first();
+            ])->select(DB::raw("sub_districts.id, provinces.name AS province, cities.name AS city, districts.id, districts.name AS district, sub_districts.name AS sub_district"))->first();
             if($result){
-
-                /*District::where("districts.id",$result->id)->update([
-                    "code" => $row[3],
-                    "name" => strtoupper($result->name)
-                ]);*/
+                Subdistrict::where("id", $result->id)
+                ->update([
+                    "sequence" => $row[7]
+                ]);
             } else {
                 $province = Province::where("name", $row[0])->first();
-                if($province){\Log::debug($province);
+                if($province){
                     $city = City::where([
                         "name"  => $row[1],
                         "province_id"   => $province->id
                     ])->select("cities.id")->first();
 
-                    if($city){\Log::debug($city);
+                    if($city){
                         $district = District::where([
                             "city_id" => $city->id,
                             "name"  => strtoupper($row[2])
                         ])->select("districts.id")->first();
 
-                        if($district){\Log::debug($district);
+                        if($district){
                             Subdistrict::create([
                                 "code" => $row[6],
                                 "name" => strtoupper($row[3]),
                                 "district_id" => $district->id,
                                 "latitude" => $row[4],
                                 "longitude" => $row[5],
+                                "sequence" => $row[7],
                             ]);
+                        } else {
+                            \Log::debug("District ".$row[2]." not found");
+                            if(!in_array($row[2], $notFoundDistrict)){
+                                $notFoundDistrict[] = $row[2];
+                            }
+                        }
+                    } else {
+                        \Log::debug("City ".$row[1]." not found");
+                        if(!in_array($row[1], $notFoundCity)){
+                            $notFoundCity[] = $row[1];
                         }
                     }
+                } else {
+                    \Log::debug("Province ".$row[0]." not found");
                 }
             }
         }
+
+        \Log::debug("City not found: ".implode(", ", $notFoundCity));
+        \Log::debug("District not found: ".implode(", ", $notFoundDistrict));
     }
 }

@@ -22,36 +22,40 @@ class VCHS implements ToCollection
     {
         foreach ($rows as $row) 
         {
-            $rowEvc = explode("-", $row[0]);
 
-            $isExist = VCH::findByCode($rowEvc[1]);
+            $isExist = VCH::findByCode($row[1]);
             
-            if($isExist) continue;
+            if($isExist) {
 
-            $result = Subdistrict::join("districts", "districts.id", "sub_districts.district_id")
-                ->join("cities", "cities.id", "districts.city_id")
-                ->join("provinces", "provinces.id", "cities.province_id")
-                ->where([
-                "provinces.name" => $row[1],
-                "cities.name" => $row[2],
-                "districts.name" => $row[3],
-                "sub_districts.name" => $row[4]
-            ])->select(DB::raw("provinces.name AS province, cities.name AS city, districts.id, districts.name AS district, sub_districts.name AS sub_district, sub_districts.id"))->first();
-            if($result){
+            } else {
+
+                $result = Subdistrict::join("districts", "districts.id", "sub_districts.district_id")
+                    ->join("cities", "cities.id", "districts.city_id")
+                    ->join("provinces", "provinces.id", "cities.province_id")
+                    ->where([
+                    "provinces.name" => $row[2],
+                    "cities.name" => $row[3],
+                    "districts.name" => $row[4],
+                    "sub_districts.name" => $row[5]
+                ])->select(DB::raw("provinces.name AS province, cities.name AS city, districts.id, districts.name AS district, sub_districts.name AS sub_district, sub_districts.id"))
+                ->first();
                 
-                $evc = Evc::findByCode($rowEvc[0]);
-
-                if(!empty($evc)){
-                    $user = VCH::create([
-                        "code"   => $rowEvc[1],
-                        "evc_id" => $evc->id,
-                        "sub_district_id" => $result->id,
-                        "latitude"  => $row[5],
-                        "longitude" => $row[6],
-                        "address"   => $row[7],
-                    ]);
+                if($result){
+                    $evc = Evc::findByCode($row[0]);
+                    if(!empty($evc)){
+                        $user = VCH::create([
+                            "code"   => $row[1],
+                            "evc_id" => $evc->id,
+                            "sub_district_id" => $result->id,
+                            "address"   => $row[6],
+                            "latitude"  => $row[7],
+                            "longitude" => $row[8],
+                            "altitude" => $row[9],
+                            "status" => strtolower($row[10]),
+                        ]);
+                    }
                 }
-            }
+            };
         }
     }
 }
