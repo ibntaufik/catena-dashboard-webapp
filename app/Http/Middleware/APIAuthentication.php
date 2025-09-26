@@ -6,6 +6,8 @@ use Closure;
 use Common;
 use App\EmployeeV2;
 use App\Helpers\CommonHelper;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 
 class APIAuthentication
 {
@@ -19,18 +21,29 @@ class APIAuthentication
     public function handle($request, Closure $next, $type)
     {
         if($request->headers->get('api-key')){
-            if(!in_array($request->headers->get('api-key'), ["jwENENd4VyL1"])){
+            if($request->headers->get('api-key') !== env("API_KEY")){
                 return response()->json(['response' => ['code' => 400,'message' =>'Invalid API KEY.'], 'data' => '']);
             } 
-        }else{
-            /*
-            if(!Common::getAPIAccess(request('api_key'), $type)){
-                if(in_array($request->get('api_key'), ["jwENENd4VyL1"])){
-                    return response()->json();
+            if(in_array($type, ["auth","mobile"])){
+                if($type == "mobile"){
+                    $auth = $request->header('Authorization');
+                    if (!$auth || !preg_match('/Bearer\s(\S+)/', $auth, $matches)) {
+                        return response()->json(['response' => ['code' => 400,'message' =>'Token is required.'], 'data' => ''], 401);
+                    }
+                    $token = $matches[1];
+
+                    try {
+                        $decoded = JWT::decode($token, new Key(env('JWT_SECRET'), 'HS256'));
+                        // $decoded->sub is user_id
+                    } catch (\Exception $e) {
+                        return response()->json(['error' => 'Invalid token'], 401);
+                    }
                 }
-                return response()->json(['response' => ['code' => 400,'message' =>'Invalid API key.'], 'data' => '']);
+            } else{
+                return response()->json(['response' => ['code' => 400,'message' =>'You have no authorization to access this portal.'], 'data' => ''], 401);
             }
-            */
+        } else {
+            return response()->json(['response' => ['code' => 400,'message' =>'API Key is required'], 'data' => ''], 401);
         }
 
         return $next($request);

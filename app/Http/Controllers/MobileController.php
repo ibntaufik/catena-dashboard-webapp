@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Model\User;
 use App\Model\VchAccount;
 use App\Model\VcpAccount;
+use Carbon\Carbon;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -122,6 +125,17 @@ class MobileController extends Controller
                             }
                         }
 
+                        $payload = [
+                            'iss'   => config('app.url'),        // Issuer
+                            'sub'   => $user->id,                // Subject (user ID)
+                            'email' => $email,
+                            'name'  => $user->name,
+                            'iat'   => Carbon::now()->timestamp, // Issued at
+                            'exp'   => Carbon::now()->addSeconds(env('JWT_TTL',3600))->timestamp, // Expiration
+                        ];
+
+                        $token = JWT::encode($payload, env('JWT_SECRET'), 'HS256');
+
                         $response["message"] = "Welcome ".$user->name." to Catena";
                         $response["code"] = 200;
 
@@ -129,6 +143,7 @@ class MobileController extends Controller
                         $response["data"]["user_id"] = $user->id;
                         $response["data"]["user_code"] = $user->code;
                         $response["data"]["email"] = $email;
+                        $response["data"]["token"] = $token;
                     }
                 }
             }

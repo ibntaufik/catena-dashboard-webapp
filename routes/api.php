@@ -17,7 +17,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('login', 'MobileController@login')->middleware('authapi:mobile');
+Route::post('login', 'MobileController@login')->middleware('authapi:auth');
 
 Route::group(['prefix' => 'master-data'], function(){
     Route::post('coverage', 'LocationController@coverage')->middleware('authapi:mobile');

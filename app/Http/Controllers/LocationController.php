@@ -236,10 +236,6 @@ class LocationController extends Controller
         try{
 
             $evcCode = $request->input("evc_code");
-            if(is_string($evcCode)){
-                $evcCode = [$evcCode];
-            }
-
             $evcId = $request->input("evc_id");
 
             if(empty($evcCode) && empty($evcId)){
@@ -256,6 +252,10 @@ class LocationController extends Controller
                     return Subdistrict::select(DB::raw("id, name, code, district_id, latitude, longitude"))->get()->toArray();
                 });
             } else {
+
+                if(!empty($evcCode) && is_string($evcCode)){
+                    $evcCode = [$evcCode];
+                }
 
                 $results = Cache::remember("location.api.coverage.province.evc_code|".implode("-", $evcCode), config("constant.ttl"), function() use($evcCode){
                     return Province::join("t_evc", "t_evc.id", "provinces.evc_id")
