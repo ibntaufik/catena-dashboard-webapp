@@ -22,7 +22,7 @@ class APIAuthentication
     {
         if($request->headers->get('api-key')){
             if($request->headers->get('api-key') !== env("API_KEY")){
-                return response()->json(['response' => ['code' => 400,'message' =>'Invalid API KEY.'], 'data' => '']);
+                return response()->json(['response' => ['code' => 400,'message' =>'Invalid API KEY.'], 'data' => ''], 401);
             } 
             if(in_array($type, ["auth","mobile"])){
                 if($type == "mobile"){
