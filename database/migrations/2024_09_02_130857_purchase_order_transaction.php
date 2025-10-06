@@ -19,7 +19,7 @@ return new class extends Migration
                 $table->engine = 'InnoDB';
                 $table->increments('id');
                 $table->unsignedInteger('purchase_order_id')->index();
-                $table->unsignedInteger('account_farmer_id')->index();
+                $table->unsignedInteger('farmer_id')->index();
                 $table->string('transaction_id', 20);
                 $table->string('receipt_number', 20)->nullable();
                 $table->date('transaction_date')->index();
@@ -33,7 +33,7 @@ return new class extends Migration
                 $table->softDeletes();
 
                 $table->foreign('purchase_order_id')->references('id')->on("purchase_order");
-                $table->foreign('account_farmer_id')->references('id')->on("account_farmer");
+                $table->foreign('farmer_id')->references('id')->on("farmers");
             });
         }
     }

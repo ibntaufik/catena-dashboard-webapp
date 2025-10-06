@@ -32,7 +32,7 @@ class FarmerCreateAsset extends Command
     public function handle()
     {
 
-        $transaction = PurchaseOrderTransaction::join("account_farmer", "account_farmer.id", "purchase_order_transaction.account_farmer_id")
+        $transaction = PurchaseOrderTransaction::join("farmers", "farmers.id", "purchase_order_transaction.farmer_id")
         ->join("users", "users.id", "account_farmer.user_id")
         ->join("sub_districts", "sub_districts.id", "account_farmer.sub_district_id")
         ->join("purchase_order", "purchase_order.id", "purchase_order_transaction.purchase_order_id")

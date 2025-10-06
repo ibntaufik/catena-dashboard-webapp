@@ -131,8 +131,8 @@ class TransactionController extends Controller
 
                 $response["count"] = Cache::remember("count.purchase_order_transaction$cacheName", config("constant.ttl"), function() use($vchCode, $status, $farmer, $vcpCode, $transactionId, $poNumber, $receiptNumber, $itemType, $floatingRate, $itemPrice, $itemQuantity, $totalPrice, $startDate, $endDate){
                     return PurchaseOrderTransaction::join("purchase_order", "purchase_order_transaction.purchase_order_id", "purchase_order.id")
-                    ->join("account_farmer", "purchase_order_transaction.account_farmer_id", "account_farmer.id")
-                    ->join("users", "users.id", "account_farmer.user_id")
+                    ->join("farmers", "purchase_order_transaction.farmer_id", "farmers.id")
+                    ->join("users", "users.id", "farmers.user_id")
                     ->join("account_vch", "purchase_order.account_vch_id", "account_vch.id")
                     ->join("t_vch", "t_vch.id", "account_vch.vch_id")
                     ->join("item_type", "item_type.id", "purchase_order.item_type_id")
@@ -186,8 +186,8 @@ class TransactionController extends Controller
 
                 $response["data"] = Cache::remember("list.purchase_order_transaction$cacheName", config("constant.ttl"), function() use($vchCode, $status, $farmer, $vcpCode, $transactionId, $poNumber, $receiptNumber, $itemType, $floatingRate, $itemPrice, $itemQuantity, $totalPrice, $startDate, $endDate, $page, $limit){
                     $transaction = PurchaseOrderTransaction::join("purchase_order", "purchase_order_transaction.purchase_order_id", "purchase_order.id")
-                    ->join("account_farmer", "purchase_order_transaction.account_farmer_id", "account_farmer.id")
-                    ->join("users", "users.id", "account_farmer.user_id")
+                    ->join("farmers", "purchase_order_transaction.farmer_id", "farmers.id")
+                    ->join("users", "users.id", "farmers.user_id")
                     ->join("account_vch", "purchase_order.account_vch_id", "account_vch.id")
                     ->join("t_vch", "t_vch.id", "account_vch.vch_id")
                     ->join("item_type", "item_type.id", "purchase_order.item_type_id")
@@ -242,7 +242,7 @@ class TransactionController extends Controller
                     ->when($limit, function($builder) use($limit){
                         return $builder->take($limit);
                     })
-                    ->select(DB::raw("transaction_id, vcp_id, receipt_number, purchase_order_transaction.status, transaction_date, floating_rate, po_number, users.name AS farmer_name, account_farmer.code AS farmer_code, item_type.name AS item_type, purchase_order_transaction.item_price AS item_price, purchase_order_transaction.item_quantity, total_item_price AS total_price"))
+                    ->select(DB::raw("transaction_id, vcp_id, receipt_number, purchase_order_transaction.status, transaction_date, floating_rate, po_number, users.name AS farmer_name, farmers.code AS farmer_code, item_type.name AS item_type, purchase_order_transaction.item_price AS item_price, purchase_order_transaction.item_quantity, total_item_price AS total_price"))
                     ->orderBy("purchase_order_transaction.created_at", "DESC")
                     ->get();
 
@@ -348,7 +348,7 @@ class TransactionController extends Controller
                         $pass = false;
                     }
 
-                    $input["account_farmer_id"] = $farmer->id;
+                    $input["farmer_id"] = $farmer->id;
                     unset($input["farmer_code"]);
                 }
 
@@ -411,10 +411,10 @@ class TransactionController extends Controller
                     $trx = PurchaseOrderTransaction::create($input);
 
                     $poTrx = PurchaseOrderTransaction::join("purchase_order", "purchase_order_transaction.purchase_order_id", "purchase_order.id")
-                    ->join("account_farmer", "purchase_order_transaction.account_farmer_id", "account_farmer.id")
-                    ->join("users", "users.id", "account_farmer.user_id")
+                    ->join("farmers", "purchase_order_transaction.farmer_id", "farmers.id")
+                    ->join("users", "users.id", "farmers.user_id")
                     ->where("purchase_order_transaction.id", $trx->id)
-                    ->select(DB::raw("transaction_id, receipt_number, transaction_date, floating_rate, po_number, users.name AS farmer_name, account_farmer.code AS farmer_code, total_item_price AS total_price"))
+                    ->select(DB::raw("transaction_id, receipt_number, transaction_date, floating_rate, po_number, users.name AS farmer_name, farmers.code AS farmer_code, total_item_price AS total_price"))
                     ->first();
 
                     $response["code"] = 200;
@@ -485,8 +485,8 @@ class TransactionController extends Controller
                     ->when($userId, function($builder) use($userId){
                         return $builder->where("purchase_order_transaction.vcp_user_id", $userId);
                     })
-                    ->select(DB::raw("po_number, users.name AS farmer_name, transaction_id, receipt_number, account_farmer_id, purchase_order_transaction.item_quantity, purchase_order_transaction.item_price AS item_price, transaction_date, floating_rate, purchase_order_transaction.vcp_id, users.id AS vcp_user_id"))
-                    ->groupBy(DB::raw("po_number, users.name, transaction_id, receipt_number, account_farmer_id, purchase_order_transaction.item_quantity, purchase_order_transaction.item_price, transaction_date, floating_rate, users.id, purchase_order_transaction.created_at, purchase_order_transaction.vcp_id"))
+                    ->select(DB::raw("po_number, users.name AS farmer_name, transaction_id, receipt_number, farmer_id, purchase_order_transaction.item_quantity, purchase_order_transaction.item_price AS item_price, transaction_date, floating_rate, purchase_order_transaction.vcp_id, users.id AS vcp_user_id"))
+                    ->groupBy(DB::raw("po_number, users.name, transaction_id, receipt_number, farmer_id, purchase_order_transaction.item_quantity, purchase_order_transaction.item_price, transaction_date, floating_rate, users.id, purchase_order_transaction.created_at, purchase_order_transaction.vcp_id"))
                     ->orderBy("purchase_order_transaction.created_at", "DESC")
                     ->get();
 
@@ -496,11 +496,11 @@ class TransactionController extends Controller
                         $transaction[$key]["vcp_code"] = $vcp->vcp_code;
                         unset($transaction[$key]["vcp_id"]);
 
-                        $farmer = Farmer::findById($value->account_farmer_id);
+                        $farmer = Farmer::findById($value->farmer_id);
                         $user = User::findById($farmer->user_id);
                         $transaction[$key]["farmer_name"] = $user->name;
                         $transaction[$key]["farmer_code"] = $farmer->code;
-                        unset($transaction[$key]["account_farmer_id"]);
+                        unset($transaction[$key]["farmer_id"]);
                     }
                     return $transaction;
                 });
@@ -553,7 +553,7 @@ class TransactionController extends Controller
                     ->join("item", "item.id", "item_type.item_id")
                     ->join("item_unit", "item_unit.id", "purchase_order.item_unit_id")
                     ->join("purchase_order_transaction", "purchase_order_transaction.purchase_order_id", "purchase_order.id")
-                    ->join("account_farmer", "purchase_order_transaction.account_farmer_id", "account_farmer.id")
+                    ->join("farmers", "purchase_order_transaction.farmer_id", "farmers.id")
                     ->join("t_vcp", "t_vcp.id", "purchase_order_transaction.vcp_id")
                     //->join("t_evc", "t_evc.id", "t_vch.evc_id")
                     //->join("sub_districts", "sub_districts.id", "t_vcp.sub_district_id")
@@ -564,7 +564,7 @@ class TransactionController extends Controller
                         return $builder->where("purchase_order_transaction.transaction_id", $transactionId);
                     })
                     ->when($farmerCode, function($builder) use($farmerCode){
-                        return $builder->where("account_farmer.code", $farmerCode);
+                        return $builder->where("farmers.code", $farmerCode);
                     })
                     ->select(DB::raw("t_evc.code AS evc_code, t_vch.code AS vch_code, t_vcp.code AS vcp_code, accounts.code AS vendor_code, users.name AS vendor, po_number, po_date, expected_shipping_date, item.name AS item_name, item_type.name AS item_type, item_unit.name AS item_unit, item_description, purchase_order.item_quantity, item_unit_price, item_max_quantity, purchase_order.status, purchase_order_transaction.receipt_number, purchase_order_transaction.transaction_date, purchase_order_transaction.floating_rate, purchase_order_transaction.total_item_price"))
                     ->first();
@@ -574,13 +574,13 @@ class TransactionController extends Controller
             $result["transaction_id"] = $transactionId;
             $result["farmer"] = Cache::remember("farmer_by_code|$farmerCode", config("constant.ttl"), function() use($farmerCode){
                 
-                return Farmer::join("users", "users.id", "account_farmer.user_id")
-                ->join("sub_districts", "sub_districts.id", "account_farmer.sub_district_id")
+                return Farmer::join("users", "users.id", "farmers.user_id")
+                ->join("sub_districts", "sub_districts.id", "farmers.sub_district_id")
                 ->join("districts", "districts.id", "sub_districts.district_id")
                 ->join("cities", "cities.id", "districts.city_id")
                 ->join("provinces", "provinces.id", "cities.province_id")
-                ->where("account_farmer.code", $farmerCode)
-                ->select(DB::raw("account_farmer.code AS farmer_code, users.name AS farmer_name, account_farmer.id_number, account_farmer.latitude, account_farmer.longitude, CONCAT(sub_districts.name, ', ', districts.name, ', ', cities.name, ', ', provinces.name) AS location, account_farmer.address"))
+                ->where("farmers.code", $farmerCode)
+                ->select(DB::raw("farmers.code AS farmer_code, users.name AS farmer_name, farmers.id_number, farmers.latitude, farmers.longitude, CONCAT(sub_districts.name, ', ', districts.name, ', ', cities.name, ', ', provinces.name) AS location, farmers.address"))
                 ->first();
             });
 

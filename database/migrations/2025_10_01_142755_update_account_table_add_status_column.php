@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    protected $table = "purchase_order_transaction";
+    protected $table = "accounts";
     /**
      * Run the migrations.
      *
@@ -16,10 +16,9 @@ return new class extends Migration
     {
         if(Schema::hasTable($this->table)){
             Schema::table($this->table, function (Blueprint $table) {
-                $table->unsignedInteger('vcp_id')->nullable()->index()->after("farmer_id");
-                $table->foreign('vcp_id')->references('id')->on('t_vcp');
+                $table->string('status', 30)->default("active")->index()->after("code");
             });
-        }
+        };
     }
 
     /**
@@ -30,8 +29,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table($this->table, function (Blueprint $table) {
-            $table->dropForeign($this->table.'_vcp_id_foreign');
-            $table->dropColumn('vcp_id');
+            $table->dropColumn('status');
         });
     }
 };
