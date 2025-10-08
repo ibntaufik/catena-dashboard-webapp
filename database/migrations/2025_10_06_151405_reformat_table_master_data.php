@@ -51,8 +51,8 @@ return new class extends Migration
                 $table->unsignedInteger('vch_id')->nullable()->index();
                 $table->unsignedInteger('sub_district_id')->index();
                 $table->text('address')->nullable();
-                $table->string('latitude', 255)->index();
-                $table->string('longitude', 255)->index();
+                $table->string('latitude', 255)->index()->nullable();
+                $table->string('longitude', 255)->index()->nullable();
                 $table->string('id_number', 255)->index();
                 $table->text('thumb_finger')->nullable();
                 $table->text('index_finger')->nullable();
