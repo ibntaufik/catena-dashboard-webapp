@@ -18,7 +18,7 @@ use App\Http\Requests\RemoveFarmerPostRequest;
 use App\Model\Location;
 use App\Model\Province;
 use App\Model\Subdistrict;
-use App\Model\Farmer;
+use App\Model\Supplier;
 use App\Model\User;
 use App\Model\VCH;
 
@@ -118,28 +118,27 @@ class FarmerController extends Controller
             }
 
             $response["count"] = Cache::remember("count.$cacheName", config("constant.ttl"), function() use($name, $emailUser, $phone, $idNumber, $latitude, $longitude, $provinceId, $cityId, $districtId, $subDistrictId){
-                return Farmer::join("sub_districts", "sub_districts.id", "account_farmer.sub_district_id")
-                ->leftJoin("users", "account_farmer.user_id", "users.id")
+                return Supplier::join("sub_districts", "sub_districts.id", "master_supplier.sub_district_id")
                 ->join("districts", "districts.id", "sub_districts.district_id")
                 ->join("cities", "cities.id", "districts.city_id")
                 ->join("provinces", "provinces.id", "cities.province_id")
                 ->when($name, function($builder) use($name){
-                    return $builder->whereRaw("UPPER(users.name) LIKE ?", ["%".strtoupper($name)."%"]);
+                    return $builder->whereRaw("UPPER(master_supplier.name) LIKE ?", ["%".strtoupper($name)."%"]);
                 })
                 ->when($emailUser, function($builder) use($emailUser){
-                    return $builder->whereRaw("LOWER(users.email) LIKE ?", ["%".strtolower($emailUser)."%"]);
+                    return $builder->whereRaw("LOWER(master_supplier.email) LIKE ?", ["%".strtolower($emailUser)."%"]);
                 })
                 ->when($phone, function($builder) use($phone){
-                    return $builder->whereRaw("users.phone LIKE ?", [$phone]);
+                    return $builder->whereRaw("master_supplier.phone LIKE ?", [$phone]);
                 })
                 ->when($idNumber, function($builder) use($idNumber){
-                    return $builder->whereRaw("account_farmer.id_number LIKE ?", [$idNumber]);
+                    return $builder->whereRaw("master_supplier.id_number LIKE ?", [$idNumber]);
                 })
                 ->when($latitude, function($builder) use($latitude){
-                    return $builder->whereRaw("account_farmer.latitude LIKE ?", [$latitude]);
+                    return $builder->whereRaw("master_supplier.latitude LIKE ?", [$latitude]);
                 })
                 ->when($longitude, function($builder) use($longitude){
-                    return $builder->whereRaw("account_farmer.longitude LIKE ?", [$longitude]);
+                    return $builder->whereRaw("master_supplier.longitude LIKE ?", [$longitude]);
                 })
                 ->when($provinceId, function($builder) use($provinceId){
                     return $builder->whereRaw("provinces.id = ?", [$provinceId]);
@@ -157,28 +156,27 @@ class FarmerController extends Controller
             });
 
             $response["data"] = Cache::remember("data.$cacheName", config("constant.ttl"), function() use($name, $emailUser, $phone, $idNumber, $latitude, $longitude, $provinceId, $cityId, $districtId, $subDistrictId, $page, $limit){
-                return Farmer::join("sub_districts", "sub_districts.id", "account_farmer.sub_district_id")
-                ->leftJoin("users", "account_farmer.user_id", "users.id")
+                return Supplier::join("sub_districts", "sub_districts.id", "master_supplier.sub_district_id")
                 ->join("districts", "districts.id", "sub_districts.district_id")
                 ->join("cities", "cities.id", "districts.city_id")
                 ->join("provinces", "provinces.id", "cities.province_id")
                 ->when($name, function($builder) use($name){
-                    return $builder->whereRaw("UPPER(users.name) LIKE ?", ["%".strtoupper($name)."%"]);
+                    return $builder->whereRaw("UPPER(master_supplier.name) LIKE ?", ["%".strtoupper($name)."%"]);
                 })
                 ->when($emailUser, function($builder) use($emailUser){
-                    return $builder->whereRaw("LOWER(users.email) LIKE ?", ["%".strtolower($emailUser)."%"]);
+                    return $builder->whereRaw("LOWER(master_supplier.email) LIKE ?", ["%".strtolower($emailUser)."%"]);
                 })
                 ->when($phone, function($builder) use($phone){
-                    return $builder->whereRaw("users.phone LIKE ?", [$phone]);
+                    return $builder->whereRaw("master_supplier.phone LIKE ?", [$phone]);
                 })
                 ->when($idNumber, function($builder) use($idNumber){
-                    return $builder->whereRaw("account_farmer.id_number LIKE ?", [$idNumber]);
+                    return $builder->whereRaw("master_supplier.id_number LIKE ?", [$idNumber]);
                 })
                 ->when($latitude, function($builder) use($latitude){
-                    return $builder->whereRaw("account_farmer.latitude LIKE ?", [$latitude]);
+                    return $builder->whereRaw("master_supplier.latitude LIKE ?", [$latitude]);
                 })
                 ->when($longitude, function($builder) use($longitude){
-                    return $builder->whereRaw("account_farmer.longitude LIKE ?", [$longitude]);
+                    return $builder->whereRaw("master_supplier.longitude LIKE ?", [$longitude]);
                 })
                 ->when($provinceId, function($builder) use($provinceId){
                     return $builder->whereRaw("provinces.id = ?", [$provinceId]);
@@ -198,7 +196,7 @@ class FarmerController extends Controller
                 ->when($limit, function($builder) use($limit){
                     return $builder->take($limit);
                 })
-                ->select(DB::raw("account_farmer.code AS farmer_code, users.name, users.email, account_farmer.address, account_farmer.latitude, account_farmer.longitude, users.phone, account_farmer.id_number, sub_districts.code AS sub_district_code, account_farmer.image_id_number_name, account_farmer.image_photo_name, CONCAT(sub_districts.name, ' <br> ', districts.name, ' <br> ', cities.name, ' <br> ', provinces.name) AS location"))->orderBy("account_farmer.created_at", "DESC")->get();
+                ->select(DB::raw("master_supplier.code AS farmer_code, master_supplier.name, master_supplier.email, master_supplier.address, master_supplier.latitude, master_supplier.longitude, master_supplier.phone, master_supplier.id_number, sub_districts.code AS sub_district_code, CONCAT(sub_districts.name, ' <br> ', districts.name, ' <br> ', cities.name, ' <br> ', provinces.name) AS location"))->orderBy("master_supplier.local_created_at", "DESC")->get();
             });
 
 
@@ -240,18 +238,17 @@ class FarmerController extends Controller
             }
         
             $result = Cache::remember($cacheName, config("constant.ttl"), function() use($idNumber, $farmerCode){
-                return Farmer::join("sub_districts", "sub_districts.id", "account_farmer.sub_district_id")
-                ->leftJoin("users", "account_farmer.user_id", "users.id")
+                return Supplier::join("sub_districts", "sub_districts.id", "master_supplier.sub_district_id")
                 ->join("districts", "districts.id", "sub_districts.district_id")
                 ->join("cities", "cities.id", "districts.city_id")
                 ->join("provinces", "provinces.id", "cities.province_id")
                 ->when($idNumber, function($builder) use($idNumber){
-                    return $builder->whereRaw("account_farmer.id_number LIKE ?", [$idNumber]);
+                    return $builder->whereRaw("master_supplier.id_number LIKE ?", [$idNumber]);
                 })
                 ->when($idNumber, function($builder) use($farmerCode){
-                    return $builder->whereRaw("account_farmer.code LIKE ?", [$farmerCode]);
+                    return $builder->whereRaw("master_supplier.code LIKE ?", [$farmerCode]);
                 })
-                ->select(DB::raw("account_farmer.code AS farmer_code, users.name, users.email, account_farmer.address, account_farmer.latitude, account_farmer.longitude, users.phone, account_farmer.id_number, sub_districts.code AS sub_district_code, account_farmer.image_id_number_name, account_farmer.image_photo_name, CONCAT(sub_districts.name, ', ', districts.name, ', ', cities.name, ', ', provinces.name) AS location"))->first();
+                ->select(DB::raw("master_supplier.code AS farmer_code, master_supplier.name, master_supplier.email, master_supplier.address, master_supplier.latitude, master_supplier.longitude, master_supplier.phone, master_supplier.id_number, sub_districts.code AS sub_district_code, CONCAT(sub_districts.name, ', ', districts.name, ', ', cities.name, ', ', provinces.name) AS location"))->first();
                 
             });
         } catch(\Exception $e){
@@ -414,9 +411,9 @@ class FarmerController extends Controller
             }
 
             $response["count"] = (int)Cache::remember($cacheName."data.list.farmer.count", 120, function() use($vchCode){
-                return Farmer::join("sub_districts", "sub_districts.id", "account_farmer.sub_district_id")
-                ->leftJoin("users", "account_farmer.user_id", "users.id")
-                ->join("t_vch", "t_vch.id", "account_farmer.vch_id")
+                return Farmer::join("sub_districts", "sub_districts.id", "master_supplier.sub_district_id")
+                ->leftJoin("users", "master_supplier.user_id", "users.id")
+                ->join("t_vch", "t_vch.id", "master_supplier.vch_id")
                 ->join("districts", "districts.id", "sub_districts.district_id")
                 ->join("cities", "cities.id", "districts.city_id")
                 ->join("provinces", "provinces.id", "cities.province_id")
@@ -428,9 +425,9 @@ class FarmerController extends Controller
 
             $response["data"] = Cache::remember($cacheName."data.list.farmer.page_$page.limit_$limit", 120, function() use($page, $limit, $vchCode){
 
-                return Farmer::join("sub_districts", "sub_districts.id", "account_farmer.sub_district_id")
-                ->leftJoin("users", "account_farmer.user_id", "users.id")
-                ->join("t_vch", "t_vch.id", "account_farmer.vch_id")
+                return Farmer::join("sub_districts", "sub_districts.id", "master_supplier.sub_district_id")
+                ->leftJoin("users", "master_supplier.user_id", "users.id")
+                ->join("t_vch", "t_vch.id", "master_supplier.vch_id")
                 ->join("districts", "districts.id", "sub_districts.district_id")
                 ->join("cities", "cities.id", "districts.city_id")
                 ->join("provinces", "provinces.id", "cities.province_id")
@@ -440,8 +437,8 @@ class FarmerController extends Controller
                 ->when(count($vchCode) > 0, function($builder) use($vchCode){
                     return $builder->whereIn("t_vch.code", $vchCode);
                 })
-                ->select(DB::raw("account_farmer.code AS farmer_code, users.name, account_farmer.thumb_finger, account_farmer.index_finger, users.email, account_farmer.address, account_farmer.latitude, account_farmer.longitude, users.phone, account_farmer.id_number, sub_districts.code AS sub_district_code, sub_districts.name AS sub_district, districts.name AS district, cities.name AS city, provinces.name AS province, t_vch.code AS vch_code"))
-                ->orderBy("account_farmer.created_at", "DESC")
+                ->select(DB::raw("master_supplier.code AS farmer_code, users.name, master_supplier.thumb_finger, master_supplier.index_finger, users.email, master_supplier.address, master_supplier.latitude, master_supplier.longitude, users.phone, master_supplier.id_number, sub_districts.code AS sub_district_code, sub_districts.name AS sub_district, districts.name AS district, cities.name AS city, provinces.name AS province, t_vch.code AS vch_code"))
+                ->orderBy("master_supplier.created_at", "DESC")
                 ->get();
             });
 
@@ -575,14 +572,14 @@ class FarmerController extends Controller
             }
 
             $farmer = Farmer::create($dataFarmer);
-            $response["data"] = Farmer::join("sub_districts", "sub_districts.id", "account_farmer.sub_district_id")
-                ->leftJoin("users", "account_farmer.user_id", "users.id")
-                ->join("t_vch", "t_vch.id", "account_farmer.vch_id")
+            $response["data"] = Farmer::join("sub_districts", "sub_districts.id", "master_supplier.sub_district_id")
+                ->leftJoin("users", "master_supplier.user_id", "users.id")
+                ->join("t_vch", "t_vch.id", "master_supplier.vch_id")
                 ->join("districts", "districts.id", "sub_districts.district_id")
                 ->join("cities", "cities.id", "districts.city_id")
                 ->join("provinces", "provinces.id", "cities.province_id")
-                ->where("account_farmer.id", $farmer->id)
-                ->select(DB::raw("account_farmer.code AS farmer_code, users.name, account_farmer.thumb_finger, account_farmer.index_finger, users.email, account_farmer.address, account_farmer.latitude, account_farmer.longitude, users.phone, account_farmer.id_number, sub_districts.code AS sub_district_code, sub_districts.name AS sub_district, districts.name AS district, cities.name AS city, provinces.name AS province"))->orderBy("account_farmer.created_at", "DESC")->first();
+                ->where("master_supplier.id", $farmer->id)
+                ->select(DB::raw("master_supplier.code AS farmer_code, users.name, master_supplier.thumb_finger, master_supplier.index_finger, users.email, master_supplier.address, master_supplier.latitude, master_supplier.longitude, users.phone, master_supplier.id_number, sub_districts.code AS sub_district_code, sub_districts.name AS sub_district, districts.name AS district, cities.name AS city, provinces.name AS province"))->orderBy("master_supplier.created_at", "DESC")->first();
             $response["code"] = 200;
             $response["message"] = "Success";
             CommonHelper::forgetCache("farmer");
@@ -668,16 +665,16 @@ class FarmerController extends Controller
                 "id_number" => $input["id_number"]
             ])->update($dataFarmer);
 
-            $response["data"] = Farmer::join("sub_districts", "sub_districts.id", "account_farmer.sub_district_id")
-                ->leftJoin("users", "account_farmer.user_id", "users.id")
-                ->join("t_vch", "t_vch.id", "account_farmer.vch_id")
+            $response["data"] = Farmer::join("sub_districts", "sub_districts.id", "master_supplier.sub_district_id")
+                ->leftJoin("users", "master_supplier.user_id", "users.id")
+                ->join("t_vch", "t_vch.id", "master_supplier.vch_id")
                 ->join("districts", "districts.id", "sub_districts.district_id")
                 ->join("cities", "cities.id", "districts.city_id")
                 ->join("provinces", "provinces.id", "cities.province_id")
                 ->where([
                     "id_number" => $input["id_number"]
                 ])
-                ->select(DB::raw("account_farmer.code AS farmer_code, users.name, account_farmer.thumb_finger, account_farmer.index_finger, users.email, account_farmer.address, account_farmer.latitude, account_farmer.longitude, users.phone, account_farmer.id_number, sub_districts.code AS sub_district_code, sub_districts.name AS sub_district, districts.name AS district, cities.name AS city, provinces.name AS province, t_vch.code AS vch_code"))->orderBy("account_farmer.created_at", "DESC")->first();
+                ->select(DB::raw("master_supplier.code AS farmer_code, users.name, master_supplier.thumb_finger, master_supplier.index_finger, users.email, master_supplier.address, master_supplier.latitude, master_supplier.longitude, users.phone, master_supplier.id_number, sub_districts.code AS sub_district_code, sub_districts.name AS sub_district, districts.name AS district, cities.name AS city, provinces.name AS province, t_vch.code AS vch_code"))->orderBy("master_supplier.created_at", "DESC")->first();
             $response["code"] = 200;
             $response["message"] = "Success";
             CommonHelper::forgetCache("farmer");

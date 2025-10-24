@@ -298,7 +298,7 @@
             },
             { "targets": 4, "data": "sub_district_code" },
             { "targets": 5, "data":  function(data, type, row, meta){
-                  return data.latitude+"<br>"+data.longitude;
+                  return data.latitude && data.longitude ? data.latitude+"<br>"+data.longitude : "-<br>-";
               }
             },
             { "targets": 6, "data": function(data, type, row, meta){
