@@ -123,7 +123,7 @@
       </li>
       @endif
 
-      <li class="nav-item nav-category">web apps</li>
+      <!-- li class="nav-item nav-category">web apps</li>
       <li class="nav-item {{ active_class(['email/*']) }}">
         <a class="nav-link" data-bs-toggle="collapse" href="#email" role="button" aria-expanded="{{ is_active_route(['email/*']) }}" aria-controls="email">
           <i class="link-icon" data-feather="mail"></i>
@@ -413,7 +413,7 @@
           <i class="link-icon" data-feather="hash"></i>
           <span class="link-title">Documentation</span>
         </a>
-      </li>
+      </li-->
     </ul>
   </div>
 </nav>
