@@ -15,4 +15,12 @@ class SupplyCategory extends Model
     protected $table = 'master_supply_categories';
     protected $primaryKey = 'id';
     protected $guarded = ['id'];
+
+    public static function listByName($name){
+        return Cache::remember("supplier.category_$name", config("constant.ttl"), function() use($name){
+            return SupplyCategory::when(!empty($name), function($builder) use($name){
+                return $builder->whereRaw("UPPER(name) LIKE ?", ["$name%"]);
+            })->select(DB::raw("id, name AS text"))->orderBy("name", "ASC")->get()->toArray();
+        });
+    }
 }

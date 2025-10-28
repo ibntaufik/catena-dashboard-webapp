@@ -227,16 +227,16 @@
 @section('javascript')
 <script src="{{ asset('assets/js/coverage.js') }}"></script>
 <script type="text/javascript">
-    var start = 0;
-    var limit = 10;
-    var fileType = "";
+  var start = 0;
+  var limit = 10;
+  var fileType = "";
 
-    // add by faisal
-    // used for coverage.js file
-    var province = {!! json_encode($province) !!};
-    var url_coverage_city = "{{ route('coverage.city') }}";
-    var url_coverage_district = "{{ route('coverage.district') }}";
-    var url_coverage_sub_district = "{{ route('coverage.sub_district') }}";
+  // add by faisal
+  // used for coverage.js file
+  var province = {!! json_encode($province) !!};
+  var url_coverage_city = "{{ route('coverage.city') }}";
+  var url_coverage_district = "{{ route('coverage.district') }}";
+  var url_coverage_sub_district = "{{ route('coverage.sub_district') }}";
 
   $(document).ready(function() {
       
@@ -537,23 +537,21 @@
 
     function deleteRecord(idNumber){
       $.ajax({
-            type: "POST",
-            url: "{{ route('farmer.remove') }}",
-            data: {
-              _token: "{{ csrf_token() }}",
-              id_number: idNumber,
-            },
-            dataType: "json",
-            timeout: 300000
-        }).done(function(response){
-            $('#gridDataTable').DataTable().ajax.reload();
-        }).fail(function(response){
-            
-        });
+        type: "POST",
+        url: "{{ route('farmer.remove') }}",
+        data: {
+          _token: "{{ csrf_token() }}",
+          id_number: idNumber,
+        },
+        dataType: "json",
+        timeout: 300000
+      }).done(function(response){
+          $('#gridDataTable').DataTable().ajax.reload();
+      }).fail(function(response){
+          
+      });
     }
 }
-
-
 
 </script>
 @endsection  

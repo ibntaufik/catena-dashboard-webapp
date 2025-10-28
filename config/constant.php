@@ -25,4 +25,11 @@ return [
             "huller_private"    => env("FABRIC_HULLER_PRIVATE_CHAINCODE", "huller_private"),
         ]
     ],
+    "api_url"           => env("API_URL"),
+    "asset_path"        => [
+        "bank_info"     => "bank_info",
+        "identity"      => "id_numbers",
+        "business_unit" => "photos",
+        "farm"          => "land_photos"
+    ],
 ];

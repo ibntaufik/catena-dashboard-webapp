@@ -24,6 +24,7 @@ Route::group(['middleware' => 'auth'], function () {
             Route::get('grid-list', 'FarmerController@datatables')->name("farmer.grid-list");
             Route::get('detail', 'FarmerController@detail')->name("farmer.detail");
             Route::post('submit', 'FarmerController@save')->name("farmer.submit")->middleware("can:administrator");
+            Route::post('update', 'FarmerController@update')->name("farmer.update")->middleware("can:administrator");
             Route::post('remove', 'FarmerController@delete')->name("farmer.remove")->middleware("can:administrator");
         });
         Route::group(['prefix' => 'vcp'], function(){

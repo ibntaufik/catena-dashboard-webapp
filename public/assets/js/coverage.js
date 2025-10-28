@@ -37,7 +37,7 @@
         }
       });
       
-      $('#city').select2().on("select2:select", function (e) {
+      $('#city').select2({width: '100%'}).on("select2:select", function (e) {
         if(e.params.data.selected){
           $.ajax({
               type: "GET",
@@ -59,7 +59,7 @@
         }
       });
       
-      $('#district').select2().on("select2:select", function (e) {
+      $('#district').select2({width: '100%'}).on("select2:select", function (e) {
         if(e.params.data.selected){
           $.ajax({
               type: "GET",
@@ -78,6 +78,8 @@
           });
         }
       });
+
+      $('#sub_district').select2({width: '100%'});
 
       $('#f_district, #f_sub_district').select2({width: '100%'});
       $('#f_province').select2({

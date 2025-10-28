@@ -15,10 +15,20 @@ use App\Helpers\Fabric\ExportMSP\ReadAsset as ExportReadAsset;
 use App\Helpers\Fabric\HeadOfficeMSP\ReadAsset as HeadOfficeReadAsset;
 use App\Http\Requests\FarmerPostRequest;
 use App\Http\Requests\RemoveFarmerPostRequest;
+use App\Model\Bank;
+use App\Model\BusinessType;
+use App\Model\Coffee;
+use App\Model\CoffeeVariety;
+use App\Model\Farms;
+use App\Model\FarmDetail;
+use App\Model\LandStatus;
 use App\Model\Location;
 use App\Model\Province;
+use App\Model\ShadeTree;
 use App\Model\Subdistrict;
 use App\Model\Supplier;
+use App\Model\SupplierAsset;
+use App\Model\SupplyCategory;
 use App\Model\User;
 use App\Model\VCH;
 
@@ -215,48 +225,223 @@ class FarmerController extends Controller
         return response()->json($response);
     }
 
-    public function detail(Request $request){
+    public function detail(Request $request)
+    {
         $response = [
-            "code"      => 400,
-            "message"   => "Failed to complete request",
-            "data"      => []
+            "code"    => 400,
+            "message" => "Failed to complete request",
+            "data"    => []
         ];
-        
-        try{
+
+        try {
             $response["code"] = 200;
             $response["message"] = "Success";
 
-            $idNumber = $request->input("id");
+            $idNumber   = $request->input("id");
             $farmerCode = $request->input("code");
 
+            // Cache key
             $cacheName = "detail.farmer";
-            if($idNumber){
+            if ($idNumber) {
                 $cacheName .= ".id_number|$idNumber";
             }
-            if($farmerCode){
+            if ($farmerCode) {
                 $cacheName .= ".farmer_code|$farmerCode";
             }
-        
-            $result = Cache::remember($cacheName, config("constant.ttl"), function() use($idNumber, $farmerCode){
+
+            // Get Farmer Detail
+            $result = Cache::remember($cacheName, config("constant.ttl"), function() use ($idNumber, $farmerCode) {
                 return Supplier::join("sub_districts", "sub_districts.id", "master_supplier.sub_district_id")
-                ->join("districts", "districts.id", "sub_districts.district_id")
-                ->join("cities", "cities.id", "districts.city_id")
-                ->join("provinces", "provinces.id", "cities.province_id")
-                ->when($idNumber, function($builder) use($idNumber){
-                    return $builder->whereRaw("master_supplier.id_number LIKE ?", [$idNumber]);
-                })
-                ->when($idNumber, function($builder) use($farmerCode){
-                    return $builder->whereRaw("master_supplier.code LIKE ?", [$farmerCode]);
-                })
-                ->select(DB::raw("master_supplier.code AS farmer_code, master_supplier.name, master_supplier.email, master_supplier.address, master_supplier.latitude, master_supplier.longitude, master_supplier.phone, master_supplier.id_number, sub_districts.code AS sub_district_code, CONCAT(sub_districts.name, ', ', districts.name, ', ', cities.name, ', ', provinces.name) AS location"))->first();
-                
+                    ->join("districts", "districts.id", "sub_districts.district_id")
+                    ->join("cities", "cities.id", "districts.city_id")
+                    ->join("provinces", "provinces.id", "cities.province_id")
+                    ->join("t_vch", "t_vch.id", "master_supplier.vch_id")
+                    ->join("t_vcp", "t_vcp.id", "master_supplier.vcp_id")
+                    ->join("t_evc", "t_evc.id", "t_vch.evc_id")
+                    ->join("master_business_type", "master_business_type.id", "master_supplier.business_type_id")
+                    ->join("master_supply_categories", "master_supply_categories.id", "master_supplier.category_id")
+                    ->join("master_bank", "master_bank.id", "master_supplier.bank_id")
+                    ->when($idNumber, function($builder) use ($idNumber) {
+                        return $builder->whereRaw("master_supplier.id_number LIKE ?", [$idNumber]);
+                    })
+                    ->when($farmerCode, function($builder) use ($farmerCode) {
+                        return $builder->whereRaw("master_supplier.code LIKE ?", [$farmerCode]);
+                    })
+                    ->select(DB::raw("
+                        master_supplier.id,
+                        master_supplier.code AS farmer_code, 
+                        master_supplier.name, 
+                        master_supplier.alias, 
+                        master_supplier.phone, 
+                        master_supplier.email, 
+                        master_supplier.address, 
+                        master_supplier.latitude, 
+                        master_supplier.longitude, 
+                        master_supplier.id_number, 
+                        master_supplier.business_name, 
+                        master_supplier.business_type_id, 
+                        master_supplier.authentication_code, 
+                        master_supplier.npwp,
+                        master_supplier.account_name, 
+                        master_supplier.account_number, 
+                        master_supplier.verification_status, 
+                        master_supplier.local_created_at,
+                        sub_districts.code AS sub_district_code,
+                        sub_districts.name AS sub_district_name, 
+                        sub_districts.id AS sub_district_id,
+                        districts.name AS district_name, 
+                        districts.code AS district_code, 
+                        districts.id AS district_id,
+                        cities.name AS city_name, 
+                        cities.code AS city_code, 
+                        cities.id AS city_id,
+                        provinces.name AS province_name, 
+                        provinces.code AS province_code, 
+                        provinces.id AS province_id,
+                        t_evc.code AS evc_code, 
+                        t_vch.code AS vch_code, 
+                        t_vcp.code AS vcp_code, 
+                        master_business_type.code AS business_type_code, 
+                        master_business_type.name AS business_type_name, 
+                        master_supply_categories.id AS supply_categories_id, 
+                        master_supply_categories.code AS category_code,
+                        master_supply_categories.name AS category_name,
+                        master_bank.id AS bank_id, 
+                        master_bank.code AS bank_code, 
+                        master_bank.name AS bank_name, 
+                        CONCAT(sub_districts.name, ', ', districts.name, ', ', cities.name, ', ', provinces.name) AS location"))
+                    ->first();
             });
-        } catch(\Exception $e){
+
+            // Supplier Asset
+            $supplierAsset = Cache::remember("supplier_asset.supplier_code|$farmerCode", config("constant.ttl"), function() use ($result) {
+                return SupplierAsset::where("supplier_id", $result->id)
+                    ->select("name", "asset_type")
+                    ->get();
+            });
+
+            $apiUrl     = config('constant.api_url') ?? constant('api_url');
+            $assetPaths = config('constant.asset_path') ?? constant('asset_path');
+
+            foreach ($supplierAsset as $asset) {
+                $type = $asset->asset_type;
+                if (!isset($assetPaths[$type])) continue;
+                $assetUrl = "{$apiUrl}/storage/{$assetPaths[$type]}/{$asset->name}";
+                $asset->{$type . '_image'} = $assetUrl;
+            }
+
+            // Farms
+            $farms = Cache::remember("supplier.farms.supplier_code|$farmerCode", config("constant.ttl"), function() use ($result) {
+                return Farms::join("master_coffee", "master_coffee.id", "farms.coffee_id")
+                    ->join("master_coffee_variety", "master_coffee_variety.id", "farms.coffee_variety_id")
+                    ->join("master_shade_tree", "master_shade_tree.id", "farms.shade_tree_id")
+                    ->join("master_land_status", "master_land_status.id", "farms.land_status_id")
+                    ->where("supplier_id", $result->id)
+                    ->select(DB::raw("
+                        master_coffee.id AS coffee_id,
+                        master_coffee.name AS coffee_name,
+                        master_coffee_variety.id AS coffee_variety_id,
+                        master_coffee_variety.name AS coffee_variety_name,
+                        master_shade_tree.id AS shade_tree_id,
+                        master_shade_tree.name AS shade_tree_name,
+                        farms.id AS farm_id,
+                        farms.address,
+                        farms.land_certificate,
+                        farms.latitude AS farm_latitude,
+                        farms.longitude AS farm_longitude,
+                        farms.elevation AS farm_altitude,
+                        farms.land_measurement,
+                        farms.tree_population,
+                        master_land_status.id AS land_status_id,
+                        master_land_status.name AS land_status
+                    "))
+                    ->get();
+            });
+
+            // Farm Details (Photos)
+            $farmIds = $farms->pluck('farm_id');
+            $farmDetails = Cache::remember("supplier.farm.details.supplier_code|$farmerCode", config("constant.ttl"), function() use ($farmIds) {
+                return FarmDetail::whereIn("farm_id", $farmIds)
+                    ->select("farm_id", "photo")
+                    ->get()
+                    ->groupBy('farm_id');
+            });
+
+            // Attach Photos to Each Farm with Full URL
+            $farmPhotoBase = "{$apiUrl}/storage/{$assetPaths['farm']}/";
+
+            $farms->transform(function ($farm) use ($farmDetails, $farmPhotoBase) {
+
+                // Attach photos with URLs
+                $photos = $farmDetails[$farm->farm_id] ?? collect();
+                $farm->photos = $photos->map(fn($photo) => [
+                    'photo' => $photo->photo,
+                    'url'   => $farmPhotoBase . $photo->photo,
+                ]);
+
+                // Format numeric values for readability
+                $formattedLand = isset($farm->land_measurement)
+                    ? number_format($farm->land_measurement, 0, ',', '.')
+                    : '-';
+
+                $formattedTrees = isset($farm->tree_population)
+                    ? number_format($farm->tree_population, 0, ',', '.')
+                    : '-';
+
+                $formattedAltitude = isset($farm->altitude)
+                    ? number_format($farm->altitude, 0, ',', '.')
+                    : '-';
+
+                // Add formatted fields back to the object
+                $farm->land_measurement = $formattedLand;
+                $farm->tree_population  = $formattedTrees;
+                $farm->altitude         = $formattedAltitude;
+
+                // Add summary string (e.g., "1.500 m² / 250 pohon")
+                $farm->farm_summary = "{$formattedLand} / {$formattedTrees} pohon";
+
+                return $farm;
+            });
+
+            // Dropdown Data
+            $province = array_merge([
+                ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
+            ], Province::listByName(""));
+
+            $category = array_merge([
+                ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
+            ], SupplyCategory::listByName(""));
+
+            $bank = array_merge([
+                ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
+            ], Bank::listByName(""));
+
+            $coffee = array_merge([
+                ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
+            ], Coffee::listByName(""));
+
+            $coffeeVariety = array_merge([
+                ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
+            ], CoffeeVariety::listByName(""));
+
+            $shadeTree = array_merge([
+                ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
+            ], ShadeTree::listByName(""));
+
+            $landStatus = array_merge([
+                ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
+            ], LandStatus::listByName(""));
+
+            $businessType = array_merge([
+                ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
+            ], BusinessType::listByName(""));
+
+        } catch (\Exception $e) {
             \Log::error($e->getMessage());
             \Log::error($e->getTraceAsString());
         }
 
-        return view("account.farmer-detail", compact("result"));
+        return view("account.farmer-detail", compact("result", "province", "category", "bank", "supplierAsset", "farms", "coffee", "coffeeVariety", "shadeTree", "landStatus", "businessType"));
     }
 
     public function save(FarmerPostRequest $request){
@@ -358,6 +543,28 @@ class FarmerController extends Controller
             \Log::error($e->getTraceAsString());
         }
         
+        return response()->json($response);
+    }
+
+    public function update(Request $request){
+        $response = [
+            "code"      => 400,
+            "message"   => "Failed to complete request",
+            "data"      => []
+        ];
+
+        $farmerCode = $request->input("farmer_code");
+        $input = $request->except(["_token", "farmer_code"]);
+        try{
+            \Log::debug($input);
+            Supplier::where("code", $farmerCode)->update($input);
+            $response["code"] = 200;
+            $response["message"] = "Success";
+        } catch(\Exception $e){
+            \Log::error($e->getMessage());
+            \Log::error($e->getTraceAsString());
+        }
+
         return response()->json($response);
     }
 
@@ -591,7 +798,7 @@ class FarmerController extends Controller
         return response()->json($response);
     }
 
-    public function update(Request $request){
+    public function _update(Request $request){
         
         $response = [
             "code"      => 400,

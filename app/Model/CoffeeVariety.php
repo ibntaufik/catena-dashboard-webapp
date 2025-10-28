@@ -15,4 +15,12 @@ class CoffeeVariety extends Model
     protected $table = 'master_coffee_variety';
     protected $primaryKey = 'id';
     protected $guarded = ['id'];
+
+    public static function listByName($name){
+        return Cache::remember("coffee_variety|$name", config("constant.ttl"), function() use($name){
+            return CoffeeVariety::when(!empty($name), function($builder) use($name){
+                return $builder->whereRaw("UPPER(name) LIKE ?", ["$name%"]);
+            })->select(DB::raw("id, name AS text"))->orderBy("name", "ASC")->get()->toArray();
+        });
+    }
 }
