@@ -32,4 +32,10 @@ return [
         "business_unit" => "photos",
         "farm"          => "land_photos"
     ],
+    "supplier_status"   => [
+        "invalid"           => "Invalid",
+        "non_verified"      => "Non Verified",
+        "partial_verified"  => "Partial Verified",
+        "verified"          => "Verified"
+    ],
 ];

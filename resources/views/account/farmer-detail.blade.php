@@ -33,6 +33,21 @@
             <h6 class="card-title">Info Farmer</h6>
             <div class="row">
               <div class="col-md-6">
+
+                <div class="row mt-2 align-items-center">
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label for="category" class="form-label mb-0">Status</label>
+                    </div>
+                  </div>
+                  <div class="col-md-9">
+                    <div class="form-group">
+                      <select id="supplier_status" class="form-control" name="supplier_status">
+                        <option value="select" disabled selected>-- Select --</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
                 
                 <div class="row mt-2 align-items-center">
                   <div class="col-md-3">
@@ -625,6 +640,7 @@
   var shadeTree = {!! json_encode($shadeTree) !!};
   var landStatus = {!! json_encode($landStatus) !!};
   var businessType = {!! json_encode($businessType) !!};
+  var supplierStatus = {!! json_encode($supplierStatus) !!};
   var url_coverage_city = "{{ route('coverage.city') }}";
   var url_coverage_district = "{{ route('coverage.district') }}";
   var url_coverage_sub_district = "{{ route('coverage.sub_district') }}";
@@ -653,7 +669,10 @@
     $('#bank').select2({ width: '100%', data: bank });
     $('#bank').val(result.bank_id).trigger('change');
 
-    // Load initial bank list
+    $('#supplier_status').select2({ width: '100%', data: supplierStatus });
+    $('#supplier_status').val(result.verification_status).trigger('change');
+
+    // Load initial business status list
     $('#business_type').select2({ width: '100%', data: businessType });
     $('#business_type').val(result.business_type_id).trigger('change');
 
@@ -733,10 +752,12 @@
         confirmButtonColor: '#d33',
         cancelButtonColor: '#3085d6',
         confirmButtonText: 'Ya',
-        reverseButtons: true
+        reverseButtons: true,
     }).then((result) => {
-        if (section == "farmer") {
-            farmerInfo();
+        if(result.isConfirmed){
+          if (section == "farmer") {
+              farmerInfo();
+          }
         }
     });
   }
@@ -762,6 +783,7 @@
       bank_id: $('#bank').val(),
       account_name: $('#account_name').val(),
       account_number: $('#account_number').val(),
+      verification_status: $('#supplier_status').val(),
     };
 
     $.ajax({
@@ -775,6 +797,8 @@
           title: "Success",
           text: "Data farmer telah diperbaharui",
           icon: "success"
+        }).then(() => {
+          window.location.reload();
         });
     }).fail(function(response){
        Swal.fire({

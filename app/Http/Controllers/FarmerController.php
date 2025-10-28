@@ -436,12 +436,22 @@ class FarmerController extends Controller
                 ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
             ], BusinessType::listByName(""));
 
+            $supplierStatus = [
+                ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true]
+            ];
+
+            foreach(config("constant.supplier_status") as $key => $val){
+                $supplierStatus[] = [
+                    'id' => $key, 'text' => $val
+                ];
+            }
+
         } catch (\Exception $e) {
             \Log::error($e->getMessage());
             \Log::error($e->getTraceAsString());
         }
 
-        return view("account.farmer-detail", compact("result", "province", "category", "bank", "supplierAsset", "farms", "coffee", "coffeeVariety", "shadeTree", "landStatus", "businessType"));
+        return view("account.farmer-detail", compact("result", "province", "category", "bank", "supplierAsset", "farms", "coffee", "coffeeVariety", "shadeTree", "landStatus", "businessType", "supplierStatus"));
     }
 
     public function save(FarmerPostRequest $request){
@@ -556,8 +566,9 @@ class FarmerController extends Controller
         $farmerCode = $request->input("farmer_code");
         $input = $request->except(["_token", "farmer_code"]);
         try{
-            \Log::debug($input);
+            
             Supplier::where("code", $farmerCode)->update($input);
+            CommonHelper::forgetCache("farmer");
             $response["code"] = 200;
             $response["message"] = "Success";
         } catch(\Exception $e){
@@ -575,7 +586,7 @@ class FarmerController extends Controller
             "message"   => "Failed to complete request",
             "data"      => []
         ];
-        \Log::debug($request->all());
+        
         try{
             Farmer::where("id_number", $request->input("id_number"))->delete();
 
