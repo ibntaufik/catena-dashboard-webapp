@@ -425,195 +425,148 @@
             <h6 class="card-title">Info Kebun</h6>
             <div class="row">
               <div class="col-md-12">
-                <ol>
-                @foreach($farms as $index => $farm)
-                <li>
-                  <div class="farm-item mb-4">
-                    <h6>Highlight: {{ $farm->farm_summary }}</h6>
-                
-                    <div class="row mt-2 align-items-center">
-                      <div class="col-md-2">
-                        <div class="form-group">
-                          <label for="latitude" class="form-label mb-0">Alamat</label>
-                        </div>
-                      </div>
-                      <div class="col-md-6">
-                        <div class="form-group">
-                          <textarea rows="3" type="text" class="form-control" id="land_measurement" maxlength="255" placeholder="Alamat" onkeypress="return isAlphaNumericAndWhiteSpaceAndComma(event);">{{ $farm->address }}</textarea>
-                        </div>
-                      </div>
-                    </div>
+                <!-- Info Kebun Section (Accordion) -->
+                <div class="accordion mt-4" id="farmAccordion">
+                  @foreach($farms as $index => $farm)
+                    <div class="accordion-item">
+                      <h2 class="accordion-header" id="heading{{ $index }}">
+                        <button
+                          class="accordion-button {{ $index > 0 ? 'collapsed' : '' }}"
+                          type="button"
+                          data-bs-toggle="collapse"
+                          data-bs-target="#collapse{{ $index }}"
+                          aria-expanded="{{ $index === 0 ? 'true' : 'false' }}"
+                          aria-controls="collapse{{ $index }}">
+                          {{ $farm->farm_name ?? 'Kebun ' . ($index + 1) }}
+                        </button>
+                      </h2>
 
-                    <div class="row mt-2 align-items-center">
-                      <div class="col-md-2">
-                        <div class="form-group">
-                          <label for="latitude" class="form-label mb-0">Luas Lahan</label>
-                        </div>
-                      </div>
-                      <div class="col-md-6">
-                        <div class="form-group">
-                          <input type="text" class="form-control" id="land_measurement" maxlength="255" placeholder="Luas Lahan" onkeypress="return isNumericAndDot(event);" value="{{ $farm->land_measurement }}">
-                        </div>
-                      </div>
-                    </div>
-                
-                    <div class="row mt-2 align-items-center">
-                      <div class="col-md-2">
-                        <div class="form-group">
-                          <label for="latitude" class="form-label mb-0">Jumlah/Populasi Pohon</label>
-                        </div>
-                      </div>
-                      <div class="col-md-6">
-                        <div class="form-group">
-                          <input type="text" class="form-control" id="tree_population" maxlength="255" placeholder="Jumlah/Populasi Pohon" onkeypress="return isNumericAndDot(event);" value="{{ $farm->tree_population }}">
-                        </div>
-                      </div>
-                    </div>
+                      <div
+                        id="collapse{{ $index }}"
+                        class="accordion-collapse collapse {{ $index === 0 ? 'show' : '' }}"
+                        aria-labelledby="heading{{ $index }}"
+                        data-bs-parent="#farmAccordion">
+                        <div class="accordion-body">
+                          <div class="row mb-3">
+                            <div class="col-md-4">
+                              <label class="form-label">Luas Lahan</label>
+                              <input type="text" class="form-control" name="land_measurement[{{ $index }}]" value="{{ $farm->land_measurement_display ?? $farm->land_measurement }}">
+                            </div>
 
-                    <div class="row mt-2 align-items-center">
-                      <div class="col-md-2">
-                        <div class="form-group">
-                          <label for="latitude" class="form-label mb-0">Latitude</label>
-                        </div>
-                      </div>
-                      <div class="col-md-6">
-                        <div class="form-group">
-                          <input type="text" class="form-control" id="farm_latitude" maxlength="255" placeholder="Latitude" onkeypress="return latitude(event);" value="{{ $farm->farm_latitude }}">
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div class="row mt-2 align-items-center">
-                      <div class="col-md-2">
-                        <div class="form-group">
-                          <label for="longitude" class="form-label mb-0">Longitude</label>
-                        </div>
-                      </div>
-                      <div class="col-md-6">
-                        <div class="form-group">
-                          <input type="text" class="form-control" id="farm_longitude" maxlength="255" placeholder="Longitude" onkeypress="return isNumericAndDot(event);" value="{{ $farm->farm_longitude }}">
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div class="row mt-2 align-items-center">
-                      <div class="col-md-2">
-                        <div class="form-group">
-                          <label for="longitude" class="form-label mb-0">Ketinggian</label>
-                        </div>
-                      </div>
-                      <div class="col-md-6">
-                        <div class="form-group">
-                          <input type="text" class="form-control" id="farm_altitude" maxlength="255" placeholder="Ketinggian" onkeypress="return isNumericAndDot(event);" value="{{ $farm->farm_altitude }}">
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div class="row mt-2 align-items-center">
-                      <div class="col-md-2">
-                        <div class="form-group">
-                          <label for="longitude" class="form-label mb-0">No. Setifikat Lahan</label>
-                        </div>
-                      </div>
-                      <div class="col-md-6">
-                        <div class="form-group">
-                          <input type="text" class="form-control" id="land_certificate" maxlength="255" placeholder="No. Setifikat Lahan" onkeypress="return isAlphaNumericDashSlash(event);" value="{{ $farm->land_certificate }}">
-                        </div>
-                      </div>
-                    </div>
+                            <div class="col-md-4">
+                              <label class="form-label">Jumlah/Populasi Pohon</label>
+                              <input type="text" class="form-control" name="tree_population[{{ $index }}]" value="{{ $farm->tree_population }}">
+                            </div>
 
-                    <div class="row mt-2 align-items-center">
-                      <div class="col-md-2">
-                        <div class="form-group">
-                          <label class="form-label mb-0">Kopi</label>
+                            <div class="col-md-4">
+                              <label class="form-label">Status Lahan</label>
+                              <select name="land_status[{{ $index }}]" class="form-control select2-land-status" data-index="{{ $index }}">
+                                @foreach($landStatus as $option)
+                                  <option value="{{ $option['id'] }}" {{ $option['id'] == $farm->land_status_id ? 'selected' : '' }}>
+                                    {{ $option['text'] ?? $option['name'] }}
+                                  </option>
+                                @endforeach
+                              </select>
+                            </div>
+                          </div>
+
+                          <div class="row mb-3">
+                            <div class="col-md-4">
+                              <label class="form-label">Latitude</label>
+                              <input type="text" class="form-control" id="farm_latitude[{{ $index }}]" name="farm_latitude[{{ $index }}]" value="{{ $farm->farm_latitude }}">
+                            </div>
+
+                            <div class="col-md-4">
+                              <label class="form-label">Longitude</label>
+                              <input type="text" class="form-control" id="farm_longitude[{{ $index }}]" name="farm_longitude[{{ $index }}]" value="{{ $farm->farm_longitude }}">
+                            </div>
+
+                            <div class="col-md-4">
+                              <label class="form-label">Ketinggian</label>
+                              <input type="text" class="form-control" id="farm_altitude[{{ $index }}]" name="farm_altitude[{{ $index }}]" value="{{ $farm->farm_altitude }}">
+                            </div>
+                          </div>
+
+                          <div class="row mb-3">
+                            <div class="col-md-4">
+                              <label class="form-label">Kopi</label>
+                              <select name="coffee[{{ $index }}]" class="form-control select2-coffee" data-index="{{ $index }}">
+                                @foreach($coffee as $option)
+                                  <option value="{{ $option['id'] }}" {{ $option['id'] == $farm->coffee_id ? 'selected' : '' }}>
+                                    {{ $option['text'] ?? $option['name'] }}
+                                  </option>
+                                @endforeach
+                              </select>
+                            </div>
+
+                            <div class="col-md-4">
+                              <label class="form-label">Varietas Kopi</label>
+                              <select name="coffee_variety[{{ $index }}]" class="form-control select2-coffee-variety" data-index="{{ $index }}">
+                                @foreach($coffeeVariety as $option)
+                                  <option value="{{ $option['id'] }}" {{ $option['id'] == $farm->coffee_variety_id ? 'selected' : '' }}>
+                                    {{ $option['text'] ?? $option['name'] }}
+                                  </option>
+                                @endforeach
+                              </select>
+                            </div>
+
+                            <div class="col-md-4">
+                              <label class="form-label">Pohon Peneduh</label>
+                              <select name="shade_tree[{{ $index }}]" class="form-control select2-shade-tree" data-index="{{ $index }}">
+                                @foreach($shadeTree as $option)
+                                  <option value="{{ $option['id'] }}" {{ $option['id'] == $farm->shade_tree_id ? 'selected' : '' }}>
+                                    {{ $option['text'] ?? $option['name'] }}
+                                  </option>
+                                @endforeach
+                              </select>
+                            </div>
+                          </div>
+
+                          <div class="row mb-3">
+                            <div class="col-md-4">
+                              <label class="form-label">No. Sertifikat Lahan</label>
+                              <input type="text" class="form-control" id="land_certificate[{{ $index }}]" name="land_certificate[{{ $index }}]" value="{{ $farm->land_certificate }}">
+                            </div>
+                            <div class="col-md-8">
+                              <label for="address" class="form-label mb-0">Alamat</label>
+                              <textarea rows="3" type="text" class="form-control" id="address[{{ $index }}]" name="address[{{ $index }}]" maxlength="255" placeholder="Alamat" onkeypress="return isAlphaNumericAndWhiteSpaceAndComma(event);">{{ $farm->address }}</textarea>
+                            </div>
+                          </div>
+
+                          {{-- Photos --}}
+                          @if(!empty($farm->photos) && count($farm->photos) > 0)
+                            <div class="mb-3">
+                              <h6>Foto Kebun</h6>
+                              <div class="d-flex flex-wrap gap-3">
+                                @foreach($farm->photos as $photo)
+                                  {{-- photos are arrays (['url' => ...]) per your controller --}}
+                                  <a href="{{ $photo['url'] ?? '#' }}" target="_blank">
+                                    <img src="{{ $photo['url'] ?? '#' }}" class="img-thumbnail" style="max-width: 180px;">
+                                  </a>
+                                @endforeach
+                              </div>
+                            </div>
+                          @else
+                            <p class="text-muted mb-3">Belum ada foto untuk kebun ini.</p>
+                          @endif
+
+                          <div class="d-flex justify-content-end gap-2">
+                            {{-- per-farm update button (wire to JS) --}}
+                            <button type="button" class="btn btn-sm btn-secondary btn-reset-farm" data-index="{{ $index }}">Reset</button>
+                            <button type="button" class="btn btn-sm btn-primary btn-save-farm" data-index="{{ $index }}">Perbarui Kebun</button>
+                          </div>
                         </div>
                       </div>
-                      <div class="col-md-6">
-                        <div class="form-group">
-                          <select id="coffee-{{ $index }}" name="coffee[{{ $index }}]" class="form-control select2-coffee">
-                            @foreach($coffee as $option)
-                              <option 
-                                value="{{ $option['id'] }}" 
-                                {{ $option['id'] == $farm->coffee_id ? 'selected' : '' }}>
-                                {{ $option['text'] ?? $option['name'] }}
-                              </option>
-                            @endforeach
-                          </select>
-                        </div>
-                      </div>
                     </div>
+                  @endforeach
+                </div>
 
-                    <div class="row mt-2 align-items-center">
-                      <div class="col-md-2">
-                        <label class="form-label mb-0">Varietas Kopi</label>
-                      </div>
-                      <div class="col-md-6">
-                        <select id="coffee-variety-{{ $index }}" name="coffee_variety[{{ $index }}]" class="form-control select2-coffee-variety">
-                          @foreach($coffeeVariety as $option)
-                            <option 
-                              value="{{ $option['id'] }}" 
-                              {{ $option['id'] == $farm->coffee_variety_id ? 'selected' : '' }}>
-                              {{ $option['text'] ?? $option['name'] }}
-                            </option>
-                          @endforeach
-                        </select>
-                      </div>
-                    </div>
-
-                    <div class="row mt-2 align-items-center">
-                      <div class="col-md-2">
-                        <label class="form-label mb-0">Status Lahan</label>
-                      </div>
-                      <div class="col-md-6">
-                        <select id="land-status-{{ $index }}" name="land_status[{{ $index }}]" class="form-control select2-land-status">
-                          @foreach($landStatus as $option)
-                            <option 
-                              value="{{ $option['id'] }}" 
-                              {{ $option['id'] == $farm->land_status_id ? 'selected' : '' }}>
-                              {{ $option['text'] ?? $option['name'] }}
-                            </option>
-                          @endforeach
-                        </select>
-                      </div>
-                    </div>
-
-                    <div class="row mt-2 align-items-center">
-                      <div class="col-md-2">
-                        <label class="form-label mb-0">Pohon Peneduh</label>
-                      </div>
-                      <div class="col-md-6">
-                        <select id="shade-tree-{{ $index }}" name="shade_tree[{{ $index }}]" class="form-control select2-shade-tree">
-                          @foreach($shadeTree as $option)
-                            <option 
-                              value="{{ $option['id'] }}" 
-                              {{ $option['id'] == $farm->shade_tree_id ? 'selected' : '' }}>
-                              {{ $option['text'] ?? $option['name'] }}
-                            </option>
-                          @endforeach
-                        </select>
-                      </div>
-                    </div>
-
-                    <div class="row mt-3">
-                      @foreach($farm->photos as $photo)
-                        <div class="col-md-3">
-                          <a href="{{ $photo['url'] ?? '#' }}" target="_blank">
-                            <img src="{{ $photo['url'] }}" class="img-thumbnail" style="max-width: 100%;">
-                          </a>
-                        </div>
-                      @endforeach
-                    </div>
-                  </div>
-                </li>
-                @endforeach
-                </ol>
               </div>
             </div>
           </div>
 
           <div class="card-footer">
             <div class="col-md-12 text-end mb-3">
-              <button id="btnSaveFarmDetail" class="btn btn-primary">Simpan</button>
             </div>
           </div>
         </div>
