@@ -327,7 +327,10 @@ class FarmerController extends Controller
                         CONCAT(sub_districts.name, ', ', districts.name, ', ', cities.name, ', ', provinces.name) AS location"))
                     ->first();
             });
-
+            
+            $supplierAsset = null;
+            $farms = null;
+            $farmDetails = null;
             if($result){
                 // Supplier Asset
                 $supplierAsset = Cache::remember("supplier_asset.supplier_code|$farmerCode", config("constant.ttl"), function() use ($result) {
