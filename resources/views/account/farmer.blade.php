@@ -281,8 +281,7 @@
                                 
           "columnDefs" : [
             { "targets": 0, "data": function( data, type, row, meta ){
-                //return '<a href="javascript:void(0)" onclick=showDetail("'+data.image_id_number_name+'||'+data.image_photo_name+'")><label style="cursor: pointer;";>'+ucFirstWord(data.name)+'</label></a>';
-                return ucFirstWord(data.name);
+                return '<a href="javascript:void(0)" onclick=showDetail("'+data.image_id_number_name+'||'+data.image_photo_name+'")><label style="cursor: pointer;";>'+ucFirstWord(data.name)+'</label></a>';
               }
             },
             { "targets": 1, "data": function( data, type, row, meta ){
@@ -513,8 +512,8 @@
 
   function showDetail(image_names){
     var imageNames = image_names.split("||");
-    $("#id_number_image").attr("src", "{{ url('/storage/farmer/id-number/') }}/"+imageNames[0]);
-    $("#photo_image").attr("src", "{{ url('/storage/farmer/id-number/') }}/"+imageNames[1]);
+    $("#id_number_image").attr("src", imageNames[0]);
+    $("#photo_image").attr("src", imageNames[1]);
     
     $('#previewModal').modal('show');
   }

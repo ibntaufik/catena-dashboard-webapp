@@ -208,16 +208,27 @@ class FarmerController extends Controller
                 ->when($limit, function($builder) use($limit){
                     return $builder->take($limit);
                 })
-                ->select(DB::raw("master_supplier.code AS farmer_code, master_supplier.name, master_supplier.email, master_supplier.address, master_supplier.latitude, master_supplier.longitude, master_supplier.phone, master_supplier.id_number, sub_districts.code AS sub_district_code, CONCAT(sub_districts.name, ' <br> ', districts.name, ' <br> ', cities.name, ' <br> ', provinces.name) AS location"))->orderBy("master_supplier.local_created_at", "DESC")->get();
+                ->select(DB::raw("master_supplier.code AS farmer_code, master_supplier.name, master_supplier.email, master_supplier.address, master_supplier.latitude, master_supplier.longitude, master_supplier.phone, master_supplier.id_number, sub_districts.code AS sub_district_code, CONCAT(sub_districts.name, ' <br> ', districts.name, ' <br> ', cities.name, ' <br> ', provinces.name) AS location, master_supplier.verification_status"))
+                ->orderBy("master_supplier.local_created_at", "DESC")->get();
 
+                $apiUrl     = config('constant.api_url') ?? constant('api_url');
+                $assetPaths = config('constant.asset_path') ?? constant('asset_path');
+                $identityPhotoBase = "{$apiUrl}/storage/{$assetPaths['identity']}/";
                 foreach($supplier as $row){
-                    $row->asset = Supplier::join("supplier_assets", "master_supplier.id", "supplier_assets.supplier_id")
-                    ->where([
-                        "master_supplier.code" => $row->farmer_code,
-                        "supplier_assets.asset_type" => "identity"
-                    ])
-                    ->select("supplier_assets.name")
-                    ->get();
+                    $assets = Supplier::join("supplier_assets", "master_supplier.id", "supplier_assets.supplier_id")
+                        ->where([
+                            "master_supplier.code" => $row->farmer_code,
+                            "supplier_assets.asset_type" => "identity"
+                        ])
+                        ->pluck("supplier_assets.name")
+                        ->toArray();
+                    if(count($assets) > 1){
+                        $row->image_id_number_name = $identityPhotoBase.$assets[0] ?? null;
+                        $row->image_photo_name = $identityPhotoBase.$assets[1] ?? null;
+                    } else {
+                        $row->image_id_number_name = $identityPhotoBase.$assets[0] ?? null;
+                        $row->image_photo_name = "";
+                    }
                 }
                 return $supplier;
             });

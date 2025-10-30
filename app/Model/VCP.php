@@ -72,7 +72,11 @@ class VCP extends Model
             ->join("t_evc", "t_evc.id", "t_vch.evc_id")
             ->when(!empty($code), function($builder) use($code){
                 return $builder->whereRaw("UPPER(t_vcp.code) LIKE ?", ["$code%"]);
-            })->select(DB::raw("t_vcp.id, CONCAT(t_evc.code, '-', t_vch.code, '-', t_vcp.code) AS text"))->orderBy("t_vcp.code", "ASC")->get()->toArray();
+            })->select(DB::raw("t_vcp.id, CONCAT(t_evc.code, '-', t_vch.code, '-', t_vcp.code) AS text"))
+            ->orderBy("t_evc.code", "ASC")
+            ->orderBy("t_vch.code", "ASC")
+            ->orderBy("t_vcp.code", "ASC")
+            ->get()->toArray();
         });
     }
 }
