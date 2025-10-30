@@ -328,9 +328,9 @@ class FarmerController extends Controller
                     ->first();
             });
             
-            $supplierAsset = null;
-            $farms = null;
-            $farmDetails = null;
+            $supplierAsset = [];
+            $farms = [];
+            $farmDetails = [];
             if($result){
                 // Supplier Asset
                 $supplierAsset = Cache::remember("supplier_asset.supplier_code|$farmerCode", config("constant.ttl"), function() use ($result) {
