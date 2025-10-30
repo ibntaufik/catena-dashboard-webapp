@@ -328,96 +328,98 @@ class FarmerController extends Controller
                     ->first();
             });
 
-            // Supplier Asset
-            $supplierAsset = Cache::remember("supplier_asset.supplier_code|$farmerCode", config("constant.ttl"), function() use ($result) {
-                return SupplierAsset::where("supplier_id", $result->id)
-                    ->select("name", "asset_type")
-                    ->get();
-            });
+            if($result){
+                // Supplier Asset
+                $supplierAsset = Cache::remember("supplier_asset.supplier_code|$farmerCode", config("constant.ttl"), function() use ($result) {
+                    return SupplierAsset::where("supplier_id", $result->id)
+                        ->select("name", "asset_type")
+                        ->get();
+                });
 
-            $apiUrl     = config('constant.api_url') ?? constant('api_url');
-            $assetPaths = config('constant.asset_path') ?? constant('asset_path');
+                $apiUrl     = config('constant.api_url') ?? constant('api_url');
+                $assetPaths = config('constant.asset_path') ?? constant('asset_path');
 
-            foreach ($supplierAsset as $asset) {
-                $type = $asset->asset_type;
-                if (!isset($assetPaths[$type])) continue;
-                $assetUrl = "{$apiUrl}/storage/{$assetPaths[$type]}/{$asset->name}";
-                $asset->{$type . '_image'} = $assetUrl;
+                foreach ($supplierAsset as $asset) {
+                    $type = $asset->asset_type;
+                    if (!isset($assetPaths[$type])) continue;
+                    $assetUrl = "{$apiUrl}/storage/{$assetPaths[$type]}/{$asset->name}";
+                    $asset->{$type . '_image'} = $assetUrl;
+                }
+            
+
+                // Farms
+                $farms = Cache::remember("supplier.farms.supplier_code|$farmerCode", config("constant.ttl"), function() use ($result) {
+                    return Farms::join("master_coffee", "master_coffee.id", "farms.coffee_id")
+                        ->join("master_coffee_variety", "master_coffee_variety.id", "farms.coffee_variety_id")
+                        ->join("master_shade_tree", "master_shade_tree.id", "farms.shade_tree_id")
+                        ->join("master_land_status", "master_land_status.id", "farms.land_status_id")
+                        ->where("supplier_id", $result->id)
+                        ->select(DB::raw("
+                            master_coffee.id AS coffee_id,
+                            master_coffee.name AS coffee_name,
+                            master_coffee_variety.id AS coffee_variety_id,
+                            master_coffee_variety.name AS coffee_variety_name,
+                            master_shade_tree.id AS shade_tree_id,
+                            master_shade_tree.name AS shade_tree_name,
+                            farms.id AS farm_id,
+                            farms.address,
+                            farms.land_certificate,
+                            farms.latitude AS farm_latitude,
+                            farms.longitude AS farm_longitude,
+                            farms.elevation AS farm_altitude,
+                            farms.land_measurement,
+                            farms.tree_population,
+                            master_land_status.id AS land_status_id,
+                            master_land_status.name AS land_status
+                        "))
+                        ->get();
+                });
+
+                // Farm Details (Photos)
+                $farmIds = $farms->pluck('farm_id');
+                $farmDetails = Cache::remember("supplier.farm.details.supplier_code|$farmerCode", config("constant.ttl"), function() use ($farmIds) {
+                    return FarmDetail::whereIn("farm_id", $farmIds)
+                        ->select("farm_id", "photo")
+                        ->get()
+                        ->groupBy('farm_id');
+                });
+
+                // Attach Photos to Each Farm with Full URL
+                $farmPhotoBase = "{$apiUrl}/storage/{$assetPaths['farm']}/";
+
+                $farms->transform(function ($farm) use ($farmDetails, $farmPhotoBase) {
+
+                    // Attach photos with URLs
+                    $photos = $farmDetails[$farm->farm_id] ?? collect();
+                    $farm->photos = $photos->map(fn($photo) => [
+                        'photo' => $photo->photo,
+                        'url'   => $farmPhotoBase . $photo->photo,
+                    ]);
+
+                    // Format numeric values for readability
+                    $formattedLand = isset($farm->land_measurement)
+                        ? number_format($farm->land_measurement, 0, ',', '.')
+                        : '-';
+
+                    $formattedTrees = isset($farm->tree_population)
+                        ? number_format($farm->tree_population, 0, ',', '.')
+                        : '-';
+
+                    $formattedAltitude = isset($farm->altitude)
+                        ? number_format($farm->altitude, 0, ',', '.')
+                        : '-';
+
+                    // Add formatted fields back to the object
+                    $farm->land_measurement = $formattedLand;
+                    $farm->tree_population  = $formattedTrees;
+                    $farm->altitude         = $formattedAltitude;
+
+                    // Add summary string (e.g., "1.500 m² / 250 pohon")
+                    $farm->farm_summary = "{$formattedLand} / {$formattedTrees} pohon";
+
+                    return $farm;
+                });
             }
-
-            // Farms
-            $farms = Cache::remember("supplier.farms.supplier_code|$farmerCode", config("constant.ttl"), function() use ($result) {
-                return Farms::join("master_coffee", "master_coffee.id", "farms.coffee_id")
-                    ->join("master_coffee_variety", "master_coffee_variety.id", "farms.coffee_variety_id")
-                    ->join("master_shade_tree", "master_shade_tree.id", "farms.shade_tree_id")
-                    ->join("master_land_status", "master_land_status.id", "farms.land_status_id")
-                    ->where("supplier_id", $result->id)
-                    ->select(DB::raw("
-                        master_coffee.id AS coffee_id,
-                        master_coffee.name AS coffee_name,
-                        master_coffee_variety.id AS coffee_variety_id,
-                        master_coffee_variety.name AS coffee_variety_name,
-                        master_shade_tree.id AS shade_tree_id,
-                        master_shade_tree.name AS shade_tree_name,
-                        farms.id AS farm_id,
-                        farms.address,
-                        farms.land_certificate,
-                        farms.latitude AS farm_latitude,
-                        farms.longitude AS farm_longitude,
-                        farms.elevation AS farm_altitude,
-                        farms.land_measurement,
-                        farms.tree_population,
-                        master_land_status.id AS land_status_id,
-                        master_land_status.name AS land_status
-                    "))
-                    ->get();
-            });
-
-            // Farm Details (Photos)
-            $farmIds = $farms->pluck('farm_id');
-            $farmDetails = Cache::remember("supplier.farm.details.supplier_code|$farmerCode", config("constant.ttl"), function() use ($farmIds) {
-                return FarmDetail::whereIn("farm_id", $farmIds)
-                    ->select("farm_id", "photo")
-                    ->get()
-                    ->groupBy('farm_id');
-            });
-
-            // Attach Photos to Each Farm with Full URL
-            $farmPhotoBase = "{$apiUrl}/storage/{$assetPaths['farm']}/";
-
-            $farms->transform(function ($farm) use ($farmDetails, $farmPhotoBase) {
-
-                // Attach photos with URLs
-                $photos = $farmDetails[$farm->farm_id] ?? collect();
-                $farm->photos = $photos->map(fn($photo) => [
-                    'photo' => $photo->photo,
-                    'url'   => $farmPhotoBase . $photo->photo,
-                ]);
-
-                // Format numeric values for readability
-                $formattedLand = isset($farm->land_measurement)
-                    ? number_format($farm->land_measurement, 0, ',', '.')
-                    : '-';
-
-                $formattedTrees = isset($farm->tree_population)
-                    ? number_format($farm->tree_population, 0, ',', '.')
-                    : '-';
-
-                $formattedAltitude = isset($farm->altitude)
-                    ? number_format($farm->altitude, 0, ',', '.')
-                    : '-';
-
-                // Add formatted fields back to the object
-                $farm->land_measurement = $formattedLand;
-                $farm->tree_population  = $formattedTrees;
-                $farm->altitude         = $formattedAltitude;
-
-                // Add summary string (e.g., "1.500 m² / 250 pohon")
-                $farm->farm_summary = "{$formattedLand} / {$formattedTrees} pohon";
-
-                return $farm;
-            });
-
             // Dropdown Data
             $province = array_merge([
                 ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
