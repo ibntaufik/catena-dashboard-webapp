@@ -181,9 +181,9 @@
           <table id="gridDataTable" class="table">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>ID Number</th>
+                <th>Name<br>ID Number</th>
                 <th>Phone</th>
+                <th>Status</th>
                 <th>Address</th>
                 <th>Sub District Code</th>
                 <th>Latitude<br>Longitude</th>
@@ -281,15 +281,36 @@
                                 
           "columnDefs" : [
             { "targets": 0, "data": function( data, type, row, meta ){
-                return '<a href="javascript:void(0)" onclick=showDetail("'+data.image_id_number_name+'||'+data.image_photo_name+'")><label style="cursor: pointer;";>'+ucFirstWord(data.name)+'</label></a>';
+                return '<a href="javascript:void(0)" onclick=showDetail("'+data.image_id_number_name+'||'+data.image_photo_name+'")><label style="cursor: pointer;";>'+ucFirstWord(data.name)+'</label></a><br>'+data.id_number;
               }
             },
             { "targets": 1, "data": function( data, type, row, meta ){
-                return data.id_number;
+                return (data.phone ? data.phone : "-");
               }
             },
             { "targets": 2, "data":  function(data, type, row, meta){
-                  return data.phone ? data.phone : "-";
+                let status = data.verification_status ? data.verification_status.toUpperCase() : '-';
+                let colorClass = '';
+
+                switch (data.verification_status) {
+                  case 'invalid':
+                    colorClass = 'bg-danger';
+                    break;
+                  case 'partial_verified':
+                    colorClass = 'bg-success';
+                    break;
+                  case 'verified':
+                    colorClass = 'bg-primary';
+                    break;
+                  case 'non_verified':
+                    colorClass = 'bg-warning';
+                    break;
+                  default:
+                    colorClass = 'bg-secondary';
+                    break;
+                }
+
+                return `<span class="badge ${colorClass} text-white px-3 py-2">${status.replace('_', ' ')}</span>`;
               }
             },
             { "targets": 3, "data":  function(data, type, row, meta){
