@@ -36,4 +36,12 @@ class VCH extends Model
             return VCH::where("code", $code)->first();   
         });
     }
+
+    public static function listByCode($code){
+        return Cache::remember("vch.code|$code", config("constant.ttl"), function() use($code){
+            return VCH::join("t_evc", "t_evc.id", "t_vch.evc_id")->when(!empty($code), function($builder) use($code){
+                return $builder->whereRaw("UPPER(code) LIKE ?", ["$code%"]);
+            })->select(DB::raw("t_vch.id, CONCAT(t_evc.code, '-', t_vch.code) AS text"))->orderBy("t_vch.code", "ASC")->get()->toArray();
+        });
+    }
 }

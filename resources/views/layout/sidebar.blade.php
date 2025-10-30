@@ -29,7 +29,7 @@
           <ul class="nav sub-menu">
             @if(\Auth::user()->isA('admin'))
             <li class="nav-item">
-              <a href="{{ url('/account/farmer') }}" class="nav-link {{ active_class(['account/farmer']) }}">Create Farmer Account</a>
+              <a href="{{ url('/account/farmer') }}" class="nav-link {{ active_class(['account/farmer']) }}">Master Data Supplier</a>
             </li>
             @endif
             @if(\Auth::user()->isA('admin'))

@@ -39,4 +39,12 @@ class Evc extends Model
             ])->first();   
         });
     }
+
+    public static function listByCode($code){
+        return Cache::remember("evc.code|$code", config("constant.ttl"), function() use($code){
+            return Evc::when(!empty($code), function($builder) use($code){
+                return $builder->whereRaw("UPPER(code) LIKE ?", ["$code%"]);
+            })->select(DB::raw("id, code AS text"))->orderBy("code", "ASC")->get()->toArray();
+        });
+    }
 }

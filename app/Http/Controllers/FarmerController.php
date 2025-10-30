@@ -30,7 +30,9 @@ use App\Model\Supplier;
 use App\Model\SupplierAsset;
 use App\Model\SupplyCategory;
 use App\Model\User;
+use App\Model\Evc;
 use App\Model\VCH;
+use App\Model\VCP;
 
 class FarmerController extends Controller
 {
@@ -166,7 +168,7 @@ class FarmerController extends Controller
             });
 
             $response["data"] = Cache::remember("data.$cacheName", config("constant.ttl"), function() use($name, $emailUser, $phone, $idNumber, $latitude, $longitude, $provinceId, $cityId, $districtId, $subDistrictId, $page, $limit){
-                return Supplier::join("sub_districts", "sub_districts.id", "master_supplier.sub_district_id")
+                $supplier = Supplier::join("sub_districts", "sub_districts.id", "master_supplier.sub_district_id")
                 ->join("districts", "districts.id", "sub_districts.district_id")
                 ->join("cities", "cities.id", "districts.city_id")
                 ->join("provinces", "provinces.id", "cities.province_id")
@@ -207,8 +209,18 @@ class FarmerController extends Controller
                     return $builder->take($limit);
                 })
                 ->select(DB::raw("master_supplier.code AS farmer_code, master_supplier.name, master_supplier.email, master_supplier.address, master_supplier.latitude, master_supplier.longitude, master_supplier.phone, master_supplier.id_number, sub_districts.code AS sub_district_code, CONCAT(sub_districts.name, ' <br> ', districts.name, ' <br> ', cities.name, ' <br> ', provinces.name) AS location"))->orderBy("master_supplier.local_created_at", "DESC")->get();
-            });
 
+                foreach($supplier as $row){
+                    $row->asset = Supplier::join("supplier_assets", "master_supplier.id", "supplier_assets.supplier_id")
+                    ->where([
+                        "master_supplier.code" => $row->farmer_code,
+                        "supplier_assets.asset_type" => "identity"
+                    ])
+                    ->select("supplier_assets.name")
+                    ->get();
+                }
+                return $supplier;
+            });
 
             if($response["count"] > 0){
                 $response["code"] = 200;
@@ -286,6 +298,8 @@ class FarmerController extends Controller
                         master_supplier.account_number, 
                         master_supplier.verification_status, 
                         master_supplier.local_created_at,
+                        master_supplier.vch_id,
+                        master_supplier.vcp_id,
                         sub_districts.code AS sub_district_code,
                         sub_districts.name AS sub_district_name, 
                         sub_districts.id AS sub_district_id,
@@ -298,7 +312,8 @@ class FarmerController extends Controller
                         provinces.name AS province_name, 
                         provinces.code AS province_code, 
                         provinces.id AS province_id,
-                        t_evc.code AS evc_code, 
+                        t_evc.code AS evc_code,
+                        t_evc.id AS evc_id, 
                         t_vch.code AS vch_code, 
                         t_vcp.code AS vcp_code, 
                         master_business_type.code AS business_type_code, 
@@ -440,6 +455,18 @@ class FarmerController extends Controller
                 ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true]
             ];
 
+            $evc = array_merge([
+                ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
+            ], Evc::listByCode(""));
+
+            $vch = array_merge([
+                ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
+            ], VCH::listByCode(""));
+
+            $vcp = array_merge([
+                ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
+            ], VCP::listByCode(""));
+
             foreach(config("constant.supplier_status") as $key => $val){
                 $supplierStatus[] = [
                     'id' => $key, 'text' => $val
@@ -451,7 +478,7 @@ class FarmerController extends Controller
             \Log::error($e->getTraceAsString());
         }
 
-        return view("account.farmer-detail", compact("result", "province", "category", "bank", "supplierAsset", "farms", "coffee", "coffeeVariety", "shadeTree", "landStatus", "businessType", "supplierStatus"));
+        return view("account.farmer-detail", compact("result", "province", "category", "bank", "supplierAsset", "farms", "coffee", "coffeeVariety", "shadeTree", "landStatus", "businessType", "supplierStatus", "evc", "vch", "vcp"));
     }
 
     public function save(FarmerPostRequest $request){
@@ -566,9 +593,34 @@ class FarmerController extends Controller
         $farmerCode = $request->input("farmer_code");
         $input = $request->except(["_token", "farmer_code"]);
         try{
-            
             Supplier::where("code", $farmerCode)->update($input);
             CommonHelper::forgetCache("farmer");
+            $response["code"] = 200;
+            $response["message"] = "Success";
+        } catch(\Exception $e){
+            \Log::error($e->getMessage());
+            \Log::error($e->getTraceAsString());
+        }
+
+        return response()->json($response);
+    }
+
+    public function updateFarm(Request $request){
+        $response = [
+            "code"      => 400,
+            "message"   => "Failed to complete request",
+            "data"      => []
+        ];
+
+        $farmerCode = $request->input("farmer_code");
+        $farmId = $request->input("farm_id");
+        $input = $request->except(["_token", "farmer_code", "farm_id"]);
+        try{\Log::debug($input);
+            $supplier = Supplier::where("code", $farmerCode)->first();
+            Farms::where([
+                "supplier_id"   => $supplier->id,
+                "id"            => $farmId
+            ])->update($input);
             $response["code"] = 200;
             $response["message"] = "Success";
         } catch(\Exception $e){

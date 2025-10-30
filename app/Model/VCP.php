@@ -65,4 +65,14 @@ class VCP extends Model
             ->first();
         });
     }
+
+    public static function listByCode($code){
+        return Cache::remember("vcp.code|$code", config("constant.ttl"), function() use($code){
+            return VCP::join("t_vch", "t_vch.id", "t_vcp.vch_id")
+            ->join("t_evc", "t_evc.id", "t_vch.evc_id")
+            ->when(!empty($code), function($builder) use($code){
+                return $builder->whereRaw("UPPER(t_vcp.code) LIKE ?", ["$code%"]);
+            })->select(DB::raw("t_vcp.id, CONCAT(t_evc.code, '-', t_vch.code, '-', t_vcp.code) AS text"))->orderBy("t_vcp.code", "ASC")->get()->toArray();
+        });
+    }
 }

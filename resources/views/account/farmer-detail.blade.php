@@ -265,6 +265,21 @@
                     </div>
                   </div>
                 </div>
+
+                <div class="row mt-2 align-items-center">
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label class="form-label mb-0">VCP</label>
+                    </div>
+                  </div>
+                  <div class="col-md-8">
+                    <div class="form-group">
+                      <select id="vcp" class="form-control" name="vcp">
+                        <option value="select" disabled selected>-- Select --</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
                 
                 <div class="row mt-2 align-items-center">
                   <div class="col-md-3">
@@ -326,27 +341,17 @@
                   </div>
                 </div>
               </div>
-            </div>
-
-            <div class="row">
-              <div class="col-md-6">
-                
-              </div>
-              <div class="col-md-6">
-                
-              </div>
-            </div>  
+            </div> 
           </div>
         </div>
       
         <div class="card">
           <div class="card-body">
-            <h6 class="card-title">Info Bank</h6>
             <div class="row">
-              <div class="col-md-12">
-                
+              <div class="col-md-6">
+                <h6 class="card-title">Info Bank</h6>
                 <div class="row mt-2 align-items-center">
-                  <div class="col-md-3">
+                  <div class="col-md-4">
                     <div class="form-group">
                       <label class="form-label mb-0">Bank</label>
                     </div>
@@ -361,7 +366,7 @@
                 </div>
                 
                 <div class="row mt-2 align-items-center">
-                  <div class="col-md-3">
+                  <div class="col-md-4">
                     <div class="form-group">
                       <label class="form-label mb-0">Nama Pemilik Rekening</label>
                     </div>
@@ -374,7 +379,7 @@
                 </div>
                 
                 <div class="row mt-2 align-items-center">
-                  <div class="col-md-3">
+                  <div class="col-md-4">
                     <div class="form-group">
                       <label class="form-label mb-0">No. Rekening</label>
                     </div>
@@ -387,7 +392,7 @@
                 </div>
 
                 <div class="row mt-2 align-items-center">
-                  <div class="col-md-3">
+                  <div class="col-md-4">
                     <label class="form-label mb-0">Foto Buku Rekening</label>
                   </div>
                   <div class="col-md-6">
@@ -413,7 +418,7 @@
 
           <div class="card-footer">
             <div class="col-md-12 text-end mb-3">
-              <button id="btnSaveFarmer" class="btn btn-primary" onclick="confirm('farmer')">Simpan</button>
+              <button id="btnSaveFarmer" class="btn btn-primary" onclick="confirmFarmUpdate('farmer', null)">Simpan</button>
             </div>
           </div>
         </div>
@@ -447,6 +452,7 @@
                         aria-labelledby="heading{{ $index }}"
                         data-bs-parent="#farmAccordion">
                         <div class="accordion-body">
+                          <input type="hidden" name="farm_id[{{ $index }}]" value="{{ $farm->farm_id }}">
                           <div class="row mb-3">
                             <div class="col-md-4">
                               <label class="form-label">Luas Lahan</label>
@@ -536,7 +542,7 @@
                           {{-- Photos --}}
                           @if(!empty($farm->photos) && count($farm->photos) > 0)
                             <div class="mb-3">
-                              <h6>Foto Kebun</h6>
+                              <label class="form-label"><strong>Foto Kebun</strong></label>
                               <div class="d-flex flex-wrap gap-3">
                                 @foreach($farm->photos as $photo)
                                   {{-- photos are arrays (['url' => ...]) per your controller --}}
@@ -587,6 +593,9 @@
   var result = {!! json_encode($result) !!};
   var category = {!! json_encode($category) !!};
   var province = {!! json_encode($province) !!};
+  var evc = {!! json_encode($evc) !!};
+  var vch = {!! json_encode($vch) !!};
+  var vcp = {!! json_encode($vcp) !!};
   var bank = {!! json_encode($bank) !!};
   var coffee = {!! json_encode($coffee) !!};
   var coffeeVariety = {!! json_encode($coffeeVariety) !!};
@@ -634,6 +643,18 @@
 
     // Load initial province list
     $('#province').select2({ width: '100%', data: province });
+/*
+    // Load initial evc list
+    $('#evc').select2({ width: '100%', data: evc });
+    $('#evc').val(result.evc_id).trigger('change');
+
+    // Load initial vch list
+    $('#vch').select2({ width: '100%', data: vch });
+    $('#vch').val(result.vch_id).trigger('change');
+*/
+    // Load initial vcp list
+    $('#vcp').select2({ width: '100%', data: vcp });
+    $('#vcp').val(result.vcp_id).trigger('change');
 
     // Farm
     $('.select2-coffee').select2({ width: '100%' });
@@ -696,7 +717,7 @@
     }(jQuery, document));
   });
 
-  function confirm(section){
+  function confirmFarmUpdate(section, index){
     Swal.fire({
         title: 'Konfirmasi perubahan data',
         text: "Pastikan data sudah sesuai.",
@@ -710,6 +731,8 @@
         if(result.isConfirmed){
           if (section == "farmer") {
               farmerInfo();
+          } else if (section == "farm") {
+            updateFarm(index);
           }
         }
     });
@@ -737,6 +760,8 @@
       account_name: $('#account_name').val(),
       account_number: $('#account_number').val(),
       verification_status: $('#supplier_status').val(),
+      //vch_id: $('#vch').val(),
+      vcp_id: $('#vcp').val(),
     };
 
     $.ajax({
@@ -759,6 +784,72 @@
           title: "Oops...",
           text: "Something went wrong!",
         }); 
+    });
+  }
+
+  // Initialize Select2 for dynamic farm selects
+  $('.select2-coffee, .select2-coffee-variety, .select2-land-status, .select2-shade-tree').select2({
+    width: '100%',
+    placeholder: '-- Select --'
+  });
+
+  // Handle per-farm update button
+  $(document).on('click', '.btn-save-farm', function() {
+    const index = $(this).data('index');
+    confirmFarmUpdate("farm", index);
+  });
+
+  // Send AJAX request for a specific farm
+  function updateFarm(index) {
+    const accordionBody = $(`#collapse${index} .accordion-body`);
+    
+    const data = {
+      _token: "{{ csrf_token() }}",
+      farmer_code: $('#farmer_code').val(),
+      farm_id: accordionBody.find(`[name="farm_id[${index}]"]`).val() || '', // add hidden field if needed
+      land_measurement: accordionBody.find(`[name="land_measurement[${index}]"]`).val(),
+      tree_population: accordionBody.find(`[name="tree_population[${index}]"]`).val(),
+      land_status_id: accordionBody.find(`[name="land_status[${index}]"]`).val(),
+      latitude: accordionBody.find(`[name="farm_latitude[${index}]"]`).val(),
+      longitude: accordionBody.find(`[name="farm_longitude[${index}]"]`).val(),
+      elevation: accordionBody.find(`[name="farm_altitude[${index}]"]`).val(),
+      coffee_id: accordionBody.find(`[name="coffee[${index}]"]`).val(),
+      coffee_variety_id: accordionBody.find(`[name="coffee_variety[${index}]"]`).val(),
+      shade_tree_id: accordionBody.find(`[name="shade_tree[${index}]"]`).val(),
+      address: accordionBody.find(`[name="address[${index}]"]`).val(),
+      land_certificate: accordionBody.find(`[name="land_certificate[${index}]"]`).val(),
+    };
+    
+    $.ajax({
+      url: "{{ route('farmer.updateFarm') }}",
+      type: "POST",
+      data: data,
+      dataType: "json",
+      timeout: 300000,
+      beforeSend: function() {
+        Swal.fire({
+          title: 'Menyimpan...',
+          text: 'Sedang memperbarui data kebun',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
+        });
+      }
+    })
+    .done(function(response) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: response.message || 'Data kebun telah diperbarui.',
+        timer: 1500,
+        showConfirmButton: false
+      }).then(() => window.location.reload());
+    })
+    .fail(function(xhr) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal!',
+        text: xhr.responseJSON?.message || 'Terjadi kesalahan, coba lagi nanti.'
+      });
     });
   }
 </script>

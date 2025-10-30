@@ -281,11 +281,12 @@
                                 
           "columnDefs" : [
             { "targets": 0, "data": function( data, type, row, meta ){
-                return '<a href="javascript:void(0)" onclick=showDetail("'+data.image_id_number_name+'||'+data.image_photo_name+'")><label style="cursor: pointer;";>'+ucFirstWord(data.name)+'</label></a>';
+                //return '<a href="javascript:void(0)" onclick=showDetail("'+data.image_id_number_name+'||'+data.image_photo_name+'")><label style="cursor: pointer;";>'+ucFirstWord(data.name)+'</label></a>';
+                return ucFirstWord(data.name);
               }
             },
             { "targets": 1, "data": function( data, type, row, meta ){
-                return '<a onclick=$(this).detail("'+data.id_number+'","'+data.farmer_code+'") class="form-label" style="cursor: pointer;">'+data.id_number+'</a>';
+                return data.id_number;
               }
             },
             { "targets": 2, "data":  function(data, type, row, meta){
@@ -302,8 +303,7 @@
               }
             },
             { "targets": 6, "data": function(data, type, row, meta){
-                  return '<a href="javascript:void(0)" onclick="confirmDelete('+data.id_number+')" style="cursor: pointer;"><i data-feather="trash-2"></i></a>';
-//'<a href="#" onclick=$(this).delete("'+data.id_number+'") style="cursor: pointer;"><i data-feather="trash-2"></i>';
+                  return '<a href="javascript:void(0)" onclick="confirmDelete('+data.id_number+')" style="cursor: pointer;"><i data-feather="trash-2"></i></a> &nbsp; <a href="javascript:void(0)" onclick=$(this).detail("'+data.id_number+'","'+data.farmer_code+'") style="cursor: pointer;"><i data-feather="eye"></i></a>';
               }
             },
           ],
