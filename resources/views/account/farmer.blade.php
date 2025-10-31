@@ -59,7 +59,16 @@
                     <input type="text" class="form-control" id="f_id_number" maxlength="255" placeholder="(SIM, KK, or KTP))" onkeypress="return isNumber(event);">
                   </div>
                 </div>
+                
                 @include("layout.coverage-filter")
+
+                <div class="col-sm-3">
+                  <div class="mb-3">
+                    <label for="category" class="form-label">Status</label>
+                    <select id="f_supplier_status" class="form-control" name="f_supplier_status">
+                    </select>
+                  </div>
+                </div>
               </div>
           </div>
           <div class="card-footer">
@@ -237,9 +246,11 @@
   var url_coverage_city = "{{ route('coverage.city') }}";
   var url_coverage_district = "{{ route('coverage.district') }}";
   var url_coverage_sub_district = "{{ route('coverage.sub_district') }}";
+  var supplierStatus = {!! json_encode($supplierStatus) !!};
 
   $(document).ready(function() {
       
+      $('#f_supplier_status').select2({ width: '100%', data: supplierStatus });
       $("#response_message").attr("style", 'display: none;');
 
       $('#gridDataTable').DataTable( {
@@ -269,6 +280,7 @@
               d.city_id = $("#f_city").val();
               d.district_id = $("#f_district").val();
               d.sub_district_id = $("#f_sub_district").val();
+              d.supplier_status = $("#f_supplier_status").val();
             },
             "dataSrc": function(json){
               

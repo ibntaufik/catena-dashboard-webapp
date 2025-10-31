@@ -46,7 +46,16 @@ class FarmerController extends Controller
             ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
         ], Province::listByName(""));
 
-        return view("account.farmer", compact("province"));
+        $supplierStatus = [
+            ['id' => 'all', 'text' => '-- Semua --', 'disabled' => false, "selected" => true]
+        ];
+        foreach(config("constant.supplier_status") as $key => $val){
+            $supplierStatus[] = [
+                'id' => $key, 'text' => $val
+            ];
+        }
+
+        return view("account.farmer", compact("province", "supplierStatus"));
     }
 
     public function datatables(Request $request){
@@ -125,11 +134,17 @@ class FarmerController extends Controller
 
             }
 
+            $supplierStatus = $request->input("supplier_status");
+            if($supplierStatus && ($supplierStatus !== "all")){
+                $cacheName .= ".supplier_status_id$supplierStatus";
+
+            }
+
             if($page){
                 $cacheName .= ".page|$page";
             }
 
-            $response["count"] = Cache::remember("count.$cacheName", config("constant.ttl"), function() use($name, $emailUser, $phone, $idNumber, $latitude, $longitude, $provinceId, $cityId, $districtId, $subDistrictId){
+            $response["count"] = Cache::remember("count.$cacheName", config("constant.ttl"), function() use($name, $emailUser, $phone, $idNumber, $latitude, $longitude, $provinceId, $cityId, $districtId, $supplierStatus, $subDistrictId){
                 return Supplier::join("sub_districts", "sub_districts.id", "master_supplier.sub_district_id")
                 ->join("districts", "districts.id", "sub_districts.district_id")
                 ->join("cities", "cities.id", "districts.city_id")
@@ -164,10 +179,13 @@ class FarmerController extends Controller
                 ->when($subDistrictId, function($builder) use($subDistrictId){
                     return $builder->whereRaw("sub_districts.id = ?", [$subDistrictId]);
                 })
+                ->when($supplierStatus && ($supplierStatus !== "all"), function($builder) use($supplierStatus){
+                    return $builder->whereRaw("master_supplier.verification_status = ?", [$supplierStatus]);
+                })
                 ->count();
             });
 
-            $response["data"] = Cache::remember("data.$cacheName", config("constant.ttl"), function() use($name, $emailUser, $phone, $idNumber, $latitude, $longitude, $provinceId, $cityId, $districtId, $subDistrictId, $page, $limit){
+            $response["data"] = Cache::remember("data.$cacheName", config("constant.ttl"), function() use($name, $emailUser, $phone, $idNumber, $latitude, $longitude, $provinceId, $cityId, $districtId, $subDistrictId, $supplierStatus, $page, $limit){
                 $supplier = Supplier::join("sub_districts", "sub_districts.id", "master_supplier.sub_district_id")
                 ->join("districts", "districts.id", "sub_districts.district_id")
                 ->join("cities", "cities.id", "districts.city_id")
@@ -201,6 +219,9 @@ class FarmerController extends Controller
                 })
                 ->when($subDistrictId, function($builder) use($subDistrictId){
                     return $builder->whereRaw("sub_districts.id = ?", [$subDistrictId]);
+                })
+                ->when($supplierStatus && ($supplierStatus !== "all"), function($builder) use($supplierStatus){
+                    return $builder->whereRaw("master_supplier.verification_status = ?", [$supplierStatus]);
                 })
                 ->when($page, function($builder) use($page){
                     return $builder->skip($page);
