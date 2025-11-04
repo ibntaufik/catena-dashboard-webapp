@@ -632,6 +632,8 @@ class FarmerController extends Controller
         try{
             Supplier::where("code", $farmerCode)->update($input);
             CommonHelper::forgetCache("farmer");
+            CommonHelper::forgetCache("supplier_all");
+            CommonHelper::forgetCache("supplier_list");
             $response["code"] = 200;
             $response["message"] = "Success";
         } catch(\Exception $e){
@@ -652,7 +654,7 @@ class FarmerController extends Controller
         $farmerCode = $request->input("farmer_code");
         $farmId = $request->input("farm_id");
         $input = $request->except(["_token", "farmer_code", "farm_id"]);
-        try{\Log::debug($input);
+        try{
             $supplier = Supplier::where("code", $farmerCode)->first();
             Farms::where([
                 "supplier_id"   => $supplier->id,
