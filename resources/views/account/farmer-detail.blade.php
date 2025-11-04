@@ -48,6 +48,19 @@
                     </div>
                   </div>
                 </div>
+
+                <div class="row mt-2 align-items-center">
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label class="form-label mb-0">Keterangan Status</label>
+                    </div>
+                  </div>
+                  <div class="col-md-9">
+                    <div class="form-group">
+                      <textarea id="status_description" class="form-control width-100" rows="2"></textarea>
+                    </div>
+                  </div>
+                </div>
                 
                 <div class="row mt-2 align-items-center">
                   <div class="col-md-3">
@@ -319,6 +332,7 @@
                     </div>
                   </div>
                 </div>
+
                 <div class="row mt-2 align-items-center">
                   <div class="col-md-3">
                     <label class="form-label mb-0">Foto Unit Usaha</label>
@@ -622,6 +636,7 @@
     $("#business_name").val(result?.business_name || '');
     $("#account_name").val(result?.account_name || '');
     $("#account_number").val(result?.account_number || '');
+    $("#status_description").val(result?.status_description || '');
 
     // Load initial category list
     $('#category').select2({ width: '100%', data: category });
@@ -760,7 +775,7 @@
       account_name: $('#account_name').val(),
       account_number: $('#account_number').val(),
       verification_status: $('#supplier_status').val(),
-      //vch_id: $('#vch').val(),
+      status_description: $('#status_description').val(),
       vcp_id: $('#vcp').val(),
     };
 

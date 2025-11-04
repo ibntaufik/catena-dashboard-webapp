@@ -332,6 +332,7 @@ class FarmerController extends Controller
                         master_supplier.local_created_at,
                         master_supplier.vch_id,
                         master_supplier.vcp_id,
+                        master_supplier.status_description,
                         sub_districts.code AS sub_district_code,
                         sub_districts.name AS sub_district_name, 
                         sub_districts.id AS sub_district_id,
