@@ -243,11 +243,15 @@ class FarmerController extends Controller
                         ])
                         ->pluck("supplier_assets.name")
                         ->toArray();
+
                     if(count($assets) > 1){
                         $row->image_id_number_name = $identityPhotoBase.$assets[0] ?? null;
                         $row->image_photo_name = $identityPhotoBase.$assets[1] ?? null;
-                    } else {
+                    } else if(count($assets) == 1){
                         $row->image_id_number_name = $identityPhotoBase.$assets[0] ?? null;
+                        $row->image_photo_name = "";
+                    } else {
+                        $row->image_id_number_name = "";
                         $row->image_photo_name = "";
                     }
                 }
