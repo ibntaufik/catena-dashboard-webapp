@@ -29,11 +29,6 @@
           <ul class="nav sub-menu">
             @if(\Auth::user()->isA('admin'))
             <li class="nav-item">
-              <a href="{{ url('/account/farmer') }}" class="nav-link {{ active_class(['account/farmer']) }}">Master Data Supplier</a>
-            </li>
-            @endif
-            @if(\Auth::user()->isA('admin'))
-            <li class="nav-item">
               <a href="{{ url('/account/vcp') }}" class="nav-link {{ active_class(['account/vcp']) }}">Create VCP Account</a>
             </li>
             @endif
@@ -84,18 +79,23 @@
         <div class="collapse {{ show_class(['master-data/*']) }}" id="master-data">
           <ul class="nav sub-menu">
             @if(\Auth::user()->isA('admin'))
-            <li class="nav-item">
+            <li class="nav-item" style="display: none;">
               <a href="{{ url('/master-data/ho-approval') }}" class="nav-link {{ active_class(['master-data/ho-approval']) }}">HO Approval</a>
             </li>
             @endif
             @if(\Auth::user()->isA('admin'))
-            <li class="nav-item">
+            <li class="nav-item" style="display: none;">
               <a href="{{ url('/master-data/user') }}" class="nav-link {{ active_class(['master-data/user']) }}">HO Account</a>
             </li>
             @endif
             @if(\Auth::user()->isA('admin'))
             <li class="nav-item">
-              <a href="{{ url('/master-data/location') }}" class="nav-link {{ active_class(['master-data/location']) }}">Location</a>
+              <a href="{{ url('/master-data/supplier') }}" class="nav-link {{ active_class(['master-data/supplier*']) }}">Supplier</a>
+            </li>
+            @endif
+            @if(\Auth::user()->isA('admin'))
+            <li class="nav-item">
+              <a href="{{ url('/master-data/locality') }}" class="nav-link {{ active_class(['master-data/locality*']) }}">Locality</a>
             </li>
             @endif
             @if(\Auth::user()->isA('admin'))
@@ -114,7 +114,7 @@
             </li>
             @endif
             @if(\Auth::user()->isA('admin'))
-            <li class="nav-item">
+            <li class="nav-item" style="display: none;">
               <a href="{{ url('/master-data/accounts') }}" class="nav-link {{ active_class(['master-data/accounts']) }}">Accounts</a>
             </li>
             @endif

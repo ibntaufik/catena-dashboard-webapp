@@ -6,7 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
-use App\Model\Location;
+use App\Model\Locality;
+use App\Model\LocalityAsset;
 use App\Model\Province;
 use App\Model\City;
 use App\Model\District;
@@ -26,7 +27,7 @@ class LocationController extends Controller
         $province = array_merge([
             ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
         ], Province::listByName(""));
-        return view("master-data.location", compact("province"));
+        return view("master-data.locality", compact("province"));
     }
 
     public function datatables(Request $request){
@@ -43,12 +44,87 @@ class LocationController extends Controller
             ->join("cities", "cities.id", "districts.city_id")
             ->join("provinces", "provinces.id", "cities.province_id")
             ->join("t_evc", "t_evc.id", "provinces.evc_id")
-            ->select(DB::raw("sub_districts.code, sub_districts.name AS sub_district, sub_districts.latitude, sub_districts.longitude, districts.name AS district, cities.name AS city, provinces.name AS province, t_evc.code AS evc_code"))->orderby("provinces.name", "ASC")->get();
+            ->join("master_locality", "sub_districts.id", "master_locality.sub_district_id")
+            ->select(DB::raw("sub_districts.code, sub_districts.name AS sub_district, sub_districts.latitude, sub_districts.longitude, districts.name AS district, cities.name AS city, provinces.name AS province, t_evc.code AS evc_code, master_locality.project_name, master_locality.latitude AS locality_latitude, master_locality.longitude AS locality_longitude, master_locality.field_verification, master_locality.additional_information, master_locality.locality_status"))
+            ->orderby("provinces.name", "ASC")->get();
         } catch(\Exception $e){
             
         }
         
         return response()->json($response);
+    }
+
+    public function detail(Request $request)
+    {
+        $response = [
+            "code"    => 400,
+            "message" => "Failed to complete request",
+            "data"    => []
+        ];
+
+        try {
+            $response["code"] = 200;
+            $response["message"] = "Success";
+
+            $localityCode = $request->input("code");
+
+            // Cache key
+            $cacheName = "detail.locality";
+            
+            if ($localityCode) {
+                $cacheName .= ".locality_code|$localityCode";
+            }
+
+            // Get Detail
+            $result = Cache::remember($cacheName, config("constant.ttl"), function() use ($localityCode) {
+                return Subdistrict::join("districts", "districts.id", "sub_districts.district_id")
+                    ->join("cities", "cities.id", "districts.city_id")
+                    ->join("provinces", "provinces.id", "cities.province_id")
+                    ->join("t_evc", "t_evc.id", "provinces.evc_id")
+                    ->join("master_locality", "sub_districts.id", "master_locality.sub_district_id")
+                    ->where("sub_districts.code", $localityCode)
+                    ->select(DB::raw("sub_districts.id AS sub_district_id, sub_districts.code, sub_districts.name AS sub_district, sub_districts.latitude, sub_districts.longitude, districts.name AS district, districts.id AS district_id, cities.name AS city, cities.id AS city_id, provinces.name AS province, provinces.id AS province_id, t_evc.code AS evc_code, master_locality.project_name, master_locality.latitude AS locality_latitude, master_locality.longitude AS locality_longitude, master_locality.field_verification, master_locality.additional_information, master_locality.locality_status, master_locality.status_description, master_locality.id AS locality_id"))
+                    ->first();
+            });
+            
+            $localityAsset = [];
+            $localityStatus = [];
+            if($result){
+                // Asset
+                $localityAsset = Cache::remember("locality_asset.locality_code|$localityCode", config("constant.ttl"), function() use ($localityCode) {
+                    return LocalityAsset::join("master_locality", "master_locality.id", "master_locality_assets.locality_id")
+                    ->join("sub_districts", "sub_districts.id", "master_locality.sub_district_id")
+                    ->where("sub_districts.code", $localityCode)
+                        ->select("master_locality_assets.name")
+                        ->get();
+                });
+
+                $apiUrl     = config('constant.api_url') ?? constant('api_url');
+                $assetPaths = config('constant.asset_path') ?? constant('asset_path');
+
+                foreach ($localityAsset as $asset) {
+                    $assetUrl = "{$apiUrl}/storage/locality_photos/{$asset->name}";
+                    $asset->image_url = $assetUrl;
+                }
+            }
+
+            // Dropdown Data
+            $province = array_merge([
+                ['id' => 'select', 'text' => '-- Select --', 'disabled' => true, "selected" => true],
+            ], Province::listByName(""));
+
+            foreach(config("constant.locality_status") as $key => $val){
+                $localityStatus[] = [
+                    'id' => $key, 'text' => $val
+                ];
+            }
+
+        } catch (\Exception $e) {
+            \Log::error($e->getMessage());
+            \Log::error($e->getTraceAsString());
+        }
+
+        return view("master-data.locality-detail", compact("result", "province", "localityStatus", "localityAsset"));
     }
 
     public function save(LocationPostRequest $request){
@@ -89,6 +165,29 @@ class LocationController extends Controller
             $response["message"] = $e->getMessage();
         }
         
+        return response()->json($response);
+    }
+
+    public function update(Request $request){
+        $response = [
+            "code"      => 400,
+            "message"   => "Failed to complete request",
+            "data"      => []
+        ];
+
+        $localityId = $request->input("locality_id");
+        $input = $request->except(["_token", "locality_id"]);
+        try{
+            Locality::where("id", $localityId)->update($input);
+            CommonHelper::forgetCache("locality");
+            CommonHelper::forgetCache("locality_list");
+            $response["code"] = 200;
+            $response["message"] = "Success";
+        } catch(\Exception $e){
+            \Log::error($e->getMessage());
+            \Log::error($e->getTraceAsString());
+        }
+
         return response()->json($response);
     }
 

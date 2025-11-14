@@ -103,14 +103,13 @@
           <table id="gridDataTable" class="table">
             <thead>
               <tr>
-                <th>Provinsi</th>
-                <th>Kabupaten</th>
-                <th>Kecamatan</th>
-                <th>Desa</th>
-                <th>ID Location</th>
-                <th>EVC Code</th>
-                <th>Latitude</th>
-                <th>Longitude</th>
+                <th>Project</th>
+                <th>Status</th>
+                <th>Locality/Sub District ID</th>
+                <th>Location</th>
+                <th>Latitude<br>Longitude</th>
+                <th>Verifikasi Ketersediaan Kopi</th>
+                <th>Keterangan</th>
                 <th></th>
               </tr>
             </thead>
@@ -193,7 +192,7 @@
           "searching"     : true,
           "pageLength"    : limit,
           "ajax": {
-            "url": "{{ route('location.grid-list') }}",
+            "url": "{{ route('locality.grid-list') }}",
             "data": function ( d ) {
               var info = $('#gridDataTable').DataTable().page.info();
               d.start = info.start;
@@ -209,19 +208,45 @@
           },
                                 
           "columnDefs" : [
-            { "targets": 0, "data": "province" },
-            { "targets": 1, "data": "city" },
-            { "targets": 2, "data": "district" },
-            { "targets": 3, "data": "sub_district" },
-            { "targets": 4, "data": "code" },
-            { "targets": 5, "data": function(data, type, row, meta){
-                  return data.evc_code ?? "-";
+            { "targets": 0, "data": "project_name" },
+            { "targets": 1, "data": function(data, type, row, meta){
+                let status = data.locality_status ? data.locality_status.toUpperCase() : '-';
+                let colorClass = '';
+
+                switch (data.locality_status) {
+                  case 'invalid':
+                    colorClass = 'bg-danger';
+                    break;
+                  case 'valid':
+                    colorClass = 'bg-success';
+                    break;
+                  default:
+                    colorClass = 'bg-secondary';
+                    break;
+                }
+
+                return `<span class="badge ${colorClass} text-white px-3 py-2">${status.replace('_', ' ')}</span>`;
               }
             },
-            { "targets": 6, "data": "latitude" },
-            { "targets": 7, "data": "longitude" },
-            { "targets": 8, "data": function(data, type, row, meta){
-                  return '<a href="#" onclick=$(this).deleteLocation("'+data.code+'") style="cursor: pointer;"><i data-feather="trash-2"></i>';
+            { "targets": 2, "data": "code" },
+            { "targets": 3, "data": function(data, type, row, meta){
+                  return data.sub_district+"<br>"+data.district+"<br>"+data.city+"<br>"+data.province; 
+              }
+            },
+            { "targets": 4, "data": function(data, type, row, meta){
+                  return data.locality_latitude && data.locality_longitude ? data.locality_latitude +"<br>"+ data.locality_longitude : "-"; 
+              }
+            },
+            { "targets": 5, "data": function(data, type, row, meta){
+                  return data.field_verification; 
+              }
+            },
+            { "targets": 6, "data": function(data, type, row, meta){
+                  return data.additional_information;
+              }
+            },
+            { "targets": 7, "data": function(data, type, row, meta){
+                  return '<a href="#" onclick=$(this).deleteLocation("'+data.code+'") style="cursor: pointer;"><i data-feather="trash-2"></i> &nbsp; <a href="javascript:void(0)" onclick=$(this).detail("'+data.code+'") style="cursor: pointer;"><i data-feather="eye"></i></a>';
               }
             },
           ],
@@ -233,7 +258,7 @@
       $.fn.deleteLocation = function(locationId) {
         $.ajax({
             type: "POST",
-            url: "{{ route('location.remove') }}",
+            url: "{{ route('locality.remove') }}",
             data: {
               _token: "{{ csrf_token() }}",
               location_id: locationId,
@@ -260,6 +285,10 @@
             $('#response_message').removeClass('alert-success');
             $('#response_message').addClass('alert-danger');
         });
+      };
+
+      $.fn.detail = function(code) {
+        window.open(('{{ route('locality.detail') }}?code=' + code), '_blank' );
       };
   });
   
@@ -297,7 +326,7 @@
 
         $.ajax({
             type: "POST",
-            url: "{{ route('location.submit') }}",
+            url: "{{ route('locality.submit') }}",
             data: submitData,
             dataType: "json",
             timeout: 300000

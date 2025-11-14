@@ -38,4 +38,8 @@ return [
         "partial_verified"  => "Partial Verified",
         "verified"          => "Verified"
     ],
+    "locality_status"   => [
+        "invalid"   => "Invalid",
+        "Valid"     => "Valid"
+    ],
 ];

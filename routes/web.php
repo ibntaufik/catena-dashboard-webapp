@@ -19,15 +19,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/home', 'DashboardController@index')->name("home");
 
     Route::group(['prefix' => 'account'], function(){
-        Route::group(['prefix' => 'farmer'], function(){
-            Route::get('', 'FarmerController@index')->name("farmer.index")->middleware("can:administrator");
-            Route::get('grid-list', 'FarmerController@datatables')->name("farmer.grid-list");
-            Route::get('detail', 'FarmerController@detail')->name("farmer.detail");
-            Route::post('submit', 'FarmerController@save')->name("farmer.submit")->middleware("can:administrator");
-            Route::post('update', 'FarmerController@update')->name("farmer.update")->middleware("can:administrator");
-            Route::post('update-farm', 'FarmerController@updateFarm')->name("farmer.updateFarm")->middleware("can:administrator");
-            Route::post('remove', 'FarmerController@delete')->name("farmer.remove")->middleware("can:administrator");
-        });
+        
         Route::group(['prefix' => 'vcp'], function(){
             Route::get('', 'VcpAccountController@index')->name("vcp-account.index")->middleware("can:administrator");
             Route::get('grid-list', 'VcpAccountController@datatables')->name("vcp-account.grid-list");
@@ -42,11 +34,23 @@ Route::group(['middleware' => 'auth'], function () {
         });
     });    
     Route::group(['prefix' => 'master-data'], function(){
-        Route::group(['prefix' => 'location'], function(){
-            Route::get('', 'LocationController@index')->name("location.index")->middleware("can:administrator");
-            Route::get('grid-list', 'LocationController@datatables')->name("location.grid-list");
-            Route::post('submit', 'LocationController@save')->name("location.submit")->middleware("can:administrator");
-            Route::post('remove', 'LocationController@delete')->name("location.remove")->middleware("can:administrator");
+        Route::group(['prefix' => 'supplier'], function(){
+            Route::get('', 'FarmerController@index')->name("farmer.index")->middleware("can:administrator");
+            Route::get('grid-list', 'FarmerController@datatables')->name("farmer.grid-list");
+            Route::get('detail', 'FarmerController@detail')->name("farmer.detail");
+            Route::post('submit', 'FarmerController@save')->name("farmer.submit")->middleware("can:administrator");
+            Route::post('update', 'FarmerController@update')->name("farmer.update")->middleware("can:administrator");
+            Route::post('update-farm', 'FarmerController@updateFarm')->name("farmer.updateFarm")->middleware("can:administrator");
+            Route::post('remove', 'FarmerController@delete')->name("farmer.remove")->middleware("can:administrator");
+        });
+        
+        Route::group(['prefix' => 'locality'], function(){
+            Route::get('', 'LocationController@index')->name("locality.index")->middleware("can:administrator");
+            Route::get('grid-list', 'LocationController@datatables')->name("locality.grid-list");
+            Route::post('submit', 'LocationController@save')->name("locality.submit")->middleware("can:administrator");
+            Route::post('remove', 'LocationController@delete')->name("locality.remove")->middleware("can:administrator");
+            Route::get('detail', 'LocationController@detail')->name("locality.detail");
+            Route::post('update', 'LocationController@update')->name("locality.update")->middleware("can:administrator");
         });
         Route::group(['prefix' => 'ho-approval'], function(){
             Route::get('', 'ApprovalController@index')->name("approval.index")->middleware("can:administrator");
