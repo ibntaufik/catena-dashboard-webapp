@@ -45,6 +45,7 @@ class LocationController extends Controller
             ->join("provinces", "provinces.id", "cities.province_id")
             ->join("t_evc", "t_evc.id", "provinces.evc_id")
             ->join("master_locality", "sub_districts.id", "master_locality.sub_district_id")
+            ->whereNull("master_locality.deleted_at")
             ->select(DB::raw("sub_districts.code, sub_districts.name AS sub_district, sub_districts.latitude, sub_districts.longitude, districts.name AS district, cities.name AS city, provinces.name AS province, t_evc.code AS evc_code, master_locality.project_name, master_locality.latitude AS locality_latitude, master_locality.longitude AS locality_longitude, master_locality.field_verification, master_locality.additional_information, master_locality.locality_status"))
             ->orderby("provinces.name", "ASC")->get();
         } catch(\Exception $e){
